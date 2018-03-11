@@ -1,0 +1,11 @@
+# yarn
+yarn.lock
+
+# npm
+package-lock.json
+
+# node modules
+node_modules
+
+# build directory
+dist
