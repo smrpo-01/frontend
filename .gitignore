@@ -9,3 +9,8 @@ node_modules
 
 # build directory
 dist
+
+# coverage
+coverage
+
+.eslintcache
