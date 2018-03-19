@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Switch, Route, Redirect } from 'react-router';
 
 // Grommet components
 import App from 'grommet/components/App';
@@ -10,10 +11,46 @@ import Split from 'grommet/components/Split';
 import AppHeader from './components/AppHeader';
 import NavSidebar from './components/NavSidebar';
 
-class MainApp extends Component {
-  render() {
-    // console.log(this.props);
+// App sub pages
+import Home from './pages/home/Home';
+import Board from './pages/board/Board';
+import Management from './pages/management/Management';
+import Login from './pages/login/Login';
 
+class MainApp extends Component {
+  constructor() {
+    super();
+    this.authenticateUser = this.authenticateUser.bind(this);
+    this.toggleSidebar = this.toggleSidebar.bind(this);
+
+    this.state = {
+      sidebarVisible: false,
+      userAuthenticated: false,
+      user: {
+        name: '',
+        type: '',
+        roles: []
+      },
+      appState: {}
+    };
+  }
+
+
+  /**
+   * Toggles sidebar visibility
+   */
+  toggleSidebar() {
+    this.setState({ sidebarVisible: !this.state.sidebarVisible });
+  }
+
+  /**
+   * Callback to set app state for user authentication
+   */
+  authenticateUser() {
+    this.setState({ userAuthenticated: true });
+  }
+
+  render() {
     return (
       <App centered={false}>
         {/* Split view */}
@@ -22,25 +59,43 @@ class MainApp extends Component {
           flex='right'
         >
           {/* Application sidebar */}
-          <NavSidebar />
+          {(this.state.sidebarVisible) ? <NavSidebar toggleSidebar={this.toggleSidebar} /> : null}
 
           {/* Main application content */}
           <Article>
             {/* Application header */}
-            <AppHeader />
+            {(this.state.userAuthenticated) ?
+              <AppHeader
+                toggleSidebar={this.toggleSidebar}
+                sidebarVisible={this.state.sidebarVisible}
+              /> :
+              null
+            }
 
             {/* Main application content */}
-            <Section colorIndex='light-2'
-              justify='center'
-              align='center'
-              pad='medium'
+            <Section
+              pad={{ horizontal: 'medium', vertical: 'none' }}
               full
             >
-              Main application content
+              <Switch>
+                <Route exact path='/' render={props =>
+                  (this.state.userAuthenticated ? (
+                    <Redirect to='/home' />
+                  ) : (
+                    <Login authenticateUser={this.authenticateUser} {...props} />
+                  )
+                  )}
+                />
+                <Route exact path='/home' render={props => (<Home {...props} />)} />
+                <Route exact path='/management' render={props => (<Management {...props} />)} />
+                <Route exact path='/board' render={props => (<Board {...props} />)} />
+                <Redirect to='/' />
+              </Switch>
+
             </Section>
 
             {/* Footer */}
-            {/* Place app footer if needed */}
+            {/* Place app footer here if needed */}
           </Article>
         </Split>
       </App>
