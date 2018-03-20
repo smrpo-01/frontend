@@ -54,11 +54,7 @@
 </head>
 <body class="loading">
   <div id="content" tabindex="-1" style="outline: none;">
-    <svg id="logo" viewBox="0 0 182 182" version="1.1" role="img">
-      <path role="presentation"
-        d="M 91,91 m 0,-82 a 82,82 0 1,1 0,164 a 82,82 0 1,1 0,-164"
-        stroke-width="18" stroke="#865CD6" fill="none"></path>
-    </svg>
+    <!-- place svg element here to render logo over loading screen -->
     <script>
     var c = document.getElementById("content");
     for (var i = 0; i < 100; i += 1) {
@@ -80,7 +76,7 @@
       if (! again) {
         clearInterval(timer);
       }
-    }, 100)
+    }, 50)
     </script>
   </div>
   <script async src="/index.js"></script>
