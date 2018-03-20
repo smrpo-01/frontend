@@ -13,7 +13,7 @@ rules:
     - 1
     - allow-single-line: true
   class-name-format:
-    - 1
+    - 0
     - convention: hyphenatedbem
   clean-import-paths:
     - 1

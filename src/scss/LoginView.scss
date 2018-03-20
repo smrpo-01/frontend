@@ -1,0 +1,39 @@
+.container {
+  border-radius: 5%;
+  width: 40%;
+}
+
+.formBox {
+  margin-bottom: 10px;
+}
+
+.formLogo {
+  height: 30px;
+  width: 30px;
+  margin-right: 10px;
+}
+
+.loginButton {
+  margin-top: 20px;
+}
+
+.logo {
+  border-radius: 100%;
+  border-style: groove;
+  border-width: 1px;
+  border-color: #01a982;
+  width: 150px;
+}
+
+.notification {
+  position: absolute;
+  bottom: 20px;
+  opacity: 0;
+  width: 300px;
+  border-radius: 2%;
+  margin: 0;
+}
+
+.notification-entering {
+  transform: translate(-100px, 0);
+}
