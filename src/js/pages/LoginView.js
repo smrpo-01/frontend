@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Transition } from 'react-transition-group';
-import PropTypes from 'prop-types';
 
 import Box from 'grommet/components/Box';
 import Section from 'grommet/components/Section';
@@ -15,12 +14,17 @@ import CheckmarkIcon from 'grommet/components/icons/base/Checkmark';
 import { graphql } from 'react-apollo';
 import gql from 'graphql-tag';
 
-const duration = 1300;
+const duration = 200;
 
 const transitionStyles = {
   entering: 0,
-  entered: 1,
+  entered: 0.9,
   exited: 0,
+};
+
+const transitionStylesTransform = {
+  entering: 0,
+  entered: 30,
 };
 
 
@@ -31,25 +35,40 @@ class LoginView extends Component {
       email: '',
       password: '',
       in: false,
+      errorDescription: '',
     };
   }
 
   async handleForm() {
-    this.setState({
-      in: false,
-    });
-    try {
-      const res = await this.props.mutate({
-        variables: {
-          email: this.state.email,
-          password: this.state.password,
-        }
+    const emailRegex = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}/;
+
+    if (this.state.email === '' || this.state.password === '') {
+      this.setState({
+        in: true,
+        errorDescription: 'Izpolnite obe polji.',
       });
-      console.log(res);
+      return;
+    } else if (!this.state.email.match(emailRegex) || this.state.password.length < 6) {
+      console.log(this.state.email.match(emailRegex), this.state.password);
+      this.setState({
+        in: true,
+        errorDescription: 'Nepravilen vnos, poskusite ponovno.',
+      });
+      return;
+    }
+    try {
+      const res = await fetch('http://127.0.0.1:5000/', { method: 'GET', headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      } });
+
+      const token = 'pridobljen od resa';
+      this.props.handler(token);
     } catch (err) {
       console.log(err);
       this.setState({
         in: true,
+        errorDescription: 'Povezava na strežnik neuspešna.',
       });
     }
   }
@@ -62,6 +81,22 @@ class LoginView extends Component {
         justify='center'
         align='center'
         full>
+        <Transition in={this.state.in} timeout={duration}>
+          {(status) => {
+            return (<Notification className={'notification'}
+              state={this.state.errorDescription}
+              message='Napaka pri prijavi!'
+              status='critical'
+              style={{
+                opacity: transitionStyles[status],
+                transform: `translate(0, ${transitionStylesTransform[status]}px)`,
+                transition: `all ${duration}ms ease-in-out`,
+              }}
+            />
+            );
+          }
+          }
+        </Transition>
         <Section
           colorIndex='light-1'
           align='center'
@@ -83,6 +118,7 @@ class LoginView extends Component {
             <Box direction='row' className='formBox' align='center' justify='center'>
               <Image src='./img/padlock.png' className='formLogo' />
               <TextInput
+                type='password'
                 placeHolder='Geslo'
                 value={this.state.password}
                 onDOMChange={event => this.setState({ password: event.target.value })}
@@ -97,34 +133,10 @@ class LoginView extends Component {
             onClick={() => this.handleForm()}
           />
         </Section>
-        <Transition in={this.state.in} timeout={duration}>
-          {(status) => {
-            console.log(status);
-            return (<Notification className={`notification notification-${status}`}
-              state='Sample state'
-              message='Napaka pri prijavi'
-              status='critical'
-              style={{
-                opacity: transitionStyles[status],
-                transition: `opacity ${duration}ms ease-in-out`
-              }}
-            />
-            );
-          }
-          }
-        </Transition>
       </Box>
     );
   }
 }
-
-LoginView.defaultProps = {
-  mutate: null,
-};
-
-LoginView.propTypes = {
-  mutate: PropTypes.func,
-};
 
 const submitForm = gql`
   mutation login($email: String!, $password: String!) {
