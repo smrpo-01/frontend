@@ -11,16 +11,23 @@ import Section from 'grommet/components/Section';
 import Menu from 'grommet/components/Menu';
 
 import Button from 'grommet/components/Button';
+
+// Icons
 import LogoutIcon from 'grommet/components/icons/base/Logout';
+import UserSettingsIcon from 'grommet/components/icons/base/UserSettings';
+import TableIcon from 'grommet/components/icons/base/Table';
+import HomeIcon from 'grommet/components/icons/base/Home';
+import VmMaintenanceIcon from 'grommet/components/icons/base/VmMaintenance';
 
 class AppHeader extends Component {
   constructor() {
     super();
     this.state = {
       menuItems: [
-        { id: 1, itemName: 'Home', route: '/home' },
-        { id: 2, itemName: 'Management', route: '/management' },
-        { id: 3, itemName: 'Board', route: '/board' },
+        { id: 1, itemName: 'Domov', route: '/home', icon: <HomeIcon /> },
+        { id: 2, itemName: 'Management', route: '/management', icon: <VmMaintenanceIcon /> },
+        { id: 3, itemName: 'Tabla', route: '/board', icon: <TableIcon /> },
+        { id: 4, itemName: 'Administracija uporabnikov', route: '/administration', icon: <UserSettingsIcon /> }
       ]
     };
   }
@@ -55,6 +62,7 @@ class AppHeader extends Component {
               (<Anchor
                 key={item.id}
                 path={{ path: item.route, index: true }}
+                icon={item.icon}
               >
                 {item.itemName}
               </Anchor>)
@@ -63,7 +71,7 @@ class AppHeader extends Component {
         </Section>
 
         {/* Logout button */}
-        <Button icon={<LogoutIcon />} href='../' onClick={() => this.props.logoutUser()} />
+        <Button plain label='Odjava' icon={<LogoutIcon />} href='../' onClick={() => this.props.logoutUser()} />
       </Header>
     );
   }

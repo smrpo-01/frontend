@@ -16,6 +16,7 @@ import NavSidebar from './components/NavSidebar';
 import Home from './pages/home/Home';
 import Board from './pages/board/Board';
 import Management from './pages/management/Management';
+import Administration from './pages/administration/Administration';
 
 class MainApp extends Component {
   constructor() {
@@ -85,6 +86,7 @@ class MainApp extends Component {
               <Route exact path='/home' render={props => (<Home {...props} />)} />
               <Route exact path='/management' render={props => (<Management {...props} />)} />
               <Route exact path='/board' render={props => (<Board {...props} />)} />
+              <Route path='/administration' render={props => (<Administration {...props} />)} />
               <Redirect to='/home' />
             </Switch>
 
