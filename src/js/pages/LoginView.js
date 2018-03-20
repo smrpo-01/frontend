@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Transition } from 'react-transition-group';
+import PropTypes from 'prop-types';
 
 import Box from 'grommet/components/Box';
 import Section from 'grommet/components/Section';
@@ -62,6 +63,8 @@ class LoginView extends Component {
         'Content-Type': 'application/json'
       } });
 
+      console.log(res);
+
       const token = 'pridobljen od resa';
       this.props.handler(token);
     } catch (err) {
@@ -82,19 +85,16 @@ class LoginView extends Component {
         align='center'
         full>
         <Transition in={this.state.in} timeout={duration}>
-          {(status) => {
-            return (<Notification className={'notification'}
-              state={this.state.errorDescription}
-              message='Napaka pri prijavi!'
-              status='critical'
-              style={{
-                opacity: transitionStyles[status],
-                transform: `translate(0, ${transitionStylesTransform[status]}px)`,
-                transition: `all ${duration}ms ease-in-out`,
-              }}
-            />
-            );
-          }
+          {status => (<Notification className={'notification'}
+            state={this.state.errorDescription}
+            message='Napaka pri prijavi!'
+            status='critical'
+            style={{
+              opacity: transitionStyles[status],
+              transform: `translate(0, ${transitionStylesTransform[status]}px)`,
+              transition: `all ${duration}ms ease-in-out`,
+            }}
+          />)
           }
         </Transition>
         <Section
@@ -137,6 +137,14 @@ class LoginView extends Component {
     );
   }
 }
+
+LoginView.defaultProps = {
+  handler: null,
+};
+
+LoginView.propTypes = {
+  handler: PropTypes.func,
+};
 
 const submitForm = gql`
   mutation login($email: String!, $password: String!) {

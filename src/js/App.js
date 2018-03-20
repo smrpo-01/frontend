@@ -45,15 +45,18 @@ class MainApp extends Component {
    * Callback to set app state for user authentication
    */
   authenticateUser(token) {
+    // eslint-disable-next-line no-undef
     localStorage.setItem('token', token);
     this.setState({ appState: { token } });
   }
 
   logoutUser() {
+    // eslint-disable-next-line no-undef
     localStorage.clear();
   }
 
   render() {
+    // eslint-disable-next-line no-undef
     const token = localStorage.getItem('token');
 
     if (!token) return <LoginView handler={this.authenticateUser} />;

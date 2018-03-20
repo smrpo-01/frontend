@@ -28,9 +28,9 @@ class AppHeader extends Component {
       <Header
         flex={true}
         justify='between'
-        style={{backgroundColor: '#f2efeb'}}
+        style={{ backgroundColor: '#f2efeb' }}
       >
-        <Section direction='row' pad={{horizontal: 'small', vertical: 'small', between: 'large' }}>
+        <Section direction='row' pad={{ horizontal: 'small', vertical: 'small', between: 'large' }}>
           {(this.props.sidebarVisible) ?
             null :
             <Title onClick={this.props.toggleSidebar} >Emineo</Title>
@@ -58,12 +58,14 @@ class AppHeader extends Component {
 
 AppHeader.defaultProps = {
   toggleSidebar: () => {},
-  sidebarVisible: false
+  sidebarVisible: false,
+  logoutUser: null,
 };
 
 AppHeader.propTypes = {
   toggleSidebar: PropTypes.func.isRequired,
-  sidebarVisible: PropTypes.bool.isRequired
+  sidebarVisible: PropTypes.bool.isRequired,
+  logoutUser: PropTypes.func,
 };
 
 export default AppHeader;
