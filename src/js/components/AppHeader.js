@@ -5,8 +5,10 @@ import PropTypes from 'prop-types';
 import Anchor from 'grommet/components/Anchor';
 import Header from 'grommet/components/Header';
 import Title from 'grommet/components/Title';
-import Box from 'grommet/components/Box';
+// import Box from 'grommet/components/Box';
+import Image from 'grommet/components/Image';
 import Section from 'grommet/components/Section';
+import Menu from 'grommet/components/Menu';
 
 import Button from 'grommet/components/Button';
 import LogoutIcon from 'grommet/components/icons/base/Logout';
@@ -26,31 +28,42 @@ class AppHeader extends Component {
   render() {
     return (
       <Header
-        flex={true}
         justify='between'
-        style={{ backgroundColor: '#f2efeb' }}
+        colorIndex='neutral-1'
       >
-        <Section direction='row' pad={{ horizontal: 'small', vertical: 'small', between: 'large' }}>
+        <Section
+          direction='row'
+          pad={{ horizontal: 'medium', vertical: 'small', between: 'large' }}
+          full='horizontal'
+        >
           {(this.props.sidebarVisible) ?
             null :
-            <Title onClick={this.props.toggleSidebar} >Emineo</Title>
+            <Title onClick={this.props.toggleSidebar} >
+              <Image
+                className='header-logo'
+                src='./img/random-logo2.png'
+              />
+              Emineo
+            </Title>
           }
           {/* Render menu items */}
-          {this.state.menuItems.map(item =>
-            (<Anchor
-              key={item.id}
-              path={{ path: item.route, index: true }}
-            >
-              {item.itemName}
-            </Anchor>)
-          )}
+          <Menu
+            inline={true}
+            direction='row'
+            size='medium'>
+            {this.state.menuItems.map(item =>
+              (<Anchor
+                key={item.id}
+                path={{ path: item.route, index: true }}
+              >
+                {item.itemName}
+              </Anchor>)
+            )}
+          </Menu>
         </Section>
-        <Box
-          justify='end'
-          direction='row'
-          responsive={false}>
-          <Button icon={<LogoutIcon />} href='../' onClick={() => this.props.logoutUser()} />
-        </Box>
+
+        {/* Logout button */}
+        <Button icon={<LogoutIcon />} href='../' onClick={() => this.props.logoutUser()} />
       </Header>
     );
   }
