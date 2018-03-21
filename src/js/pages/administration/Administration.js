@@ -12,16 +12,25 @@ import UserAddIcon from 'grommet/components/icons/base/UserAdd';
 
 // Custom components
 import UsersTable from './UsersTable';
+import AddEditNewUser from './AddEditNewUser';
 
 class Administration extends Component {
   constructor() {
     super();
+    this.addNewUser = this.addNewUser.bind(this);
+    this.closeLayer = this.closeLayer.bind(this);
 
-    this.state = {};
+    this.state = {
+      showAddNewUser: false
+    };
   }
 
   addNewUser() {
-    console.log('add new user');
+    this.setState({ showAddNewUser: true });
+  }
+
+  closeLayer() {
+    this.setState({ showAddNewUser: false });
   }
 
   render() {
@@ -35,6 +44,7 @@ class Administration extends Component {
         }
       >
         <UsersTable />
+        {(this.state.showAddNewUser) ? <AddEditNewUser closer={this.closeLayer} /> : null}
       </PageTemplate>
     );
   }
