@@ -25,7 +25,7 @@ const transitionStylesTransform = {
 };
 
 
-class LoginView extends Component {
+class Login extends Component {
   constructor() {
     super();
     this.state = {
@@ -139,12 +139,12 @@ class LoginView extends Component {
   }
 }
 
-LoginView.defaultProps = {
+Login.defaultProps = {
   handler: null,
 };
 
-LoginView.propTypes = {
+Login.propTypes = {
   handler: PropTypes.func,
 };
 
-export default LoginView;
+export default Login;
