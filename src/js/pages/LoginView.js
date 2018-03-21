@@ -11,10 +11,6 @@ import Notification from 'grommet/components/Notification';
 
 import CheckmarkIcon from 'grommet/components/icons/base/Checkmark';
 
-
-import { graphql } from 'react-apollo';
-import gql from 'graphql-tag';
-
 const duration = 200;
 
 const transitionStyles = {
@@ -58,15 +54,20 @@ class LoginView extends Component {
       return;
     }
     try {
-      const res = await fetch('http://127.0.0.1:5000/', { method: 'GET', headers: {
+      const res = await fetch('http://127.0.0.1:8000/api-token-auth/', { method: 'POST', headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json'
-      } });
-
-      console.log(res);
-
-      const token = 'pridobljen od resa';
-      this.props.handler(token);
+      }, body: JSON.stringify({ email: this.state.email, password: this.state.password }) });
+      const json = await res.json();
+      const { token } = json;
+      if (!token) {
+        this.setState({
+          in: true,
+          errorDescription: 'Email naslov in geslo se ne ujemata.',
+        });
+      } else {
+        this.props.handler(token);
+      }
     } catch (err) {
       console.log(err);
       this.setState({
@@ -146,14 +147,4 @@ LoginView.propTypes = {
   handler: PropTypes.func,
 };
 
-const submitForm = gql`
-  mutation login($email: String!, $password: String!) {
-    login(email: $email, password: $password) {
-      id
-      email
-      token
-    }
-  }
-`;
-
-export default graphql(submitForm)(LoginView);
+export default LoginView;
