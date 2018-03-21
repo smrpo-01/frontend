@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { Switch, Route, Redirect } from 'react-router';
 
 // Grommet components
-import App from 'grommet/components/App';
 import Article from 'grommet/components/Article';
 import Section from 'grommet/components/Section';
 import Split from 'grommet/components/Split';
@@ -17,6 +16,7 @@ import NavSidebar from './components/NavSidebar';
 import Home from './pages/home/Home';
 import Board from './pages/board/Board';
 import Management from './pages/management/Management';
+import Administration from './pages/administration/Administration';
 
 class MainApp extends Component {
   constructor() {
@@ -62,43 +62,40 @@ class MainApp extends Component {
     if (!token) return <LoginView handler={this.authenticateUser} />;
 
     return (
-      <App centered={false}>
-        {/* Split view */}
-        <Split
-          separator={false}
-          flex='right'
-        >
-          {/* Application sidebar */}
-          {(this.state.sidebarVisible) ? <NavSidebar toggleSidebar={this.toggleSidebar} /> : null}
+      <Split
+        separator={true}
+        flex='right'
+      >
+        {/* Application sidebar */}
+        {(this.state.sidebarVisible) ? <NavSidebar toggleSidebar={this.toggleSidebar} /> : null}
+
+        {/* Main application content */}
+        <Article full>
+          {/* Application header */}
+          <AppHeader
+            toggleSidebar={this.toggleSidebar}
+            logoutUser={this.logoutUser}
+            sidebarVisible={this.state.sidebarVisible}
+          />
 
           {/* Main application content */}
-          <Article>
-            {/* Application header */}
-            <AppHeader
-              toggleSidebar={this.toggleSidebar}
-              logoutUser={this.logoutUser}
-              sidebarVisible={this.state.sidebarVisible}
-            />
+          <Section
+            pad={{ horizontal: 'medium', vertical: 'none' }}
+          >
+            <Switch>
+              <Route exact path='/home' render={props => (<Home {...props} />)} />
+              <Route exact path='/management' render={props => (<Management {...props} />)} />
+              <Route exact path='/board' render={props => (<Board {...props} />)} />
+              <Route path='/administration' render={props => (<Administration {...props} />)} />
+              <Redirect to='/home' />
+            </Switch>
 
-            {/* Main application content */}
-            <Section
-              pad={{ horizontal: 'medium', vertical: 'none' }}
-              full
-            >
-              <Switch>
-                <Route exact path='/home' render={props => (<Home {...props} />)} />
-                <Route exact path='/management' render={props => (<Management {...props} />)} />
-                <Route exact path='/board' render={props => (<Board {...props} />)} />
-                <Redirect to='/home' />
-              </Switch>
+          </Section>
 
-            </Section>
-
-            {/* Footer */}
-            {/* Place app footer here if needed */}
-          </Article>
-        </Split>
-      </App>
+          {/* Footer */}
+          {/* Place app footer here if needed */}
+        </Article>
+      </Split>
     );
   }
 }

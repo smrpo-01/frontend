@@ -13,7 +13,8 @@ import '../scss/index.scss';
 import { ApolloProvider } from 'react-apollo';
 
 // Application component
-import App from './App';
+import App from 'grommet/components/App';
+import MainApp from './App';
 
 // Define Apollo client
 const client = new ApolloClient({
@@ -28,7 +29,9 @@ const element = document.getElementById('content');
 ReactDOM.render(
   <ApolloProvider client={client}>
     <BrowserRouter>
-      <App />
+      <App centered={false} >
+        <MainApp />
+      </App>
     </BrowserRouter>
   </ApolloProvider>,
   element
