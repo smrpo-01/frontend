@@ -7,6 +7,8 @@ import Article from 'grommet/components/Article';
 import Section from 'grommet/components/Section';
 import Split from 'grommet/components/Split';
 
+import LoginView from './pages/LoginView';
+
 // Custom components
 import AppHeader from './components/AppHeader';
 import NavSidebar from './components/NavSidebar';
@@ -15,7 +17,6 @@ import NavSidebar from './components/NavSidebar';
 import Home from './pages/home/Home';
 import Board from './pages/board/Board';
 import Management from './pages/management/Management';
-import Login from './pages/login/Login';
 
 class MainApp extends Component {
   constructor() {
@@ -25,13 +26,10 @@ class MainApp extends Component {
 
     this.state = {
       sidebarVisible: false,
-      userAuthenticated: false,
-      user: {
-        name: '',
-        type: '',
-        roles: []
-      },
-      appState: {}
+      userAuthenticated: true,
+      appState: {
+        token: ''
+      }
     };
   }
 
@@ -46,11 +44,23 @@ class MainApp extends Component {
   /**
    * Callback to set app state for user authentication
    */
-  authenticateUser() {
-    this.setState({ userAuthenticated: true });
+  authenticateUser(token) {
+    // eslint-disable-next-line no-undef
+    localStorage.setItem('token', token);
+    this.setState({ appState: { token } });
+  }
+
+  logoutUser() {
+    // eslint-disable-next-line no-undef
+    localStorage.clear();
   }
 
   render() {
+    // eslint-disable-next-line no-undef
+    const token = localStorage.getItem('token');
+
+    if (!token) return <LoginView handler={this.authenticateUser} />;
+
     return (
       <App centered={false}>
         {/* Split view */}
@@ -64,13 +74,11 @@ class MainApp extends Component {
           {/* Main application content */}
           <Article>
             {/* Application header */}
-            {(this.state.userAuthenticated) ?
-              <AppHeader
-                toggleSidebar={this.toggleSidebar}
-                sidebarVisible={this.state.sidebarVisible}
-              /> :
-              null
-            }
+            <AppHeader
+              toggleSidebar={this.toggleSidebar}
+              logoutUser={this.logoutUser}
+              sidebarVisible={this.state.sidebarVisible}
+            />
 
             {/* Main application content */}
             <Section
@@ -78,18 +86,10 @@ class MainApp extends Component {
               full
             >
               <Switch>
-                <Route exact path='/' render={props =>
-                  (this.state.userAuthenticated ? (
-                    <Redirect to='/home' />
-                  ) : (
-                    <Login authenticateUser={this.authenticateUser} {...props} />
-                  )
-                  )}
-                />
                 <Route exact path='/home' render={props => (<Home {...props} />)} />
                 <Route exact path='/management' render={props => (<Management {...props} />)} />
                 <Route exact path='/board' render={props => (<Board {...props} />)} />
-                <Redirect to='/' />
+                <Redirect to='/home' />
               </Switch>
 
             </Section>
