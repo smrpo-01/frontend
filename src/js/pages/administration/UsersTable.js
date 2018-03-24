@@ -69,7 +69,7 @@ class UsersTable extends Component {
 
   onRemove(userId) {
     // open confirm dialog
-    console.log(userId);
+    this.props.deleteUser(userId);
   }
 
   closeLayer() {
@@ -103,18 +103,19 @@ class UsersTable extends Component {
       <div>
         <Table>
           <TableHeader
-            labels={['Ime', 'Priimek', 'e-mail', 'Vloge', 'Akcije']}
+            labels={['Ime', 'Priimek', 'e-mail', 'Vloge', 'Aktiven', 'Akcije']}
             sortIndex={this.state.columnIndexToSort}
             sortAscending={this.state.sortAscending}
             onSort={this.handleSort}
           />
           <tbody>
             {allUsers.map(rowData => (
-              <TableRow key={rowData.id} >
+              <TableRow key={rowData.id} className={(rowData.isActive) ? '' : 'table-row-grey'} >
                 <td>{rowData.firstName}</td>
                 <td>{rowData.lastName}</td>
                 <td>{rowData.email}</td>
                 <td>{rowData.roles.map(role => role.name)}</td>
+                <td>{(rowData.isActive) ? 'Da' : 'Ne'}</td>
                 <td>
                   <Button plain icon={<EditIcon />} onClick={() => this.onEdit(rowData)} />
                   <Button plain icon={<TrashIcon />} onClick={() => this.onRemove(rowData.id)} />
@@ -133,7 +134,8 @@ UsersTable.defaultProps = {
 };
 
 UsersTable.propTypes = {
-  data: PropTypes.object.isRequired
+  data: PropTypes.object.isRequired,
+  deleteUser: PropTypes.func.isRequired
 };
 
 const allUsersQuery = gql`
@@ -143,6 +145,7 @@ const allUsersQuery = gql`
       firstName
       lastName
       email
+      isActive
       roles {
         name
       }

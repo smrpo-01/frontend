@@ -13,15 +13,19 @@ import UserAddIcon from 'grommet/components/icons/base/UserAdd';
 // Custom components
 import UsersTable from './UsersTable';
 import AddEditNewUser from './AddEditNewUser';
+import DeleteUser from './DeleteUser';
 
 class Administration extends Component {
   constructor() {
     super();
     this.addNewUser = this.addNewUser.bind(this);
     this.closeLayer = this.closeLayer.bind(this);
+    this.deleteUser = this.deleteUser.bind(this);
 
     this.state = {
-      showAddNewUser: false
+      showAddNewUser: false,
+      showDelete: false,
+      id: null // userId to delete
     };
   }
 
@@ -29,8 +33,21 @@ class Administration extends Component {
     this.setState({ showAddNewUser: true });
   }
 
+
+  /**
+   * [Closes overlay and resets state]
+   */
   closeLayer() {
-    this.setState({ showAddNewUser: false });
+    this.setState({ showAddNewUser: false, showDelete: false, id: null });
+  }
+
+
+  /**
+   * [Shows delete user overlay and sets userId to delete]
+   * @param  {[string]} id [User id]
+   */
+  deleteUser(id) {
+    this.setState({ id, showDelete: true });
   }
 
   render() {
@@ -43,8 +60,10 @@ class Administration extends Component {
           </Title>
         }
       >
-        <UsersTable />
+        <UsersTable deleteUser={this.deleteUser} />
         {(this.state.showAddNewUser) ? <AddEditNewUser closer={this.closeLayer} /> : null}
+        {(this.state.showDelete) ?
+          <DeleteUser closer={this.closeLayer} id={this.state.id} /> : null}
       </PageTemplate>
     );
   }

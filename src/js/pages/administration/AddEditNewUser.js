@@ -129,12 +129,12 @@ class AddEditNewUser extends Component {
         if (this.state.password !== '') userData.user.password = this.state.password;
         this.props.editUserMutation({ variables: userData })
           .then(this.props.closer())
-          .catch(err => console.err(err));
+          .catch(err => console.log(err));
       } else {
         userData.user.password = this.state.password;
         this.props.addUserMutation({ variables: userData })
           .then(this.props.closer())
-          .catch(err => console.err(err));
+          .catch(err => console.log(err));
       }
     }
   }
