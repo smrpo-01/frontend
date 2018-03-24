@@ -39,12 +39,31 @@ class UsersTable extends Component {
     // update state with edited data
     // console.log(userData);
     this.setState({ showEditOverlay: true });
+    let roles = Object.keys(userData.roles)
+      .map((key) => {
+        switch (userData.roles[key].name) {
+          case 'Administrator':
+            return 'admin';
+          case 'KanbanMaster':
+            return 'kanban';
+          case 'Product Owner':
+            return 'po';
+          case 'Razvijalec':
+            return 'dev';
+          default:
+            return null;
+        }
+      });
 
+    let editData = Object.assign({}, userData);
+    editData.roles = roles;
+
+    console.log('edit data', editData);
     ReactDOM.render(
       <AddEditNewUser
         closer={this.closeLayer}
         modeEdit={true}
-        editData={userData}
+        editData={editData}
       />, document.getElementById('overlay'));
   }
 
@@ -92,10 +111,10 @@ class UsersTable extends Component {
           <tbody>
             {allUsers.map(rowData => (
               <TableRow key={rowData.id} >
-                {Object.keys(rowData).map((key) => {
-                  if (key === 'id') return null;
-                  return <td key={key}>{rowData[key]}</td>;
-                })}
+                <td>{rowData.firstName}</td>
+                <td>{rowData.lastName}</td>
+                <td>{rowData.email}</td>
+                <td>{rowData.roles.map(role => role.name)}</td>
                 <td>
                   <Button plain icon={<EditIcon />} onClick={() => this.onEdit(rowData)} />
                   <Button plain icon={<TrashIcon />} onClick={() => this.onRemove(rowData.id)} />
@@ -117,18 +136,22 @@ UsersTable.propTypes = {
   data: PropTypes.object.isRequired
 };
 
-const AllUsersQuery = gql`
+const allUsersQuery = gql`
   query AllUsersQuery {
     allUsers {
       id
       firstName
       lastName
       email
+      roles {
+        name
+      }
     }
   }
 `;
 
-export default graphql(AllUsersQuery)(UsersTable);
+
+export default graphql(allUsersQuery)(UsersTable);
 
 // CODE FOR PAGINATION - MISSING SERVER SIDE IMPL FOR CURSOR
 

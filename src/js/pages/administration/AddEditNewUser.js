@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { graphql, compose } from 'react-apollo';
+import gql from 'graphql-tag';
 
 // Grommet components
 import Article from 'grommet/components/Article';
@@ -17,6 +19,30 @@ import CheckBox from 'grommet/components/CheckBox';
 
 const emailRegex = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}/;
 
+const addUserMutation = gql`
+  mutation createUser($user: CreateUserInput!) {
+    createUser(userData: $user) {
+      user {
+        id
+      }
+    }
+  }
+`;
+
+const editUserMutation = gql`
+  mutation editUser($user: EditUserInput!) {
+    editUser(userData: $user) {
+      user {
+        email
+        roles {
+          id
+        }
+      }
+    }
+  }
+`;
+
+
 class AddEditNewUser extends Component {
   constructor() {
     super();
@@ -32,8 +58,7 @@ class AddEditNewUser extends Component {
         admin: false,
         kanban: false,
         dev: false,
-        po: false,
-        user: false
+        po: false
       },
       error: {
         firstName: '',
@@ -46,20 +71,35 @@ class AddEditNewUser extends Component {
     };
   }
 
-  // TODO update roles on edit
+
+  /**
+   * [Set component state when displaying edit data]
+   * @return {[type]} [description]
+   */
   componentWillMount() {
     if (this.props.modeEdit) {
-      console.log('on mount data');
-      console.log(this.props.editData);
+      let tmpRoles = this.state.roles;
+      // vem da ni lepo ampak dela
+      for (let i = 0; i < this.props.editData.roles.length; i++) {
+        let role = this.props.editData.roles[i];
+        if (role === 'admin') tmpRoles.admin = true;
+        if (role === 'kanban') tmpRoles.kanban = true;
+        if (role === 'po') tmpRoles.po = true;
+        if (role === 'dev') tmpRoles.dev = true;
+      }
+
       this.setState({
         firstName: this.props.editData.firstName,
         lastName: this.props.editData.lastName,
         email: this.props.editData.email,
-        password: ''
+        password: '',
+        roles: tmpRoles
       });
     }
   }
 
+
+  // CheckBox handler
   onCheckBoxChange(id) {
     // eslint-disable-next-line
     let tmpRoles = this.state.roles;
@@ -68,15 +108,76 @@ class AddEditNewUser extends Component {
   }
 
 
+  /**
+   * [onSubmit button handler. Call approprite mutation]
+   */
   onSubmit() {
-    console.log('on submit');
     this.setState({ onSubmit: null });
     if (this.validateInput()) {
-      console.log('send mutation - TODO');
+      const tmpRoles = this.mapRoles(this.state.roles);
+      let userData = {
+        user: {
+          email: this.state.email,
+          firstName: this.state.firstName,
+          lastName: this.state.lastName,
+          roles: tmpRoles
+        }
+      };
+
+
+      if (this.props.modeEdit) {
+        if (this.state.password !== '') userData.user.password = this.state.password;
+        this.props.editUserMutation({ variables: userData })
+          .then(this.props.closer())
+          .catch(err => console.err(err));
+      } else {
+        userData.user.password = this.state.password;
+        this.props.addUserMutation({ variables: userData })
+          .then(this.props.closer())
+          .catch(err => console.err(err));
+      }
     }
   }
 
 
+  /**
+   * Map CheckBox selection to userRoles
+   * ADMIN = 1
+   * PRODUCT_OWNER = 2
+   * KANBAN_MASTER = 3
+   * DEV = 4
+   * @param  {[object]} roles [Roles object to map]
+   * @return {[array]}       [Array of selected user roles]
+   */
+  mapRoles(roles) {
+    // eslint-disable-next-line
+    let tmpRoles = [];
+    Object.keys(roles).map((role) => {
+      switch (role) {
+        case 'admin':
+          if (roles[role]) tmpRoles.push(1);
+          return null;
+        case 'kanban':
+          if (roles[role]) tmpRoles.push(3);
+          return null;
+        case 'dev':
+          if (roles[role]) tmpRoles.push(4);
+          return null;
+        case 'po':
+          if (roles[role]) tmpRoles.push(2);
+          return null;
+        default:
+          return null;
+      }
+    });
+    return tmpRoles;
+  }
+
+
+  /**
+   * [validates form]
+   * @return {[bool]} [returns true if form is valid]
+   */
   validateInput() {
     // eslint-disable-next-line
     let error = {
@@ -94,7 +195,8 @@ class AddEditNewUser extends Component {
     if (this.state.firstName === '') { error.firstName = 'Obvezno polje'; formIsValid = false; }
     if (this.state.lastName === '') { error.lastName = 'Obvezno polje'; formIsValid = false; }
     if (this.state.email === '') { error.email = 'Obvezno polje'; formIsValid = false; }
-    if (this.state.password === '') { error.password = 'Obvezno polje'; formIsValid = false; }
+    // password can be blank in edit mode (we do not update it)
+    if (this.state.password === '' && !this.props.modeEdit) { error.password = 'Obvezno polje'; formIsValid = false; }
     if (Object.values(this.state.roles).find(el => el === true) === undefined) { error.role = 'Dolocite vsaj eno vlogo'; formIsValid = false; }
 
     this.setState({ error, onSubmit: this.onSubmit });
@@ -103,7 +205,6 @@ class AddEditNewUser extends Component {
 
 
   render() {
-    console.log(this.props);
     return (
       <Layer
         closer
@@ -114,7 +215,7 @@ class AddEditNewUser extends Component {
 
             <Header pad={{ vertical: 'medium' }}>
               <Heading>
-                Dodaj novega uporabnika
+                {(this.props.modeEdit) ? 'Uredi uporabnika' : 'Dodaj uporabnika'}
               </Heading>
             </Header>
 
@@ -159,7 +260,6 @@ class AddEditNewUser extends Component {
                 <CheckBox id='kanban' label='KanbanMaster' checked={this.state.roles.kanban} onChange={event => this.onCheckBoxChange(event.target.id)} />
                 <CheckBox id='po' label='Product Owner' checked={this.state.roles.po} onChange={event => this.onCheckBoxChange(event.target.id)} />
                 <CheckBox id='dev' label='Razvijalec' checked={this.state.roles.dev} onChange={event => this.onCheckBoxChange(event.target.id)} />
-                <CheckBox id='user' label='Uporabnik' checked={this.state.roles.user} onChange={event => this.onCheckBoxChange(event.target.id)} />
               </FormField>
 
             </FormFields>
@@ -192,8 +292,21 @@ AddEditNewUser.propTypes = {
   editData: PropTypes.shape({
     firstName: PropTypes.string,
     lastName: PropTypes.string,
-    email: PropTypes.string
-  })
+    email: PropTypes.string,
+    roles: PropTypes.array
+  }),
+  addUserMutation: PropTypes.func.isRequired,
+  editUserMutation: PropTypes.func.isRequired
 };
 
-export default AddEditNewUser;
+
+const AddEditNewUserWithMutations = compose(
+  graphql(addUserMutation, {
+    name: 'addUserMutation'
+  }),
+  graphql(editUserMutation, {
+    name: 'editUserMutation'
+  })
+)(AddEditNewUser);
+
+export default AddEditNewUserWithMutations;
