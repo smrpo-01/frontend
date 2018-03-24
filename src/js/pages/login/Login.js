@@ -54,7 +54,7 @@ class Login extends Component {
       return;
     }
     try {
-      const res = await fetch('http://127.0.0.1:8000/api-token-auth/', { method: 'POST', headers: {
+      const res = await fetch('http://127.0.0.1:8000/login/', { method: 'POST', headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json'
       }, body: JSON.stringify({ email: this.state.email, password: this.state.password }) });
