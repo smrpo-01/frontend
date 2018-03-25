@@ -98,9 +98,9 @@ class UsersTable extends Component {
         <Table>
           <TableHeader
             labels={['Ime', 'Priimek', 'E-mail', 'Vloge', 'Aktiven', 'Akcije']}
-            sortIndex={this.state.columnIndexToSort}
-            sortAscending={this.state.sortAscending}
-            onSort={this.handleSort}
+            // sortIndex={this.state.columnIndexToSort}
+            // sortAscending={this.state.sortAscending}
+            // onSort={this.handleSort}
           />
           <tbody>
             {allUsers.map(rowData => (
