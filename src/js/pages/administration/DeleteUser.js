@@ -11,6 +11,8 @@ import Heading from 'grommet/components/Heading';
 import Footer from 'grommet/components/Footer';
 import Layer from 'grommet/components/Layer';
 
+import { allUsersQuery } from './UsersTable';
+
 class DeleteUser extends Component {
   constructor() {
     super();
@@ -19,7 +21,10 @@ class DeleteUser extends Component {
 
 
   onConfirm() {
-    this.props.mutate({ variables: { id: this.props.id } })
+    this.props.mutate({
+      variables: { id: this.props.id },
+      refetchQueries: [{ query: allUsersQuery }]
+    })
       .then(this.props.closer())
       .catch(err => console.log(err));
   }

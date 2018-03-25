@@ -138,7 +138,7 @@ UsersTable.propTypes = {
   deleteUser: PropTypes.func.isRequired
 };
 
-const allUsersQuery = gql`
+export const allUsersQuery = gql`
   query AllUsersQuery {
     allUsers {
       id
@@ -154,7 +154,9 @@ const allUsersQuery = gql`
 `;
 
 
-export default graphql(allUsersQuery)(UsersTable);
+export default graphql(allUsersQuery, {
+  options: { pollInterval: 10000 }, // refresh table every 10 seconds
+})(UsersTable);
 
 // CODE FOR PAGINATION - MISSING SERVER SIDE IMPL FOR CURSOR
 
