@@ -59,13 +59,14 @@ class Login extends Component {
         'Content-Type': 'application/json'
       }, body: JSON.stringify({ email: this.state.email, password: this.state.password }) });
       const json = await res.json();
-      const { token } = json;
+      const { token, user } = json;
       if (!token) {
         this.setState({
           in: true,
           errorDescription: 'Email naslov in geslo se ne ujemata.',
         });
       } else {
+        this.props.saveUserData(user);
         this.props.handler(token);
       }
     } catch (err) {
@@ -144,7 +145,8 @@ Login.defaultProps = {
 };
 
 Login.propTypes = {
-  handler: PropTypes.func,
+  handler: PropTypes.func.isRequired,
+  saveUserData: PropTypes.func.isRequired
 };
 
 export default Login;

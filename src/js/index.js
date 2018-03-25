@@ -17,7 +17,7 @@ import { ApolloProvider } from 'react-apollo';
 import App from 'grommet/components/App';
 import MainApp from './App';
 
-const uri = process.env.NODE_ENV === 'development' ? 'http://127.0.0.1:8000/graphiql' : '/graphql';
+const uri = process.env.NODE_ENV === 'development' ? 'http://127.0.0.1:8000/graphiql' : '/graphiql';
 
 const httpLink = createHttpLink({
   uri,

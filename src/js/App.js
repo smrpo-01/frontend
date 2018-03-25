@@ -22,13 +22,15 @@ class MainApp extends Component {
   constructor() {
     super();
     this.authenticateUser = this.authenticateUser.bind(this);
+    this.saveUserData = this.saveUserData.bind(this);
     this.toggleSidebar = this.toggleSidebar.bind(this);
 
     this.state = {
       sidebarVisible: false,
       userAuthenticated: true,
       appState: {
-        token: ''
+        token: '',
+        userData: null
       }
     };
   }
@@ -41,6 +43,7 @@ class MainApp extends Component {
     this.setState({ sidebarVisible: !this.state.sidebarVisible });
   }
 
+
   /**
    * Callback to set app state for user authentication
    */
@@ -50,16 +53,44 @@ class MainApp extends Component {
     this.setState({ appState: { token } });
   }
 
+
+  /**
+   * [Saves user data to local storage. This data is used for routing permissions.
+   * Function is called from child Login component.]
+   * @param  {[object]} user [description]
+   */
+  saveUserData(user) {
+    let userData = Object.assign({}, user);
+    userData.roles = user.roles.map((val) => {
+      switch (val) {
+        case 1:
+          return 'admin';
+        case 2:
+          return 'po';
+        case 3:
+          return 'km';
+        default:
+          return 'dev';
+      }
+    });
+    // eslint-disable-next-line no-undef
+    localStorage.setItem('user', JSON.stringify(userData));
+    this.setState({ userData });
+  }
+
+
+  // Logout user by clearing localStorage
   logoutUser() {
     // eslint-disable-next-line no-undef
     localStorage.clear();
   }
 
+
   render() {
     // eslint-disable-next-line no-undef
     const token = localStorage.getItem('token');
 
-    if (!token) return <Login handler={this.authenticateUser} />;
+    if (!token) return <Login handler={this.authenticateUser} saveUserData={this.saveUserData} />;
 
     return (
       <Split
