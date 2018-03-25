@@ -2,7 +2,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { ApolloClient } from 'apollo-client';
-import { HttpLink } from 'apollo-link-http';
+import { createHttpLink } from 'apollo-link-http';
+import { setContext } from 'apollo-link-context';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { BrowserRouter } from 'react-router-dom';
 
@@ -16,9 +17,29 @@ import { ApolloProvider } from 'react-apollo';
 import App from 'grommet/components/App';
 import MainApp from './App';
 
-// Define Apollo client
+const uri = process.env.NODE_ENV === 'development' ? 'http://127.0.0.1:8000/graphiql' : '/graphql';
+
+const httpLink = createHttpLink({
+  uri,
+});
+
+const authLink = setContext((_, { headers }) => {
+  // get the authentication token from local storage if it exists
+  // eslint-disable-next-line no-undef
+  const token = localStorage.getItem('token');
+  // return the headers to the context so httpLink can read them
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `JWT ${token}` : '',
+    }
+  };
+});
+
+
+// Define apollo client
 const client = new ApolloClient({
-  link: new HttpLink({ uri: 'https://api.example.com/graphql' }),
+  link: authLink.concat(httpLink),
   cache: new InMemoryCache()
 });
 

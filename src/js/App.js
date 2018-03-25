@@ -6,7 +6,7 @@ import Article from 'grommet/components/Article';
 import Section from 'grommet/components/Section';
 import Split from 'grommet/components/Split';
 
-import LoginView from './pages/LoginView';
+import Login from './pages/login/Login';
 
 // Custom components
 import AppHeader from './components/AppHeader';
@@ -59,7 +59,7 @@ class MainApp extends Component {
     // eslint-disable-next-line no-undef
     const token = localStorage.getItem('token');
 
-    if (!token) return <LoginView handler={this.authenticateUser} />;
+    if (!token) return <Login handler={this.authenticateUser} />;
 
     return (
       <Split
