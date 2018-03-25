@@ -16,8 +16,10 @@ import Layer from 'grommet/components/Layer';
 import TextInput from 'grommet/components/TextInput';
 import PasswordInput from 'grommet/components/PasswordInput';
 import CheckBox from 'grommet/components/CheckBox';
+import Section from 'grommet/components/Section';
 
 const emailRegex = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}/;
+import { allUsersQuery } from './UsersTable';
 
 const addUserMutation = gql`
   mutation createUser($user: CreateUserInput!) {
@@ -54,6 +56,7 @@ class AddEditNewUser extends Component {
       lastName: '',
       email: '',
       password: '',
+      isActive: false,
       roles: {
         admin: false,
         kanban: false,
@@ -77,6 +80,7 @@ class AddEditNewUser extends Component {
    * @return {[type]} [description]
    */
   componentWillMount() {
+    console.log(this.props);
     if (this.props.modeEdit) {
       let tmpRoles = this.state.roles;
       // vem da ni lepo ampak dela
@@ -93,7 +97,8 @@ class AddEditNewUser extends Component {
         lastName: this.props.editData.lastName,
         email: this.props.editData.email,
         password: '',
-        roles: tmpRoles
+        roles: tmpRoles,
+        isActive: this.props.editData.isActive
       });
     }
   }
@@ -109,7 +114,7 @@ class AddEditNewUser extends Component {
 
 
   /**
-   * [onSubmit button handler. Call approprite mutation]
+   * [onSubmit button handler. Prepares mutation data and executes mutation]
    */
   onSubmit() {
     this.setState({ onSubmit: null });
@@ -126,17 +131,54 @@ class AddEditNewUser extends Component {
 
 
       if (this.props.modeEdit) {
+        // only update password when it changes
         if (this.state.password !== '') userData.user.password = this.state.password;
-        this.props.editUserMutation({ variables: userData })
-          .then(this.props.closer())
-          .catch(err => console.log(err));
+        // add user id
+        userData.user.id = this.props.editData.id;
+
+        this.props.editUserMutation({
+          variables: userData,
+          refetchQueries: [{ query: allUsersQuery }]
+        })
+          .then(() => this.props.closer())
+          .catch(err => this.handleError(err));
       } else {
         userData.user.password = this.state.password;
-        this.props.addUserMutation({ variables: userData })
-          .then(this.props.closer())
-          .catch(err => console.log(err));
+        this.props.addUserMutation({
+          variables: userData,
+          refetchQueries: [{ query: allUsersQuery }]
+        })
+          .then(() => this.props.closer())
+          .catch(err => this.handleError(err));
       }
+    } else {
+      // reenable button for input validation
+      this.setState({ onSubmit: this.onSubmit });
     }
+  }
+
+
+  /**
+   * [Handles error responses and sets state to show err info.]
+   * @param  {[object]} err [Error object]
+   */
+  handleError(err) {
+    let error = {
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      role: '',
+      generalError: ''
+    };
+
+    if (err.message.search('email') !== -1) {
+      error.email = 'Zasedeno uporabniško ime';
+    } else {
+      error.generalError = err.message;
+      console.error(err);
+    }
+    this.setState({ onSubmit: this.onSubmit, error });
   }
 
 
@@ -199,7 +241,7 @@ class AddEditNewUser extends Component {
     if (this.state.password === '' && !this.props.modeEdit) { error.password = 'Obvezno polje'; formIsValid = false; }
     if (Object.values(this.state.roles).find(el => el === true) === undefined) { error.role = 'Dolocite vsaj eno vlogo'; formIsValid = false; }
 
-    this.setState({ error, onSubmit: this.onSubmit });
+    this.setState({ error });
     return formIsValid;
   }
 
@@ -247,6 +289,7 @@ class AddEditNewUser extends Component {
                 />
               </FormField>
 
+
               <FormField label='Geslo' error={this.state.error.password}>
                 <PasswordInput
                   id='password'
@@ -255,6 +298,7 @@ class AddEditNewUser extends Component {
                 />
               </FormField>
 
+
               <FormField label='Uporabniške vloge' error={this.state.error.role}>
                 <CheckBox id='admin' label='Administrator' checked={this.state.roles.admin} onChange={event => this.onCheckBoxChange(event.target.id)} />
                 <CheckBox id='kanban' label='KanbanMaster' checked={this.state.roles.kanban} onChange={event => this.onCheckBoxChange(event.target.id)} />
@@ -262,7 +306,23 @@ class AddEditNewUser extends Component {
                 <CheckBox id='dev' label='Razvijalec' checked={this.state.roles.dev} onChange={event => this.onCheckBoxChange(event.target.id)} />
               </FormField>
 
+              {(this.props.modeEdit) ?
+                <FormField label='Aktiven uporabnik'>
+                  <CheckBox
+                    id='active'
+                    toggle={true}
+                    checked={this.state.isActive}
+                    onChange={() => this.setState({ isActive: !this.state.isActive })}
+                  />
+                </FormField>
+                : null}
+
             </FormFields>
+
+            {(this.state.error.generalError !== undefined) ?
+              <Section className='color-red padding-bottom-0'>{this.state.error.generalError}</Section>
+              : null
+            }
 
             <Footer pad={{ vertical: 'medium', between: 'medium' }}>
               <Button label='Prekliči'
@@ -293,7 +353,9 @@ AddEditNewUser.propTypes = {
     firstName: PropTypes.string,
     lastName: PropTypes.string,
     email: PropTypes.string,
-    roles: PropTypes.array
+    roles: PropTypes.array,
+    isActive: PropTypes.bool,
+    id: PropTypes.string
   }),
   addUserMutation: PropTypes.func.isRequired,
   editUserMutation: PropTypes.func.isRequired

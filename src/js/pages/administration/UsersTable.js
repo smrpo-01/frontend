@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import ReactDOM from 'react-dom';
 
 import { graphql } from 'react-apollo';
 import gql from 'graphql-tag';
@@ -17,28 +16,19 @@ import TrashIcon from 'grommet/components/icons/base/Trash';
 
 // Custom
 import Loading from '../../components/Loading';
-import AddEditNewUser from './AddEditNewUser';
 
 class UsersTable extends Component {
   constructor() {
     super();
     this.handleSort = this.handleSort.bind(this);
-    this.closeLayer = this.closeLayer.bind(this);
 
     this.state = {
       columnIndexToSort: 0,
-      sortAscending: true,
-      showAddNewUser: false,
-      showEditOverlay: false
+      sortAscending: true
     };
   }
 
   onEdit(userData) {
-    // open edit dialog
-    // post new data to server
-    // update state with edited data
-    // console.log(userData);
-    this.setState({ showEditOverlay: true });
     let roles = Object.keys(userData.roles)
       .map((key) => {
         switch (userData.roles[key].name) {
@@ -58,28 +48,32 @@ class UsersTable extends Component {
     let editData = Object.assign({}, userData);
     editData.roles = roles;
 
-    console.log('edit data', editData);
-    ReactDOM.render(
-      <AddEditNewUser
-        closer={this.closeLayer}
-        modeEdit={true}
-        editData={editData}
-      />, document.getElementById('overlay'));
+    // call parent func to open overlay
+    this.props.editUser(true, editData);
   }
 
+
+  /**
+   * [Deactivates user. Handeled in parent component.]
+   * @param  {[string]} userId [UserId to deactivate]
+   */
   onRemove(userId) {
     // open confirm dialog
     this.props.deleteUser(userId);
   }
 
-  closeLayer() {
-    ReactDOM.unmountComponentAtNode(document.getElementById('overlay'));
-  }
 
+  /**
+   * [Handle table sort]
+   * @param  {[type]} index     [description]
+   * @param  {[type]} ascending [description]
+   * @return {[type]}           [description]
+   */
   handleSort(index, ascending) {
     if (index < 4) this.setState({ columnIndexToSort: index, sortAscending: ascending });
     // TODO create function to sort data
   }
+
 
   /**
    * [This function is called when user scroll to the bottom of the Table]
@@ -96,14 +90,14 @@ class UsersTable extends Component {
     if (loading) {
       return <Loading />;
     } else if (error) {
-      return <p>Error!</p>;
+      return <p style={{ color: 'red' }}>Error!</p>;
     }
 
     return (
       <div>
         <Table>
           <TableHeader
-            labels={['Ime', 'Priimek', 'e-mail', 'Vloge', 'Aktiven', 'Akcije']}
+            labels={['Ime', 'Priimek', 'E-mail', 'Vloge', 'Aktiven', 'Akcije']}
             sortIndex={this.state.columnIndexToSort}
             sortAscending={this.state.sortAscending}
             onSort={this.handleSort}
@@ -135,7 +129,8 @@ UsersTable.defaultProps = {
 
 UsersTable.propTypes = {
   data: PropTypes.object.isRequired,
-  deleteUser: PropTypes.func.isRequired
+  deleteUser: PropTypes.func.isRequired,
+  editUser: PropTypes.func.isRequired
 };
 
 export const allUsersQuery = gql`
@@ -153,10 +148,13 @@ export const allUsersQuery = gql`
   }
 `;
 
-
+/*
 export default graphql(allUsersQuery, {
   options: { pollInterval: 10000 }, // refresh table every 10 seconds
 })(UsersTable);
+*/
+
+export default graphql(allUsersQuery)(UsersTable);
 
 // CODE FOR PAGINATION - MISSING SERVER SIDE IMPL FOR CURSOR
 
