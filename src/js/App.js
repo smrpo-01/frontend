@@ -49,7 +49,7 @@ class MainApp extends Component {
    */
   authenticateUser(token) {
     // eslint-disable-next-line no-undef
-    localStorage.setItem('token', token);
+    sessionStorage.setItem('token', token);
     this.setState({ appState: { token } });
   }
 
@@ -74,21 +74,21 @@ class MainApp extends Component {
       }
     });
     // eslint-disable-next-line no-undef
-    localStorage.setItem('user', JSON.stringify(userData));
+    sessionStorage.setItem('user', JSON.stringify(userData));
     this.setState({ userData });
   }
 
 
-  // Logout user by clearing localStorage
+  // Logout user by clearing sessionStorage
   logoutUser() {
     // eslint-disable-next-line no-undef
-    localStorage.clear();
+    sessionStorage.clear();
   }
 
 
   render() {
     // eslint-disable-next-line no-undef
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
 
     if (!token) return <Login handler={this.authenticateUser} saveUserData={this.saveUserData} />;
 

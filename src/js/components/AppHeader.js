@@ -37,7 +37,7 @@ class AppHeader extends Component {
   // Set user roles
   componentWillMount() {
     // eslint-disable-next-line no-undef
-    const user = localStorage.getItem('user');
+    const user = sessionStorage.getItem('user');
     const userRoles = JSON.parse(user).roles;
     this.setState({ userRoles });
   }
