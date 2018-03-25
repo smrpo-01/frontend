@@ -19,6 +19,7 @@ import CheckBox from 'grommet/components/CheckBox';
 import Section from 'grommet/components/Section';
 
 const emailRegex = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}/;
+const nameRegex = /^[a-zA-Z]*$/;
 import { allUsersQuery } from './UsersTable';
 
 const addUserMutation = gql`
@@ -80,7 +81,6 @@ class AddEditNewUser extends Component {
    * @return {[type]} [description]
    */
   componentWillMount() {
-    console.log(this.props);
     if (this.props.modeEdit) {
       let tmpRoles = this.state.roles;
       // vem da ni lepo ampak dela
@@ -135,6 +135,7 @@ class AddEditNewUser extends Component {
         if (this.state.password !== '') userData.user.password = this.state.password;
         // add user id
         userData.user.id = this.props.editData.id;
+        userData.user.isActive = this.state.isActive;
 
         this.props.editUserMutation({
           variables: userData,
@@ -234,6 +235,9 @@ class AddEditNewUser extends Component {
     let formIsValid = true;
 
     if (!this.state.email.match(emailRegex)) { error.email = 'Nepravilen format'; formIsValid = false; }
+    if (!this.state.firstName.match(nameRegex)) { error.firstName = 'Nepravilen format'; formIsValid = false; }
+    if (!this.state.lastName.match(nameRegex)) { error.lastName = 'Nepravilen format'; formIsValid = false; }
+
     if (this.state.firstName === '') { error.firstName = 'Obvezno polje'; formIsValid = false; }
     if (this.state.lastName === '') { error.lastName = 'Obvezno polje'; formIsValid = false; }
     if (this.state.email === '') { error.email = 'Obvezno polje'; formIsValid = false; }
