@@ -21,16 +21,23 @@ class Administration extends Component {
     this.addNewUser = this.addNewUser.bind(this);
     this.closeLayer = this.closeLayer.bind(this);
     this.deleteUser = this.deleteUser.bind(this);
+    this.editUser = this.editUser.bind(this);
 
     this.state = {
-      showAddNewUser: false,
+      showAddEditUser: false,
       showDelete: false,
+      editData: {},
+      modeEdit: false,
       id: null // userId to delete
     };
   }
 
   addNewUser() {
-    this.setState({ showAddNewUser: true });
+    this.setState({ showAddEditUser: true });
+  }
+
+  editUser(modeEdit, editData) {
+    this.setState({ showAddEditUser: true, modeEdit, editData });
   }
 
 
@@ -38,7 +45,13 @@ class Administration extends Component {
    * [Closes overlay and resets state]
    */
   closeLayer() {
-    this.setState({ showAddNewUser: false, showDelete: false, id: null });
+    this.setState({
+      showAddEditUser: false,
+      showDelete: false,
+      editData: {},
+      modeEdit: false,
+      id: null
+    });
   }
 
 
@@ -60,8 +73,18 @@ class Administration extends Component {
           </Title>
         }
       >
-        <UsersTable deleteUser={this.deleteUser} />
-        {(this.state.showAddNewUser) ? <AddEditNewUser closer={this.closeLayer} /> : null}
+        <UsersTable deleteUser={this.deleteUser} editUser={this.editUser} />
+
+        {/* Overlays */}
+        {(this.state.showAddEditUser) ?
+          <AddEditNewUser
+            closer={this.closeLayer}
+            editData={this.state.editData}
+            modeEdit={this.state.modeEdit}
+          />
+          : null
+        }
+
         {(this.state.showDelete) ?
           <DeleteUser closer={this.closeLayer} id={this.state.id} /> : null}
       </PageTemplate>
