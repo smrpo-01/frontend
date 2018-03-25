@@ -44,7 +44,7 @@ PageTemplate.defaultProps = {
 };
 
 PageTemplate.propTypes = {
-  children: PropTypes.array,
+  children: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
   header: PropTypes.node,
   footer: PropTypes.node
 };
