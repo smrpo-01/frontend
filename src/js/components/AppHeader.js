@@ -61,7 +61,7 @@ class AppHeader extends Component {
             {this.state.menuItems.map(item =>
               (<Anchor
                 key={item.id}
-                path={{ path: item.route, index: true }}
+                path={item.route}
                 icon={item.icon}
               >
                 {item.itemName}
@@ -71,7 +71,12 @@ class AppHeader extends Component {
         </Section>
 
         {/* Logout button */}
-        <Button plain label='Odjava' icon={<LogoutIcon />} href='../' onClick={() => this.props.logoutUser()} />
+        <Button
+          plain
+          label='Odjava'
+          icon={<LogoutIcon />}
+          href='../'
+          onClick={() => this.props.logoutUser()} />
       </Header>
     );
   }
