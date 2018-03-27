@@ -62,7 +62,7 @@ class Login extends Component {
         if (!token) {
           this.setState({
             in: true,
-            errorDescription: json.non_field_errors[0],
+            errorDescription: 'Email naslov in geslo se ne ujemata.',
           });
         } else {
           this.props.handler(token);
