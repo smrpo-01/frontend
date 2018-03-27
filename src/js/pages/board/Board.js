@@ -1,19 +1,15 @@
 import React, { Component } from 'react';
+import BoardContent from './BoardContent';
 
 // Template
 import PageTemplate from '../../templates/PageTemplate';
 
-// Grommet components
 import Title from 'grommet/components/Title';
 
 class Board extends Component {
   render() {
     return (
-      <PageTemplate
-        header={<Title>Board</Title>}
-      >
-        <span>content</span>
-      </PageTemplate>
+        <BoardContent />
     );
   }
 }
