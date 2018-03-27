@@ -22,8 +22,8 @@ const transitionStyles = {
 const transitionStylesTransform = {
   entering: 0,
   entered: 30,
+  exited: 0,
 };
-
 
 class Login extends Component {
   constructor() {
@@ -39,42 +39,42 @@ class Login extends Component {
   async handleForm() {
     const emailRegex = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}/;
 
+    await this.setState({ in: false });
+
     if (this.state.email === '' || this.state.password === '') {
       this.setState({
         in: true,
         errorDescription: 'Izpolnite obe polji.',
       });
-      return;
     } else if (!this.state.email.match(emailRegex) || this.state.password.length < 6) {
-      console.log(this.state.email.match(emailRegex), this.state.password);
       this.setState({
         in: true,
         errorDescription: 'Nepravilen vnos, poskusite ponovno.',
       });
-      return;
-    }
-    try {
-      const res = await fetch('http://127.0.0.1:8000/login/', { method: 'POST', headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json'
-      }, body: JSON.stringify({ email: this.state.email, password: this.state.password }) });
-      const json = await res.json();
-      const { token, user } = json;
-      if (!token) {
+    } else {
+      try {
+        const res = await fetch('http://127.0.0.1:8000/login/', { method: 'POST', headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        }, body: JSON.stringify({ email: this.state.email, password: this.state.password }) });
+        const json = await res.json();
+        const { token, user } = json;
+        if (!token) {
+          this.setState({
+            in: true,
+            errorDescription: json.non_field_errors[0],
+          });
+        } else {
+          this.props.handler(token);
+          this.props.saveUserData(user);
+        }
+      } catch (err) {
+        console.log(err);
         this.setState({
           in: true,
-          errorDescription: 'Email naslov in geslo se ne ujemata.',
+          errorDescription: 'Povezava na strežnik neuspešna.',
         });
-      } else {
-        this.props.saveUserData(user);
-        this.props.handler(token);
       }
-    } catch (err) {
-      console.log(err);
-      this.setState({
-        in: true,
-        errorDescription: 'Povezava na strežnik neuspešna.',
-      });
     }
   }
 
