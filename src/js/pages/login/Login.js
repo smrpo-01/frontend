@@ -58,6 +58,7 @@ class Login extends Component {
           'Content-Type': 'application/json'
         }, body: JSON.stringify({ email: this.state.email, password: this.state.password }) });
         const json = await res.json();
+        console.log(json);
         const { token, user } = json;
         if (!token) {
           this.setState({
@@ -65,8 +66,8 @@ class Login extends Component {
             errorDescription: json.non_field_errors[0],
           });
         } else {
-          this.props.handler(token);
           this.props.saveUserData(user);
+          this.props.handler(token);
         }
       } catch (err) {
         console.log(err);
