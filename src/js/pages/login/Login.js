@@ -39,7 +39,7 @@ class Login extends Component {
   async handleForm() {
     const emailRegex = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}/;
 
-    await this.setState({in: false});
+    await this.setState({ in: false });
 
     if (this.state.email === '' || this.state.password === '') {
       this.setState({
@@ -58,13 +58,15 @@ class Login extends Component {
           'Content-Type': 'application/json'
         }, body: JSON.stringify({ email: this.state.email, password: this.state.password }) });
         const json = await res.json();
-        const { token } = json;
+        console.log(json);
+        const { token, user } = json;
         if (!token) {
           this.setState({
             in: true,
-            errorDescription: 'Email naslov in geslo se ne ujemata.',
+            errorDescription: json.non_field_errors[0],
           });
         } else {
+          this.props.saveUserData(user);
           this.props.handler(token);
         }
       } catch (err) {
@@ -144,7 +146,8 @@ Login.defaultProps = {
 };
 
 Login.propTypes = {
-  handler: PropTypes.func,
+  handler: PropTypes.func.isRequired,
+  saveUserData: PropTypes.func.isRequired
 };
 
 export default Login;
