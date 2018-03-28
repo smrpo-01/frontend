@@ -38,13 +38,13 @@ class PageTemplate extends Component {
 }
 
 PageTemplate.defaultProps = {
-  children: {},
+  children: null,
   header: null,
   footer: null
 };
 
 PageTemplate.propTypes = {
-  children: PropTypes.object,
+  children: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
   header: PropTypes.node,
   footer: PropTypes.node
 };

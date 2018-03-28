@@ -28,9 +28,54 @@ class AppHeader extends Component {
         { id: 2, itemName: 'Management', route: '/management', icon: <VmMaintenanceIcon /> },
         { id: 3, itemName: 'Tabla', route: '/board', icon: <TableIcon /> },
         { id: 4, itemName: 'Administracija uporabnikov', route: '/administration', icon: <UserSettingsIcon /> }
-      ]
+      ],
+      userRoles: []
     };
   }
+
+
+  // Set user roles
+  componentWillMount() {
+    // eslint-disable-next-line no-undef
+    const user = sessionStorage.getItem('user');
+    const userRoles = JSON.parse(user).roles;
+    this.setState({ userRoles });
+  }
+
+
+  /**
+   * [Array intersection]
+   * @param  {[array]} arr1 [First array]
+   * @param  {[array]} arr2 [Second array]
+   * @return {[bool]}      [Returns true if two array have at least one element in intersection]
+   */
+  arrIntersection(arr1, arr2) {
+    // eslint-disable-next-line
+    let result = arr1.reduce((r, a) => arr2.includes(a) && r.concat(a) || r, []);
+    if (result.length > 0) return true;
+    return false;
+  }
+
+
+  // Validates user role for specific route
+  checkRoleForPath(route) {
+    const roles = this.state.userRoles;
+    const rolesForManagement = ['po', 'km', 'admin'];
+
+    switch (route) {
+      case '/home':
+        return true;
+      case '/board':
+        return true;
+      case '/administration':
+        return ((roles.find(el => el === 'admin')) !== undefined);
+      case '/management':
+        return this.arrIntersection(roles, rolesForManagement);
+      default:
+        return false;
+    }
+  }
+
 
   render() {
     return (
@@ -58,15 +103,20 @@ class AppHeader extends Component {
             inline={true}
             direction='row'
             size='medium'>
-            {this.state.menuItems.map(item =>
-              (<Anchor
-                key={item.id}
-                path={item.route}
-                icon={item.icon}
-              >
-                {item.itemName}
-              </Anchor>)
-            )}
+            {this.state.menuItems.map((item) => {
+              if (this.checkRoleForPath(item.route)) {
+                return (
+                  <Anchor
+                    key={item.id}
+                    path={item.route}
+                    icon={item.icon}
+                  >
+                    {item.itemName}
+                  </Anchor>
+                );
+              }
+              return null;
+            })}
           </Menu>
         </Section>
 
