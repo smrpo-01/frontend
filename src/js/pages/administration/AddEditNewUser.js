@@ -19,7 +19,7 @@ import CheckBox from 'grommet/components/CheckBox';
 import Section from 'grommet/components/Section';
 
 const emailRegex = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}/;
-const nameRegex = /^[a-zA-Z]*$/;
+const nameRegex = /^[a-zA-ZšđčćžŠĐČĆŽ]*$/;
 import { allUsersQuery } from './UsersTable';
 
 const addUserMutation = gql`
