@@ -1,15 +1,24 @@
 import React, { Component } from 'react';
-import BoardContent from './BoardContent';
-
-// Template
-import PageTemplate from '../../templates/PageTemplate';
-
+import BoardCustom from './BoardCustom';
 import Title from 'grommet/components/Title';
+
+import Anchor from 'grommet/components/Anchor';
+
 
 class Board extends Component {
   render() {
     return (
-        <BoardContent />
+      <div>
+        <div style={{ backgroundColor: 'red', display: 'flex', justifyContent: 'space-between' }}>
+          <Title style={{ marginLeft: 20, marginTop: 10, marginBottom: 15 }}>
+            Board
+          </Title>
+          <div style={{ marginRight: 30, display: 'flex' }}>
+
+          </div>
+        </div>
+        <BoardCustom />
+      </div>
     );
   }
 }

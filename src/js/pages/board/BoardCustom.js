@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
-import Column from './Column'
+import Column from './Column';
+import { DragDropContext } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
 
 const columns = [{
   title: 'Product backlog',
@@ -12,16 +14,16 @@ const columns = [{
     tasks: [{
       label: 'Pripravi shemo za Projects (2h)',
       done: true,
-    },{
+    }, {
       label: 'Pripravi mutacije za shemo Projects (2h)',
       done: false,
-    },{
+    }, {
       label: 'Code merge & deploy (1h)',
       done: true,
-    },{
+    }, {
       label: 'Osnovna stran za tablo (route, user logic) (2h)',
       done: false,
-    },{
+    }, {
       label: 'Validacija atributov (1h)',
       done: true,
     }]
@@ -33,18 +35,18 @@ const columns = [{
     tasks: [{
       label: 'Osnovna stran za tablo (route, user logic) (2h)',
       done: true,
-    },{
+    }, {
       label: 'Dodajanje projektov na tablo (2h)',
       done: false,
-    },{
+    }, {
       label: 'Gumbi za shranjevanje/brisanje (1h)',
       done: true,
-    },{
+    }, {
       label: 'Testiranje & AC (2h)',
       done: false,
     }]
   }]
-},{
+  }, {
   title: 'Sprint backlog',
   color: '#00A0B0',
   cards: [{
@@ -55,22 +57,22 @@ const columns = [{
     tasks: [{
       label: 'Osnovna stran za tablo (route, user logic) (2h)',
       done: true,
-    },{
+    }, {
       label: 'Dodajanje projektov na tablo (2h)',
       done: false,
-    },{
+    }, {
       label: 'Gumbi za shranjevanje/brisanje (1h)',
       done: true,
-    },{
+    }, {
       label: 'Testiranje & AC (2h)',
       done: false,
     }]
   }]
-},{
+  }, {
   title: 'Product backlog',
   color: '#AA001E',
   cards: []
-},{
+  }, {
   title: 'jajajaja backlog',
   color: '#AA001E',
   cards: []
@@ -78,13 +80,13 @@ const columns = [{
 
 class BoardCustom extends Component {
   render() {
-    return  (
-      <div style={{backgroundColor: '#f5fbef', display: 'flex', minHeight: 800}}>
-        {columns.map((column, i) => 
-          <Column title={column.title} color={column.color} cards={column.cards} key={i}/>
+    return (
+      <div style={{ backgroundColor: '#f5fbef', display: 'flex', minHeight: 800 }}>
+        {columns.map((column, i) =>
+          <Column title={column.title} color={column.color} cards={column.cards} key={i} />
         )}
       </div>
-      )
+    );
   }
 }
 
@@ -94,4 +96,4 @@ BoardCustom.defaultProps = {
 BoardCustom.propTypes = {
 };
 
-export default BoardCustom;
+export default DragDropContext(HTML5Backend)(BoardCustom);
