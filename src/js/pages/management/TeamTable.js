@@ -57,9 +57,9 @@ class TeamTable extends Component {
 }
 
 TeamTable.propTypes = {
-  data: PropTypes.array.isRequired,
   onEdit: PropTypes.func.isRequired,
-  onRemove: PropTypes.func.isRequired
+  onRemove: PropTypes.func.isRequired,
+  data: PropTypes.object.isRequired
 };
 
 export const allTeamsQuery = gql`

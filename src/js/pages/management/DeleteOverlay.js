@@ -28,8 +28,9 @@ class DeleteTeam extends Component {
 
   onConfirm() {
     this.setState({ onConfirm: null });
+    // console.log(this.props);
     this.props.mutate({
-      variables: { userTeamId: this.props.id },
+      variables: { id: this.props.id },
       refetchQueries: [{ query: allTeamsQuery }]
     })
       .then(() => this.props.closer())
@@ -43,7 +44,7 @@ class DeleteTeam extends Component {
     return (
       <Layer>
         <Article pad='small'>
-          <Header><Heading>Potrdi brisanje razvojne skupine</Heading></Header>
+          <Header><Heading>Potrdi brisanje</Heading></Header>
 
           {(this.state.error !== undefined) ?
             <Section className='color-red padding-bottom-0'>{this.state.error}</Section>
@@ -66,6 +67,8 @@ class DeleteTeam extends Component {
     );
   }
 }
+
+// TODO create multiple component with multiple mutations
 
 const DeleteTeamMutation = gql`
   mutation DeleteTeam($id: Int!) {
