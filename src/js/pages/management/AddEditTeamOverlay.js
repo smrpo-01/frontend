@@ -16,16 +16,17 @@ import Layer from 'grommet/components/Layer';
 import TextInput from 'grommet/components/TextInput';
 import Title from 'grommet/components/Title';
 import Section from 'grommet/components/Section';
-import Table from 'grommet/components/Table';
-import TableRow from 'grommet/components/TableRow';
-import TableHeader from 'grommet/components/TableHeader';
+import List from 'grommet/components/List';
+import ListItem from 'grommet/components/ListItem';
+import Select from 'grommet/components/Select';
+
 
 // Icons
 // import EditIcon from 'grommet/components/icons/base/Edit';
 import TrashIcon from 'grommet/components/icons/base/Trash';
 
 // const emailRegex = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}/;
-// const nameRegex = /^[a-zA-ZšđčćžŠĐČĆŽ]*$/;
+// const alphaNumRegex = /^[a-zA-Z0-9šđčćžŠĐČĆŽ]*$/;
 // import { allUsersQuery } from './UsersTable';
 
 const addTeamMutation = gql`
@@ -70,36 +71,37 @@ export const allUsersQuery = gql`
 class AddEditTeam extends Component {
   constructor() {
     super();
+    this.filterSuggestions = this.filterSuggestions.bind(this);
 
     this.state = {
       allUsers: [],
+      options: [],
       teamName: '',
       po: '',
+      poId: '',
       km: '',
-      password: '',
-      isActive: false,
-      roles: {
-        admin: false,
-        kanban: false,
-        dev: false,
-        po: false
-      },
+      kmId: '',
+      dev: '',
+      developers: [],
       error: {
         teamName: '',
         po: '',
         km: '',
-        password: '',
-        role: ''
+        dev: ''
       },
       onSubmit: null
     };
   }
 
   componentWillReceiveProps(nextProps) {
-    const { data: { loading, error, allUsers } } = nextProps;
+    const { data: { error, allUsers } } = nextProps;
+
+    if (error) console.error(error);
+
     if (this.state.allUsers.length === 0) {
-      console.log(allUsers);
-      this.setState({ allUsers });
+      let users = allUsers.map(user => ({ value: user, label: user.firstName + ' ' + user.lastName }));
+      console.log(users);
+      this.setState({ allUsers: users, options: users });
     }
   }
 
@@ -138,6 +140,29 @@ class AddEditTeam extends Component {
   }
 
 
+  filterSuggestions(query) {
+    let options = this.state.allUsers.filter(obj =>
+      obj.label.toLowerCase().indexOf(query.toLowerCase()) !== -1);
+    // console.log(options);
+    this.setState({ options });
+  }
+
+  addDeveloper(dev) {
+    let developers = this.state.developers.slice();
+    developers.push(dev);
+    this.setState({ developers });
+  }
+
+  removeDev(id) {
+    if (!this.props.modeEdit) {
+      let developers = this.state.developers.slice();
+      developers = developers.filter(dev => dev.id !== id);
+      this.setState({ developers });
+    } else {
+      console.log('call mutation');
+    }
+  }
+
   render() {
     // console.log(this.props);
     // const { data: { loading, error, allUsers } } = this.props;
@@ -167,36 +192,59 @@ class AddEditTeam extends Component {
               </FormField>
 
               <FormField label='Product owner' error={this.state.error.po}>
-                <TextInput
+                <Select
                   id='po'
                   value={this.state.po}
                   placeHolder='Janez Novak'
-                  onDOMChange={event => this.setState({ po: event.target.value })}
-                  suggestions={this.state.allUsers}
+                  options={this.state.options}
+                  onChange={event =>
+                    this.setState({
+                      po: event.option.label,
+                      poId: event.option.value.id,
+                      options: this.state.allUsers
+                    })}
+                  onSearch={event => this.filterSuggestions(event.target.value)}
                 />
               </FormField>
 
               <FormField label='Kanban master' error={this.state.error.km}>
-                <TextInput
+                <Select
                   id='km'
                   value={this.state.km}
                   placeHolder='Janez Novak'
-                  onDOMChange={event => this.setState({ km: event.target.value })}
+                  options={this.state.options}
+                  onChange={event =>
+                    this.setState({
+                      km: event.option.label,
+                      kmId: event.option.value.id,
+                      options: this.state.allUsers
+                    })}
+                  onSearch={event => this.filterSuggestions(event.target.value)}
                 />
               </FormField>
             </FormFields>
 
             <Section>
               <Header><Title>Ostali člani</Title></Header>
-              <Table>
-                <TableHeader labels={['Razvijalec', '']} />
-                <tbody>
-                  <TableRow>
-                    <td>Luka Podgorsek</td>
-                    <td><Button plain icon={<TrashIcon />} onClick={() => null} /></td>
-                  </TableRow>
-                </tbody>
-              </Table>
+              <Section pad={{ vertical: 'small' }}>
+                <Select
+                  id='dev'
+                  value={this.state.dev}
+                  placeHolder='Janez Novak'
+                  options={this.state.options}
+                  onChange={event => this.addDeveloper(event.option.value)}
+                  onSearch={event => this.filterSuggestions(event.target.value)}
+                />
+              </Section>
+
+              <List>
+                {this.state.developers.map(dev => (
+                  <ListItem key={dev.id} justify='between' pad={{ horizontal: 'small' }}>
+                    {dev.firstName + ' ' + dev.lastName}
+                    <Button plain icon={<TrashIcon />} onClick={() => this.removeDev(dev.id)} />
+                  </ListItem>
+                ))}
+              </List>
             </Section>
 
             {(this.state.error.generalError !== undefined) ?
