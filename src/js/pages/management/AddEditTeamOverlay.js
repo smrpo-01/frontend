@@ -51,12 +51,28 @@ const editTeamMutation = gql`
   }
 `;
 
+export const allUsersQuery = gql`
+  query AllUsersQuery {
+    allUsers {
+      id
+      firstName
+      lastName
+      email
+      isActive
+      roles {
+        name
+      }
+    }
+  }
+`;
+
 
 class AddEditTeam extends Component {
   constructor() {
     super();
 
     this.state = {
+      allUsers: [],
       teamName: '',
       po: '',
       km: '',
@@ -77,6 +93,14 @@ class AddEditTeam extends Component {
       },
       onSubmit: null
     };
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const { data: { loading, error, allUsers } } = nextProps;
+    if (this.state.allUsers.length === 0) {
+      console.log(allUsers);
+      this.setState({ allUsers });
+    }
   }
 
 
@@ -115,6 +139,9 @@ class AddEditTeam extends Component {
 
 
   render() {
+    // console.log(this.props);
+    // const { data: { loading, error, allUsers } } = this.props;
+
     return (
       <Layer
         closer
@@ -145,6 +172,7 @@ class AddEditTeam extends Component {
                   value={this.state.po}
                   placeHolder='Janez Novak'
                   onDOMChange={event => this.setState({ po: event.target.value })}
+                  suggestions={this.state.allUsers}
                 />
               </FormField>
 
@@ -200,7 +228,8 @@ AddEditTeam.defaultProps = {
 
 AddEditTeam.propTypes = {
   closer: PropTypes.func.isRequired,
-  modeEdit: PropTypes.bool
+  modeEdit: PropTypes.bool,
+  data: PropTypes.object.isRequired
   // addTeamMutation: PropTypes.func.isRequired,
   // editTeamMutation: PropTypes.func.isRequired
 };
@@ -212,7 +241,8 @@ const AddEditTeamWithMutations = compose(
   }),
   graphql(editTeamMutation, {
     name: 'editTeamMutation'
-  })
+  }),
+  graphql(allUsersQuery)
 )(AddEditTeam);
 
 export default AddEditTeamWithMutations;

@@ -78,12 +78,12 @@ class Management extends Component {
 
 
         {/* Overlays */}
-        {(this.state.showDeleteOverlay) ?
+        {(this.state.showDeleteOverlay) &&
           <DeleteOverlay closer={this.closeOverlay} id={this.state.teamId} />
-          : null}
-        {(this.state.showAddEditOverlay) ?
+        }
+        {(this.state.showAddEditOverlay) &&
           <AddEditOverlay closer={this.closeOverlay} modeEdit={this.state.modeEdit} />
-          : null}
+        }
       </PageTemplate>
     );
   }

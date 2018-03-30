@@ -72,7 +72,7 @@ class DeleteTeam extends Component {
 
 const DeleteTeamMutation = gql`
   mutation DeleteTeam($id: Int!) {
-    deleteUserTeam(userTeamId: $id) {
+    deleteTeam(teamId: $id) {
       ok
     }
   }
