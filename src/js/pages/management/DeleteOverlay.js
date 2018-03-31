@@ -12,7 +12,7 @@ import Footer from 'grommet/components/Footer';
 import Layer from 'grommet/components/Layer';
 import Section from 'grommet/components/Section';
 
-import { allTeamsQuery } from './TeamTable';
+import { allTeamsQuery } from './team/TeamTable';
 
 class DeleteTeam extends Component {
   constructor() {

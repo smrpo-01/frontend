@@ -27,40 +27,8 @@ import Select from 'grommet/components/Select';
 import TrashIcon from 'grommet/components/icons/base/Trash';
 
 // const emailRegex = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}/;
-const alphaNumRegex = /^[a-zA-Z0-9šđčćžŠĐČĆŽ]*$/;
+const alphaNumRegex = /^[a-zA-Z0-9šđčćžŠĐČĆŽ ]*$/;
 import { allTeamsQuery } from './TeamTable';
-
-const addTeamMutation = gql`
-  mutation createTeam($team: CreateTeamInput!) {
-    createTeam(teamData: $team) {
-      ok
-    }
-  }
-`;
-
-const editTeamMutation = gql`
-  mutation editTeam($team: EditTeamInput!) {
-    editTeam(teamData: $team) {
-      ok
-    }
-  }
-`;
-
-export const allUsersQuery = gql`
-  query AllUsersQuery {
-    allUsers {
-      id
-      firstName
-      lastName
-      email
-      isActive
-      roles {
-        name
-      }
-    }
-  }
-`;
-
 
 class AddEditTeam extends Component {
   constructor() {
@@ -101,9 +69,12 @@ class AddEditTeam extends Component {
   componentWillMount() {
     if (this.props.modeEdit) {
       let data = this.props.editData;
+      console.log(data);
       let kmId = data.kanbanMaster.id;
       let poId = data.productOwner.id;
+      // odstrani vse tiste ki niso developerji
       let tmpDevs = data.members.filter(dev => (dev.id !== poId && dev.id !== kmId));
+      console.log(data);
 
       this.setState({
         teamName: data.name,
@@ -127,10 +98,23 @@ class AddEditTeam extends Component {
    */
   componentWillReceiveProps(nextProps) {
     const { data: { error, allUsers } } = nextProps;
-
+    console.log(allUsers);
     if (error) console.error(error);
 
     if (this.state.allUsers.length === 0) {
+      // let data = allUsers.slice();
+      // data.roles = data.map(user => user.roles = user.roles.map(role => this.mapRoles(role)));
+      /*
+      let dataWithRoles = data.reduce((acc, user) => {
+        console.log(user);
+        let mappedRoles = user.roles.map(role => this.mapRoles(role));
+        let tmpUser = Object.assign(user, {});
+        tmpUser.roles = mappedRoles;
+        return tmpUser;
+      }, []);
+
+      console.log(dataWithRoles);
+      */
       let users = allUsers.map(user =>
         ({ value: user,
           label: <Box justify='between' pad={{ horizontal: 'medium' }} direction='row'>
@@ -187,8 +171,8 @@ class AddEditTeam extends Component {
         })
           .then(() => this.props.closer())
           .catch(err => this.handleError(err.message));
-        this.setState({ onSubmit: this.onSubmit });
       }
+      console.log('query end');
     } else {
       // reenable button for input validation
       this.setState({ onSubmit: this.onSubmit });
@@ -202,12 +186,10 @@ class AddEditTeam extends Component {
    * @return {[Object]}      [Filtered user object]
    */
   filterUserObject(user) {
-    console.log(user);
     const allowedkeys = ['id', 'roles'];
     let tmp = Object.keys(user)
       .filter(key => allowedkeys.includes(key))
       .reduce((acc, key) => {
-        console.log(acc, key);
         acc[key] = user[key];
         return acc;
       }, {});
@@ -235,7 +217,7 @@ class AddEditTeam extends Component {
 
 
   /**
-   * Map CheckBox selection to userRoles
+   * Map roles to numbers
    * ADMIN = 1
    * PRODUCT_OWNER = 2
    * KANBAN_MASTER = 3
@@ -247,12 +229,12 @@ class AddEditTeam extends Component {
     switch (role.name) {
       case 'Administrator':
         return 1;
+      case 'Product Owner':
+        return 2;
       case 'KanbanMaster':
         return 3;
       case 'Razvijalec':
         return 4;
-      case 'Product Owner':
-        return 2;
       default:
         return -1;
     }
@@ -264,8 +246,10 @@ class AddEditTeam extends Component {
    * @param  {[type]} query [Search input - what user types into input field]
    */
   filterSuggestions(query) {
-    let options = this.state.allUsers.filter(obj =>
-      obj.label.toLowerCase().indexOf(query.toLowerCase()) !== -1);
+    let options = this.state.allUsers.filter((obj) => {
+      let name = obj.value.firstName + ' ' + obj.value.lastName;
+      return name.toLowerCase().indexOf(query.toLowerCase()) !== -1;
+    });
     this.setState({ options });
   }
 
@@ -275,20 +259,34 @@ class AddEditTeam extends Component {
    * @param {[type]} dev [description]
    */
   addDeveloper(dev) {
+    console.log(dev);
     let developers = this.state.developers.slice();
+    // let tmpDev = Object.assign({}, dev);
+    // TODO find PO || KM with dev.id and append role to existing role
+    // tmpDev.roles = [];
     developers.push(dev);
     this.setState({ developers });
   }
 
 
   /**
-   * [Remove developer from developer array.]
+   * [Remove developer from developer array.
+   * If mode is edit we have to call mutation to remove user.]
    * @param  {[String]} id [user id]
    */
-  removeDev(id) {
-    let developers = this.state.developers.slice();
-    developers = developers.filter(dev => dev.id !== id);
-    this.setState({ developers });
+  removeDev(userId) {
+    if (!this.props.modeEdit) {
+      let developers = this.state.developers.slice();
+      developers = developers.filter(dev => dev.id !== userId);
+      this.setState({ developers });
+    } else {
+      this.props.deleteUserFromTeamMutation({
+        variables: { id: userId },
+        refetchQueries: [{ query: allTeamsQuery }]
+      })
+        .then(res => console.log(res))
+        .catch(err => this.handleError(err.message));
+    }
   }
 
 
@@ -358,7 +356,7 @@ class AddEditTeam extends Component {
                       poId: event.option.value.id,
                       poObj: {
                         id: event.option.value.id,
-                        roles: event.option.value.roles.map(role => this.mapRoles(role))
+                        roles: [2]
                       },
                       options: this.state.allUsers
                     })}
@@ -378,7 +376,7 @@ class AddEditTeam extends Component {
                       kmId: event.option.value.id,
                       kmObj: {
                         id: event.option.value.id,
-                        roles: event.option.value.roles.map(role => this.mapRoles(role))
+                        roles: [3]
                       },
                       options: this.state.allUsers
                     })}
@@ -450,9 +448,48 @@ AddEditTeam.propTypes = {
   }),
   data: PropTypes.object.isRequired,
   addTeamMutation: PropTypes.func.isRequired,
-  editTeamMutation: PropTypes.func.isRequired
+  editTeamMutation: PropTypes.func.isRequired,
+  deleteUserFromTeamMutation: PropTypes.func.isRequired
 };
 
+const addTeamMutation = gql`
+  mutation createTeam($team: CreateTeamInput!) {
+    createTeam(teamData: $team) {
+      ok
+    }
+  }
+`;
+
+const editTeamMutation = gql`
+  mutation editTeam($team: EditTeamInput!) {
+    editTeam(teamData: $team) {
+      ok
+    }
+  }
+`;
+
+export const deleteUserFromTeamMutation = gql`
+  mutation deleteUserTeam($id: Int!) {
+    deleteUserTeam(userTeamId: $id) {
+      ok
+    }
+  }
+`;
+
+
+export const allUsersQuery = gql`
+  query AllUsersQuery {
+    allUsers {
+      id
+      firstName
+      lastName
+      email
+      roles {
+        name
+      }
+    }
+  }
+`;
 
 const AddEditTeamWithMutations = compose(
   graphql(addTeamMutation, {
@@ -460,6 +497,9 @@ const AddEditTeamWithMutations = compose(
   }),
   graphql(editTeamMutation, {
     name: 'editTeamMutation'
+  }),
+  graphql(deleteUserFromTeamMutation, {
+    name: 'deleteUserFromTeamMutation'
   }),
   graphql(allUsersQuery)
 )(AddEditTeam);

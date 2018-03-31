@@ -17,7 +17,7 @@ import EditIcon from 'grommet/components/icons/base/Edit';
 import TrashIcon from 'grommet/components/icons/base/Trash';
 
 // Custom
-import Loading from '../../components/Loading';
+import Loading from '../../../components/Loading';
 
 class TeamTable extends Component {
   render() {
@@ -83,13 +83,13 @@ export const allTeamsQuery = gql`
           name
         }
       }
-      members {
-        id
-        firstName
-        lastName
-        email
-        roles {
-          name
+      userteamSet {
+        isActive
+        member {
+          id
+          firstName
+          lastName
+          email
         }
       }
       projectSet {
