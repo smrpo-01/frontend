@@ -66,17 +66,32 @@ export const allTeamsQuery = gql`
   query allTeamsQuery {
     allTeams {
       id
+      name
       kanbanMaster {
         id
         firstName
         lastName
+        roles {
+          name
+        }
       }
       productOwner {
         id
         firstName
         lastName
+        roles {
+          name
+        }
       }
-      name
+      members {
+        id
+        firstName
+        lastName
+        email
+        roles {
+          name
+        }
+      }
       projectSet {
         id
         name

@@ -39,14 +39,9 @@ const addTeamMutation = gql`
 `;
 
 const editTeamMutation = gql`
-  mutation editTeam($user: EditUserInput!) {
-    editUser(userData: $user) {
-      user {
-        email
-        roles {
-          id
-        }
-      }
+  mutation editTeam($team: EditTeamInput!) {
+    editTeam(teamData: $team) {
+      ok
     }
   }
 `;
@@ -78,6 +73,7 @@ class AddEditTeam extends Component {
       allUsers: [],
       options: [],
       teamName: '',
+      teamId: '',
       po: '',
       poId: '',
       poObj: null,
@@ -97,22 +93,38 @@ class AddEditTeam extends Component {
     };
   }
 
+
+  /**
+   * [When component mounts check if we're in edit mode.
+   * Set appropriate state values to render data in form fields.]
+   */
   componentWillMount() {
     if (this.props.modeEdit) {
-      console.log(this.props.editData);
+      let data = this.props.editData;
+      let kmId = data.kanbanMaster.id;
+      let poId = data.productOwner.id;
+      let tmpDevs = data.members.filter(dev => (dev.id !== poId && dev.id !== kmId));
 
       this.setState({
-        teamName: this.props.editData.name,
-        po: this.props.editData.productOwner.firstName + ' ' + this.props.editData.productOwner.lastName,
-        poId: this.props.editData.productOwner.id,
-        poObj: this.props.editData.productOwner,
-        km: this.props.editData.kanbanMaster.firstName + ' ' + this.props.editData.kanbanMaster.lastName,
-        kmId: this.props.editData.kanbanMaster.id,
-        kmObj: this.props.editData.kanbanMaster
+        teamName: data.name,
+        teamId: data.id,
+        po: data.productOwner.firstName + ' ' + data.productOwner.lastName,
+        poId,
+        poObj: this.filterUserObject(data.productOwner),
+        km: data.kanbanMaster.firstName + ' ' + data.kanbanMaster.lastName,
+        kmId,
+        kmObj: this.filterUserObject(data.kanbanMaster),
+        developers: tmpDevs
       });
     }
   }
 
+
+  /**
+   * [Only triggered when AllUsersQuery returns result.
+   * Set all users to state for suggestions.]
+   * @param  {[Object]} nextProps [Next props]
+   */
   componentWillReceiveProps(nextProps) {
     const { data: { error, allUsers } } = nextProps;
 
@@ -132,6 +144,9 @@ class AddEditTeam extends Component {
   }
 
 
+  /**
+   * [onSubmit button handler. Prepares mutation data and executes mutation.]
+   */
   onSubmit() {
     console.log('before submit');
     this.setState({ onSubmit: null });
@@ -178,6 +193,26 @@ class AddEditTeam extends Component {
       // reenable button for input validation
       this.setState({ onSubmit: this.onSubmit });
     }
+  }
+
+
+  /**
+   * [Remove fields that are not allowed in GraphQl mutation]
+   * @param  {[Object]} user [User object to filter]
+   * @return {[Object]}      [Filtered user object]
+   */
+  filterUserObject(user) {
+    console.log(user);
+    const allowedkeys = ['id', 'roles'];
+    let tmp = Object.keys(user)
+      .filter(key => allowedkeys.includes(key))
+      .reduce((acc, key) => {
+        console.log(acc, key);
+        acc[key] = user[key];
+        return acc;
+      }, {});
+    tmp.roles = tmp.roles.map(role => this.mapRoles(role));
+    return tmp;
   }
 
 
@@ -287,9 +322,6 @@ class AddEditTeam extends Component {
 
 
   render() {
-    // console.log(this.props);
-    // const { data: { loading, error, allUsers } } = this.props;
-
     return (
       <Layer
         closer
@@ -410,9 +442,11 @@ AddEditTeam.propTypes = {
   closer: PropTypes.func.isRequired,
   modeEdit: PropTypes.bool,
   editData: PropTypes.shape({
+    id: PropTypes.string,
     name: PropTypes.string,
     kanbanMaster: PropTypes.object,
-    productOwner: PropTypes.object
+    productOwner: PropTypes.object,
+    members: PropTypes.array
   }),
   data: PropTypes.object.isRequired,
   addTeamMutation: PropTypes.func.isRequired,
