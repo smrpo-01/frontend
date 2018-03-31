@@ -51,9 +51,9 @@ class Management extends Component {
     this.setState({ showAddEditOverlay: true });
   }
 
-  editTeam(data) {
-    console.log('editing team', data);
-    this.setState({ showAddEditOverlay: true, modeEdit: true });
+  editTeam(editData) {
+    // console.log('editing team', editData);
+    this.setState({ showAddEditOverlay: true, modeEdit: true, editData });
   }
 
   deleteTeam(teamId) {
@@ -82,7 +82,11 @@ class Management extends Component {
           <DeleteOverlay closer={this.closeOverlay} id={this.state.teamId} />
         }
         {(this.state.showAddEditOverlay) &&
-          <AddEditOverlay closer={this.closeOverlay} modeEdit={this.state.modeEdit} />
+          <AddEditOverlay
+            closer={this.closeOverlay}
+            modeEdit={this.state.modeEdit}
+            editData={this.state.editData}
+          />
         }
       </PageTemplate>
     );
