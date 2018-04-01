@@ -7,6 +7,7 @@ import gql from 'graphql-tag';
 import Article from 'grommet/components/Article';
 import Button from 'grommet/components/Button';
 import Box from 'grommet/components/Box';
+import CheckBox from 'grommet/components/CheckBox';
 import Form from 'grommet/components/Form';
 import Header from 'grommet/components/Header';
 import Heading from 'grommet/components/Heading';
@@ -69,8 +70,6 @@ class AddEditTeam extends Component {
    * Check if allUsers need to be set to state.]
    */
   componentWillMount() {
-    console.log('mount', this.props.editData);
-
     if (this.props.data.allUsers !== undefined) this.saveAllUsersData(this.props);
 
     if (this.props.modeEdit) {
@@ -86,18 +85,16 @@ class AddEditTeam extends Component {
           firstName: obj.member.firstName,
           id: obj.member.id,
           lastName: obj.member.lastName,
+          userTeamId: obj.id,
           roles: obj.roles.map(role => (this.mapRoles(role)))
         };
         return newMember;
       });
-      console.log(tmpDevs);
+
       // Remove user that do not have dev role (KM, PO)
       tmpDevs = tmpDevs.filter(dev => (dev.roles.includes(4)));
-      // tmpDevs = tmpDevs.filter(dev => console.log(dev));
-      console.log(tmpDevs);
       let poObj = this.filterUserObject(data.productOwner);
       poObj.roles = [2];
-
       let kmObj = this.filterUserObject(data.kanbanMaster);
       kmObj.roles = [3];
 
@@ -112,6 +109,7 @@ class AddEditTeam extends Component {
         kmObj,
         developers: tmpDevs
       });
+      // console.log('developers', tmpDevs);
     }
   }
 
@@ -130,7 +128,6 @@ class AddEditTeam extends Component {
    * [onSubmit button handler. Prepares mutation data and executes mutation.]
    */
   onSubmit() {
-    console.log('before submit');
     this.setState({ onSubmit: null });
     if (this.validateForm()) {
       let teamData = {
@@ -155,11 +152,9 @@ class AddEditTeam extends Component {
         return this.filterUserObject(member);
       });
 
-      console.log(teamData);
 
       if (!poAdded) teamData.team.members.push(this.filterUserObject(this.state.poObj));
       if (!kmAdded) teamData.team.members.push(this.filterUserObject(this.state.kmObj));
-      console.log(JSON.stringify(teamData));
 
       if (this.props.modeEdit) {
         // add team id to mutation variable
@@ -179,7 +174,6 @@ class AddEditTeam extends Component {
           .then(() => this.props.closer())
           .catch(err => this.handleError(err.message));
       }
-      console.log('query end');
     } else {
       // reenable button for input validation
       this.setState({ onSubmit: this.onSubmit });
@@ -305,17 +299,24 @@ class AddEditTeam extends Component {
    * If mode is edit we have to call mutation to remove user.]
    * @param  {[String]} id [user id]
    */
-  removeDev(userId) {
+  removeDev(userId, index = 0) {
     if (!this.props.modeEdit) {
       let developers = this.state.developers.slice();
       developers = developers.filter(dev => dev.id !== userId);
       this.setState({ developers });
     } else {
+      this.setState({ onSubmit: null });
       this.props.deleteUserFromTeamMutation({
         variables: { id: userId },
         refetchQueries: [{ query: allTeamsQuery }]
       })
-        .then(res => console.log(res))
+        .then((res) => {
+          if (res.data.deleteUserTeam.ok) {
+            let developers = this.state.developers.slice();
+            developers[index].isActive = false;
+            this.setState({ developers, onSubmit: this.onSubmit });
+          }
+        })
         .catch(err => this.handleError(err.message));
     }
   }
@@ -432,10 +433,21 @@ class AddEditTeam extends Component {
               </Section>
 
               <List>
-                {this.state.developers.map(dev => (
-                  <ListItem key={dev.id} justify='between' pad={{ horizontal: 'small' }}>
+                {this.state.developers.map((dev, index) => (
+                  <ListItem
+                    key={dev.id}
+                    justify='between'
+                    pad={(this.props.modeEdit) ? { horizontal: 'small', vertical: 'small' } : { horizontal: 'small' }}>
                     {dev.firstName + ' ' + dev.lastName}
-                    <Button plain icon={<TrashIcon />} onClick={() => this.removeDev(dev.id)} />
+                    {(this.props.modeEdit) ?
+                      <CheckBox
+                        toggle={true}
+                        checked={dev.isActive}
+                        onChange={() => this.removeDev(dev.userTeamId, index)}
+                      />
+                      :
+                      <Button plain icon={<TrashIcon />} onClick={() => this.removeDev(dev.id)} />
+                    }
                   </ListItem>
                 ))}
               </List>
