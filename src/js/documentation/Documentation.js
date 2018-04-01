@@ -55,6 +55,25 @@ export const teamManagement = (
   </Article>
 );
 
+export const loginPage = (
+  <Article>
+    <Header>
+      <Heading>Pomoč pri prijavi v sistem Emineo</Heading>
+    </Header>
+    <Section>
+      Za uspešno prijavo se mora uporabnik prijaviti z ustreznim email naslovom in geslom.
+      Vneseno mora biti veljaven email naslov kot tudi geslo daljše od 6 znakov.
+      V primeru da je bil vnašen nepravilen email naslov ali geslo se uporabniku pokaže primerno obvestilo.
+      Po X neuspešnih prijavah v sistem se uporabniku onemogoči prijava za X minut.
+      Po uspešni prijavi se uporabniku ni potrebno ponovno vpisovati v sistem, saj brskalnik hrani podatke o prijavljenem uporabniku.
+    </Section>
+    <Footer>
+      Help footer
+    </Footer>
+  </Article>
+);
+
+
 export const helpTemplate = (
   <Article>
     <Header>
