@@ -25,7 +25,7 @@ class AppHeader extends Component {
     this.state = {
       menuItems: [
         { id: 1, itemName: 'Domov', route: '/home', icon: <HomeIcon /> },
-        { id: 2, itemName: 'Management', route: '/management', icon: <VmMaintenanceIcon /> },
+        { id: 2, itemName: 'Vzdrževanje', route: '/management', icon: <VmMaintenanceIcon /> },
         { id: 3, itemName: 'Tabla', route: '/board', icon: <TableIcon /> },
         { id: 4, itemName: 'Administracija uporabnikov', route: '/administration', icon: <UserSettingsIcon /> }
       ],

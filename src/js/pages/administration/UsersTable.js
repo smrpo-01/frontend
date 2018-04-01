@@ -108,7 +108,9 @@ class UsersTable extends Component {
                 <td>{rowData.firstName}</td>
                 <td>{rowData.lastName}</td>
                 <td>{rowData.email}</td>
-                <td>{rowData.roles.map(role => role.name)}</td>
+                <td>{rowData.roles.map(role =>
+                  <div key={role.name + rowData.email}>{role.name}</div>)}
+                </td>
                 <td>{(rowData.isActive) ? 'Da' : 'Ne'}</td>
                 <td>
                   <Button plain icon={<EditIcon />} onClick={() => this.onEdit(rowData)} />
