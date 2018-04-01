@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { graphql } from 'react-apollo';
+import { graphql, compose } from 'react-apollo';
 import gql from 'graphql-tag';
 
 // Grommet components
@@ -18,32 +18,40 @@ import TextInput from 'grommet/components/TextInput';
 import Section from 'grommet/components/Section';
 import Select from 'grommet/components/Select';
 
-const dateFormat = 'M/D/YYYY';
+import { allProjectsQuery } from './ProjectTable';
+
+const dateFormat = 'D/M/YYYY';
+const projectCodeRegex = /^[a-zA-Z0-9-/.]*$/;
+const alphaNumRegex = /^[a-zA-Z0-9šđčćžŠĐČĆŽ ]*$/;
+const alphaRegex = /^[a-zA-ZšđčćžŠĐČĆŽ ]*$/;
 
 class AddEditProject extends Component {
   constructor() {
     super();
     this.filterSuggestions = this.filterSuggestions.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
+    this.validateForm = this.validateForm.bind(this);
 
     this.state = {
       allTeams: null,
       options: [],
       id: '',
+      projectCode: '',
       name: '',
       customer: '',
-      startDate: '',
-      endDate: '',
+      dateStart: '',
+      dateEnd: '',
       team: '',
       error: {
-        id: '',
+        projectCode: '',
         name: '',
         customer: '',
         team: '',
-        startDate: '',
-        endDate: '',
+        dateStart: '',
+        dateEnd: '',
         general: ''
       },
-      onSubmit: null
+      onSubmit: this.onSubmit
     };
   }
 
@@ -66,6 +74,124 @@ class AddEditProject extends Component {
       console.log('teams', teams);
       this.setState({ allTeams: teams, options: teams });
     }
+  }
+
+
+  /**
+   * [Submit button handler.
+   * Triggers validation, prepares data and call appropriate mutation.
+   * Sets error to state if mutaion is not OK, otherwise close overlay.]
+   */
+  onSubmit() {
+    // Disable submit button
+    this.setState({ onSubmit: null });
+
+    // Validate form, if valid trigger mutation
+    if (this.validateForm()) {
+      let data = {
+        projectCode: this.state.projectCode,
+        name: this.state.name,
+        customer: this.state.customer,
+        dateStart: this.formatDate(this.state.dateStart), // 2018-03-30
+        dateEnd: this.formatDate(this.state.dateEnd)
+      };
+
+      if (this.state.team !== '') {
+        // We have assigned team to project, add it to mutation data
+        data.teamId = this.state.team.id;
+      }
+
+      console.log('mutation data', data);
+
+      if (this.props.modeEdit) {
+        // We're editing existing project
+        // Add project id to data
+        data.id = this.state.id;
+        this.props.editProjectMutation({
+          variables: { project: data },
+          refetchQueries: [{ query: allProjectsQuery }]
+        })
+          .then(() => this.props.closer())
+          .catch((err) => {
+            console.error(err);
+            this.setState({ onConfirm: this.onConfirm, error: err.message });
+          });
+      } else {
+        // We're adding new project
+        this.props.addProjectMutation({
+          variables: { project: data },
+          refetchQueries: [{ query: allProjectsQuery }]
+        })
+          .then(() => this.props.closer())
+          .catch((err) => {
+            console.error(err);
+            this.setState({ onConfirm: this.onConfirm, error: err.message });
+          });
+      }
+    } else {
+      // Reenable submit button
+      this.setState({ onSubmit: this.onSubmit });
+    }
+  }
+
+
+  /**
+   * [Validates form. Displays errors if not valid.]
+   * @return {[Boolean]} [True if form is valid]
+   */
+  validateForm() {
+    // eslint-disable-next-line
+    let error = {
+      projectCode: '',
+      name: '',
+      customer: '',
+      team: '',
+      dateStart: '',
+      dateEnd: '',
+      general: ''
+    };
+    // reset errors before validating input
+    this.setState({ error });
+    let formIsValid = true;
+
+    if (!this.state.projectCode.match(projectCodeRegex)) { error.projectCode = 'Nepravilen format'; formIsValid = false; }
+    if (!this.state.name.match(alphaNumRegex)) { error.projectnameCode = 'Nepravilen format'; formIsValid = false; }
+    if (!this.state.customer.match(alphaRegex)) { error.customer = 'Nepravilen format'; formIsValid = false; }
+
+    let start = new Date(this.formatDate(this.state.dateStart));
+    let end = new Date(this.formatDate(this.state.dateEnd));
+
+    if (start >= end) {
+      error.dateStart = 'Nepravilna izbira';
+      error.dateEnd = 'Nepravilna izbira';
+      formIsValid = false;
+    }
+
+    if (this.state.projectCode === '') { error.projectCode = 'Obvezno polje'; formIsValid = false; }
+    if (this.state.name === '') { error.name = 'Obvezno polje'; formIsValid = false; }
+    if (this.state.customer === '') { error.customer = 'Obvezno polje'; formIsValid = false; }
+    if (this.state.dateStart === '') { error.dateStart = 'Obvezno polje'; formIsValid = false; }
+    if (this.state.dateEnd === '') { error.dateEnd = 'Obvezno polje'; formIsValid = false; }
+
+    this.setState({ error });
+    return formIsValid;
+  }
+
+
+  /**
+   * [Formates SLO Grommet format to Django ot he other way around]
+   * @param  {[String]} dateToFormat       [Date to format. Valid formats: YYYY-MM-DD or DD/MM/YYYY]
+   * @param  {String} [format='grommet'] [Which format is passed to funciton.]
+   * @return {[String]}                    [Formatted date as string]
+   */
+  formatDate(dateToFormat, format = 'grommet') {
+    if (format === 'django') {
+      let d = dateToFormat.split('-'); // YYYY-MM-DD
+      console.log(d[2] + '/' + d[1] + '/' + d[0]);
+      return (d[2] + '/' + d[1] + '/' + d[0]); // DD/MM/YYYY
+    }
+    let d = dateToFormat.split('/'); // DD/MM/YYYY
+    return (d[2] + '-' + d[1] + '-' + d[0]); // YYYY-MM-DD
   }
 
 
@@ -97,12 +223,12 @@ class AddEditProject extends Component {
             </Header>
 
             <FormFields>
-              <FormField label='Šifra projekta' error={this.state.error.id}>
+              <FormField label='Šifra projekta' error={this.state.error.projectCode}>
                 <TextInput
-                  id='projectId'
-                  value={this.state.id}
+                  id='projectCode'
+                  value={this.state.projectCode}
                   placeHolder=''
-                  onDOMChange={event => this.setState({ id: event.target.value })}
+                  onDOMChange={event => this.setState({ projectCode: event.target.value })}
                 />
               </FormField>
 
@@ -124,25 +250,29 @@ class AddEditProject extends Component {
                 />
               </FormField>
 
-              <FormField label='Datum začetka' error={this.state.error.startDate}>
+              <FormField label='Datum začetka' error={this.state.error.dateStart}>
                 <DateTime
-                  id='startDate'
+                  id='dateStart'
                   format={dateFormat}
-                  value={this.state.startDate}
-                  onChange={e => this.setState({ startDate: e })}
+                  value={this.state.dateStart}
+                  onChange={e => this.setState({ dateStart: e })}
                 />
               </FormField>
 
-              <FormField label='Predvideni datum zaključka' error={this.state.error.endDate}>
+              <FormField label='Predvideni datum zaključka' error={this.state.error.dateEnd}>
                 <DateTime
-                  id='endDate'
+                  id='dateEnd'
                   format={dateFormat}
-                  value={this.state.endDate}
-                  onChange={e => this.setState({ endDate: e })}
+                  value={this.state.dateEnd}
+                  onChange={e => this.setState({ dateEnd: e })}
                 />
               </FormField>
 
-              <FormField label='Razvojna skupina' error={this.state.error.team}>
+              <FormField
+                label='Razvojna skupina'
+                help={'Razvojno skupino se lahko določi nakdandno'}
+                error={this.state.error.team}
+              >
                 <Select
                   id='team'
                   value={this.state.team}
@@ -183,7 +313,9 @@ AddEditProject.defaultProps = {
 AddEditProject.propTypes = {
   closer: PropTypes.func.isRequired,
   modeEdit: PropTypes.bool,
-  data: PropTypes.object.isRequired
+  data: PropTypes.object.isRequired,
+  addProjectMutation: PropTypes.func.isRequired,
+  editProjectMutation: PropTypes.func.isRequired
 };
 
 export const allTeamsQuery = gql`
@@ -195,4 +327,30 @@ export const allTeamsQuery = gql`
   }
 `;
 
-export default graphql(allTeamsQuery)(AddEditProject);
+export const editProjectMutation = gql`
+  mutation editProject($project: EditProjectInput!) {
+    editProject(projectData: $project) {
+      ok
+    }
+  }
+`;
+
+export const addProjectMutation = gql`
+  mutation addProject($project: EditProjectInput!) {
+    addProject(projectData: $project) {
+      ok
+    }
+  }
+`;
+
+const AddEditProjectWithMutations = compose(
+  graphql(addProjectMutation, {
+    name: 'addProjectMutation'
+  }),
+  graphql(editProjectMutation, {
+    name: 'editProjectMutation'
+  }),
+  graphql(allTeamsQuery)
+);
+
+export default AddEditProjectWithMutations;
