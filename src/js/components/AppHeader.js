@@ -19,6 +19,8 @@ import TableIcon from 'grommet/components/icons/base/Table';
 import HomeIcon from 'grommet/components/icons/base/Home';
 import VmMaintenanceIcon from 'grommet/components/icons/base/VmMaintenance';
 
+const imgUri = process.env.NODE_ENV === 'development' ? './' : '/static/app/';
+
 class AppHeader extends Component {
   constructor() {
     super();
@@ -93,7 +95,7 @@ class AppHeader extends Component {
             <Title onClick={this.props.toggleSidebar} >
               <Image
                 className='header-logo'
-                src='./img/random-logo2.png'
+                src={imgUri + 'img/random-logo2.png'}
               />
               Emineo
             </Title>

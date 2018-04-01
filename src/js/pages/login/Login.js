@@ -25,7 +25,7 @@ const transitionStylesTransform = {
   exited: 0,
 };
 
-const imgUri = process.env.NODE_ENV === 'development' ? './' : "{% static 'app' %}/";
+const imgUri = process.env.NODE_ENV === 'development' ? './' : '/static/app/';
 
 class Login extends Component {
   constructor() {
