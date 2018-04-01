@@ -19,6 +19,7 @@ import Section from 'grommet/components/Section';
 import Select from 'grommet/components/Select';
 
 import { allProjectsQuery } from './ProjectTable';
+import { allTeamsQuery } from '../team/TeamTable';
 
 const dateFormat = 'D/M/YYYY';
 const projectCodeRegex = /^[a-zA-Z0-9-/.]*$/;
@@ -31,6 +32,7 @@ class AddEditProject extends Component {
     this.filterSuggestions = this.filterSuggestions.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
     this.validateForm = this.validateForm.bind(this);
+    this.saveTeamData = this.saveTeamData.bind(this);
 
     this.state = {
       allTeams: null,
@@ -61,6 +63,7 @@ class AddEditProject extends Component {
    * [Set inital state with editData. Only if modeEdit is True]
    */
   componentWillMount() {
+    if (this.props.data.allTeams !== undefined) this.saveTeamData(this.props);
     if (this.props.modeEdit) {
       let initProps = this.props.editData;
       let teamId = (initProps.team !== null) ? initProps.team.id : '';
@@ -88,17 +91,7 @@ class AddEditProject extends Component {
    * @param  {[Object]} nextProps [Next props]
    */
   componentWillReceiveProps(nextProps) {
-    if (this.state.allTeams === null) {
-      const { data: { error, allTeams } } = nextProps;
-      if (error) console.error(error);
-
-      let teams = allTeams.map(team =>
-        ({ value: team,
-          label: team.name
-        }));
-      // console.log('teams', teams);
-      this.setState({ allTeams: teams, options: teams });
-    }
+    this.saveTeamData(nextProps);
   }
 
 
@@ -132,7 +125,7 @@ class AddEditProject extends Component {
         data.id = this.state.projectId;
         this.props.editProjectMutation({
           variables: { project: data },
-          refetchQueries: [{ query: allProjectsQuery }]
+          refetchQueries: [{ query: allTeamsQuery }, { query: allProjectsQuery }]
         })
           .then(() => this.props.closer())
           .catch((err) => {
@@ -143,7 +136,7 @@ class AddEditProject extends Component {
         // We're adding new project
         this.props.addProjectMutation({
           variables: { project: data },
-          refetchQueries: [{ query: allProjectsQuery }]
+          refetchQueries: [{ query: allTeamsQuery }, { query: allProjectsQuery }]
         })
           .then(() => this.props.closer())
           .catch((err) => {
@@ -154,6 +147,21 @@ class AddEditProject extends Component {
     } else {
       // Reenable submit button
       this.setState({ onSubmit: this.onSubmit });
+    }
+  }
+
+
+  saveTeamData(nextProps) {
+    if (this.state.allTeams === null) {
+      const { data: { error, allTeams } } = nextProps;
+      if (error) console.error(error);
+
+      let teams = allTeams.map(team =>
+        ({ value: team,
+          label: team.name
+        }));
+      // console.log('teams', teams);
+      this.setState({ allTeams: teams, options: teams });
     }
   }
 
@@ -210,7 +218,6 @@ class AddEditProject extends Component {
   formatDate(dateToFormat, format = 'grommet') {
     if (format === 'django') {
       let d = dateToFormat.split('-'); // YYYY-MM-DD
-      console.log(d[2] + '/' + d[1] + '/' + d[0]);
       return (d[2] + '/' + d[1] + '/' + d[0]); // DD/MM/YYYY
     }
     let d = dateToFormat.split('/'); // DD/MM/YYYY
@@ -346,8 +353,8 @@ AddEditProject.propTypes = {
   editProjectMutation: PropTypes.func.isRequired
 };
 
-export const allTeamsQuery = gql`
-  query allTeamsQuery {
+export const TeamsQuery = gql`
+  query TeamsQuery {
     allTeams {
       id
       name
@@ -378,7 +385,7 @@ const AddEditProjectWithMutations = compose(
   graphql(editProjectMutation, {
     name: 'editProjectMutation'
   }),
-  graphql(allTeamsQuery)
+  graphql(TeamsQuery)
 )(AddEditProject);
 
 export default AddEditProjectWithMutations;
