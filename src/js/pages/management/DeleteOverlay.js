@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { graphql } from 'react-apollo';
+import { graphql, compose } from 'react-apollo';
 import gql from 'graphql-tag';
 
 // Grommet components
@@ -13,6 +13,7 @@ import Layer from 'grommet/components/Layer';
 import Section from 'grommet/components/Section';
 
 import { allTeamsQuery } from './team/TeamTable';
+import { allProjectsQuery } from './project/ProjectTable';
 
 class DeleteTeam extends Component {
   constructor() {
@@ -26,19 +27,38 @@ class DeleteTeam extends Component {
   }
 
 
+  /**
+   * [Confirm button handler.
+   * Triggers delete mutation for project or team]
+   */
   onConfirm() {
     this.setState({ onConfirm: null });
-    // console.log(this.props);
-    this.props.mutate({
-      variables: { id: this.props.id },
-      refetchQueries: [{ query: allTeamsQuery }]
-    })
-      .then(() => this.props.closer())
-      .catch((err) => {
-        console.error(err);
-        this.setState({ onConfirm: this.onConfirm, error: err.message });
-      });
+    console.log(this.props);
+    if (this.props.type === 'team') {
+      console.log('deleting team');
+      this.props.deleteTeamMutation({
+        variables: { id: this.props.id },
+        refetchQueries: [{ query: allTeamsQuery }]
+      })
+        .then(() => this.props.closer())
+        .catch((err) => {
+          console.error(err);
+          this.setState({ onConfirm: this.onConfirm, error: err.message });
+        });
+    } else {
+      console.log('deleting project');
+      this.props.deleteProjectMutation({
+        variables: { id: this.props.id },
+        refetchQueries: [{ query: allProjectsQuery }]
+      })
+        .then(() => this.props.closer())
+        .catch((err) => {
+          console.error(err);
+          this.setState({ onConfirm: this.onConfirm, error: err.message });
+        });
+    }
   }
+
 
   render() {
     return (
@@ -68,9 +88,26 @@ class DeleteTeam extends Component {
   }
 }
 
-// TODO create multiple component with multiple mutations
 
-const DeleteTeamMutation = gql`
+DeleteTeam.propTypes = {
+  closer: PropTypes.func.isRequired,
+  id: PropTypes.string.isRequired,
+  deleteTeamMutation: PropTypes.func.isRequired,
+  deleteProjectMutation: PropTypes.func.isRequired,
+  type: PropTypes.oneOf(['team', 'project']).isRequired
+};
+
+
+const deleteProjectMutation = gql`
+  mutation DeleteProject($id: Int!) {
+    deleteProject(projectId: $id) {
+      ok
+    }
+  }
+`;
+
+
+const deleteTeamMutation = gql`
   mutation DeleteTeam($id: Int!) {
     deleteTeam(teamId: $id) {
       ok
@@ -78,11 +115,14 @@ const DeleteTeamMutation = gql`
   }
 `;
 
-DeleteTeam.propTypes = {
-  closer: PropTypes.func.isRequired,
-  id: PropTypes.string.isRequired,
-  mutate: PropTypes.func.isRequired
-};
 
-const DeleteTeamWithMutation = graphql(DeleteTeamMutation)(DeleteTeam);
+const DeleteTeamWithMutation = compose(
+  graphql(deleteTeamMutation, {
+    name: 'deleteTeamMutation'
+  }),
+  graphql(deleteProjectMutation, {
+    name: 'deleteProjectMutation'
+  })
+)(DeleteTeam);
+
 export default DeleteTeamWithMutation;

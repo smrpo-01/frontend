@@ -83,7 +83,11 @@ class TeamManagement extends Component {
 
         {/* Overlays */}
         {(this.state.showDeleteOverlay) &&
-          <DeleteOverlay closer={this.closeOverlay} id={this.state.teamId} />
+          <DeleteOverlay
+            closer={this.closeOverlay}
+            id={this.state.teamId}
+            type={'team'}
+          />
         }
         {(this.state.showAddEditOverlay) &&
           <AddEditOverlay
