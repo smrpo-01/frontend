@@ -36,6 +36,7 @@ class AddEditTeam extends Component {
     this.filterSuggestions = this.filterSuggestions.bind(this);
     this.validateForm = this.validateForm.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
+    this.saveAllUsersData = this.saveAllUsersData.bind(this);
 
     this.state = {
       allUsers: [],
@@ -64,27 +65,51 @@ class AddEditTeam extends Component {
 
   /**
    * [When component mounts check if we're in edit mode.
-   * Set appropriate state values to render data in form fields.]
+   * Set appropriate state values to render data in form fields.
+   * Check if allUsers need to be set to state.]
    */
   componentWillMount() {
+    console.log('mount', this.props.editData);
+
+    if (this.props.data.allUsers !== undefined) this.saveAllUsersData(this.props);
+
     if (this.props.modeEdit) {
       let data = this.props.editData;
-      console.log(data);
       let kmId = data.kanbanMaster.id;
       let poId = data.productOwner.id;
-      // odstrani vse tiste ki niso developerji
-      let tmpDevs = data.members.filter(dev => (dev.id !== poId && dev.id !== kmId));
-      console.log(data);
+
+      // Prepare array of devs with valid object structure
+      let tmpDevs = data.userteamSet.map((obj) => {
+        let newMember = {
+          isActive: obj.isActive,
+          email: obj.member.email,
+          firstName: obj.member.firstName,
+          id: obj.member.id,
+          lastName: obj.member.lastName,
+          roles: obj.roles.map(role => (this.mapRoles(role)))
+        };
+        return newMember;
+      });
+      console.log(tmpDevs);
+      // Remove user that do not have dev role (KM, PO)
+      tmpDevs = tmpDevs.filter(dev => (dev.roles.includes(4)));
+      // tmpDevs = tmpDevs.filter(dev => console.log(dev));
+      console.log(tmpDevs);
+      let poObj = this.filterUserObject(data.productOwner);
+      poObj.roles = [2];
+
+      let kmObj = this.filterUserObject(data.kanbanMaster);
+      kmObj.roles = [3];
 
       this.setState({
         teamName: data.name,
         teamId: data.id,
         po: data.productOwner.firstName + ' ' + data.productOwner.lastName,
         poId,
-        poObj: this.filterUserObject(data.productOwner),
+        poObj,
         km: data.kanbanMaster.firstName + ' ' + data.kanbanMaster.lastName,
         kmId,
-        kmObj: this.filterUserObject(data.kanbanMaster),
+        kmObj,
         developers: tmpDevs
       });
     }
@@ -97,34 +122,7 @@ class AddEditTeam extends Component {
    * @param  {[Object]} nextProps [Next props]
    */
   componentWillReceiveProps(nextProps) {
-    const { data: { error, allUsers } } = nextProps;
-    console.log(allUsers);
-    if (error) console.error(error);
-
-    if (this.state.allUsers.length === 0) {
-      // let data = allUsers.slice();
-      // data.roles = data.map(user => user.roles = user.roles.map(role => this.mapRoles(role)));
-      /*
-      let dataWithRoles = data.reduce((acc, user) => {
-        console.log(user);
-        let mappedRoles = user.roles.map(role => this.mapRoles(role));
-        let tmpUser = Object.assign(user, {});
-        tmpUser.roles = mappedRoles;
-        return tmpUser;
-      }, []);
-
-      console.log(dataWithRoles);
-      */
-      let users = allUsers.map(user =>
-        ({ value: user,
-          label: <Box justify='between' pad={{ horizontal: 'medium' }} direction='row'>
-            <span>{user.firstName + ' ' + user.lastName}</span>
-            <span>{user.email}</span>
-          </Box>
-        }));
-      // console.log('users', users);
-      this.setState({ allUsers: users, options: users });
-    }
+    this.saveAllUsersData(nextProps);
   }
 
 
@@ -140,18 +138,27 @@ class AddEditTeam extends Component {
           name: this.state.teamName,
           kmId: this.state.kmId,
           poId: this.state.poId,
-          members: this.state.developers.map(
-            dev => ({
-              id: dev.id,
-              roles: dev.roles.map(role => this.mapRoles(role))
-            })
-          )
+          members: this.state.developers.slice()
         }
       };
 
-      teamData.team.members.push(this.state.poObj);
-      teamData.team.members.push(this.state.kmObj);
+      let poAdded = false;
+      let kmAdded = false;
+      teamData.team.members = teamData.team.members.map((member) => {
+        if (member.id === this.state.kmId) {
+          if (!member.roles.includes(3)) member.roles.push(3);
+          kmAdded = true;
+        } else if (member.id === this.state.poId) {
+          if (!member.roles.includes(2)) member.roles.push(2);
+          poAdded = true;
+        }
+        return this.filterUserObject(member);
+      });
 
+      console.log(teamData);
+
+      if (!poAdded) teamData.team.members.push(this.filterUserObject(this.state.poObj));
+      if (!kmAdded) teamData.team.members.push(this.filterUserObject(this.state.kmObj));
       console.log(JSON.stringify(teamData));
 
       if (this.props.modeEdit) {
@@ -212,7 +219,33 @@ class AddEditTeam extends Component {
       general: ''
     };
     error.general = err.toString();
-    this.setState({ error });
+    this.setState({ error, onSubmit: this.onSubmit });
+  }
+
+  saveAllUsersData(nextProps) {
+    const { data: { error, allUsers } } = nextProps;
+    // console.log(allUsers);
+    if (error) console.error(error);
+
+    if (this.state.allUsers.length === 0) {
+      let users = allUsers.map((user) => {
+        let tmpUser = {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          roles: []
+        };
+        return ({ value: tmpUser,
+          label: <Box justify='between' pad={{ horizontal: 'medium' }} direction='row'>
+            <span>{user.firstName + ' ' + user.lastName}</span>
+            <span>{user.email}</span>
+          </Box>
+        });
+      });
+      // console.log('users', users);
+      this.setState({ allUsers: users, options: users });
+    }
   }
 
 
@@ -236,7 +269,7 @@ class AddEditTeam extends Component {
       case 'Razvijalec':
         return 4;
       default:
-        return -1;
+        return role;
     }
   }
 
@@ -259,11 +292,9 @@ class AddEditTeam extends Component {
    * @param {[type]} dev [description]
    */
   addDeveloper(dev) {
-    console.log(dev);
     let developers = this.state.developers.slice();
-    // let tmpDev = Object.assign({}, dev);
-    // TODO find PO || KM with dev.id and append role to existing role
-    // tmpDev.roles = [];
+    // Add role developer to obj
+    dev.roles.push(4);
     developers.push(dev);
     this.setState({ developers });
   }
@@ -330,7 +361,7 @@ class AddEditTeam extends Component {
 
             <Header pad={{ vertical: 'medium' }}>
               <Heading>
-                {(this.props.modeEdit) ? 'Uredi razvojno skupino' : 'Dodaj razvojno skupina'}
+                {(this.props.modeEdit) ? 'Uredi razvojno skupino' : 'Dodaj razvojno skupino'}
               </Heading>
             </Header>
 
@@ -339,7 +370,7 @@ class AddEditTeam extends Component {
                 <TextInput
                   id='teamName'
                   value={this.state.teamName}
-                  placeHolder='Ekipa 1'
+                  placeHolder='Skupina 1'
                   onDOMChange={event => this.setState({ teamName: event.target.value })}
                 />
               </FormField>
@@ -386,7 +417,7 @@ class AddEditTeam extends Component {
             </FormFields>
 
             <Section>
-              <Header><Title>Ostali člani</Title></Header>
+              <Header><Title>Razvijalci</Title></Header>
               <Section pad={{ vertical: 'small' }}>
                 <FormField label='Razvijalec' error={this.state.error.dev}>
                   <Select
@@ -484,9 +515,6 @@ export const allUsersQuery = gql`
       firstName
       lastName
       email
-      roles {
-        name
-      }
     }
   }
 `;

@@ -85,6 +85,9 @@ export const allTeamsQuery = gql`
       }
       userteamSet {
         isActive
+        roles {
+          name
+        }
         member {
           id
           firstName
