@@ -25,6 +25,8 @@ const transitionStylesTransform = {
   exited: 0,
 };
 
+const imgUri = process.env.NODE_ENV === 'development' ? './' : "{% static 'app' %}/";
+
 class Login extends Component {
   constructor() {
     super();
@@ -118,11 +120,11 @@ class Login extends Component {
           className='container'>
           <Image
             className='logo'
-            src='./img/random-logo2.png'
+            src={imgUri + 'img/random-logo2.png'}
             size='small' />
           <Box className='form' justify='center'>
             <Box direction='row' className='formBox' align='center' justify='center'>
-              <Image src='./img/user.png' className='formLogo' />
+              <Image src={imgUri + 'img/user.png'} className='formLogo' />
               <TextInput
                 placeHolder='Email naslov'
                 value={this.state.email}
@@ -130,7 +132,7 @@ class Login extends Component {
               />
             </Box>
             <Box direction='row' className='formBox' align='center' justify='center'>
-              <Image src='./img/padlock.png' className='formLogo' />
+              <Image src={imgUri + 'img/padlock.png'} className='formLogo' />
               <TextInput
                 type='password'
                 placeHolder='Geslo'
