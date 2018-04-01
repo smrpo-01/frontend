@@ -45,14 +45,28 @@ class ProjectManagement extends Component {
     });
   }
 
+
+  /**
+   * [Add new project button callback. Opens add overlay.]
+   */
   addNewProject() {
     this.setState({ showAddEditOverlay: true });
   }
 
+
+  /**
+   * [Edit project callback. Opens edit overlay.]
+   * @param  {[Object]} editData [Project data]
+   */
   editProject(editData) {
     this.setState({ showAddEditOverlay: true, modeEdit: true, editData });
   }
 
+
+  /**
+   * [Delete project callback. Opens delete overlay.]
+   * @param  {[String]} projectId [Project id]
+   */
   deleteProject(projectId) {
     this.setState({ showDeleteOverlay: true, projectId });
   }
@@ -85,7 +99,11 @@ class ProjectManagement extends Component {
           />
         }
         {(this.state.showAddEditOverlay) &&
-          <AddEditProject closer={this.closeOverlay} />
+          <AddEditProject
+            closer={this.closeOverlay}
+            editData={this.state.editData}
+            modeEdit={this.state.modeEdit}
+          />
         }
       </PageTemplate>
     );

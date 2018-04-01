@@ -35,7 +35,7 @@ class DeleteTeam extends Component {
     this.setState({ onConfirm: null });
     console.log(this.props);
     if (this.props.type === 'team') {
-      console.log('deleting team');
+      // console.log('deleting team');
       this.props.deleteTeamMutation({
         variables: { id: this.props.id },
         refetchQueries: [{ query: allTeamsQuery }]
@@ -46,7 +46,7 @@ class DeleteTeam extends Component {
           this.setState({ onConfirm: this.onConfirm, error: err.message });
         });
     } else {
-      console.log('deleting project');
+      // console.log('deleting project');
       this.props.deleteProjectMutation({
         variables: { id: this.props.id },
         refetchQueries: [{ query: allProjectsQuery }]

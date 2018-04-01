@@ -35,13 +35,14 @@ class AddEditProject extends Component {
     this.state = {
       allTeams: null,
       options: [],
-      id: '',
+      projectId: '',
       projectCode: '',
+      teamId: '',
+      team: '',
       name: '',
       customer: '',
       dateStart: '',
       dateEnd: '',
-      team: '',
       error: {
         projectCode: '',
         name: '',
@@ -57,12 +58,36 @@ class AddEditProject extends Component {
 
 
   /**
+   * [Set inital state with editData. Only if modeEdit is True]
+   */
+  componentWillMount() {
+    if (this.props.modeEdit) {
+      let initProps = this.props.editData;
+      let teamId = (initProps.team !== null) ? initProps.team.id : '';
+      let team = (initProps.team !== null) ? initProps.team.name : '';
+      let dateStart = this.formatDate(initProps.dateStart, 'django');
+      let dateEnd = this.formatDate(initProps.dateEnd, 'django');
+
+      this.setState({
+        projectId: initProps.id,
+        projectCode: initProps.projectCode,
+        name: initProps.name,
+        customer: initProps.customer,
+        teamId,
+        team,
+        dateStart,
+        dateEnd
+      });
+    }
+  }
+
+
+  /**
    * [Only triggered when AllUsersQuery returns result.
    * Set all teams to state for suggestions.]
    * @param  {[Object]} nextProps [Next props]
    */
   componentWillReceiveProps(nextProps) {
-    console.log(nextProps);
     if (this.state.allTeams === null) {
       const { data: { error, allTeams } } = nextProps;
       if (error) console.error(error);
@@ -71,7 +96,7 @@ class AddEditProject extends Component {
         ({ value: team,
           label: team.name
         }));
-      console.log('teams', teams);
+      // console.log('teams', teams);
       this.setState({ allTeams: teams, options: teams });
     }
   }
@@ -98,15 +123,13 @@ class AddEditProject extends Component {
 
       if (this.state.team !== '') {
         // We have assigned team to project, add it to mutation data
-        data.teamId = this.state.team.id;
+        data.teamId = this.state.teamId;
       }
-
-      console.log('mutation data', data);
-
+      // console.log('mutation data', data);
       if (this.props.modeEdit) {
         // We're editing existing project
         // Add project id to data
-        data.id = this.state.id;
+        data.id = this.state.projectId;
         this.props.editProjectMutation({
           variables: { project: data },
           refetchQueries: [{ query: allProjectsQuery }]
@@ -114,7 +137,7 @@ class AddEditProject extends Component {
           .then(() => this.props.closer())
           .catch((err) => {
             console.error(err);
-            this.setState({ onConfirm: this.onConfirm, error: err.message });
+            this.setState({ onSubmit: this.onSubmit, error: { general: err.message } });
           });
       } else {
         // We're adding new project
@@ -125,7 +148,7 @@ class AddEditProject extends Component {
           .then(() => this.props.closer())
           .catch((err) => {
             console.error(err);
-            this.setState({ onConfirm: this.onConfirm, error: err.message });
+            this.setState({ onSubmit: this.onSubmit, error: { general: err.message } });
           });
       }
     } else {
@@ -278,13 +301,15 @@ class AddEditProject extends Component {
                   value={this.state.team}
                   placeHolder='Skupina 1'
                   options={this.state.options}
-                  onChange={event => this.setState({ team: event.option.label })}
+                  onChange={event =>
+                    this.setState({ team: event.option.label, teamId: event.option.value.id })
+                  }
                   onSearch={event => this.filterSuggestions(event.target.value)}
                 />
               </FormField>
             </FormFields>
 
-            {(this.state.error.general !== undefined) &&
+            {(this.state.error.general !== '') &&
               <Section className='color-red padding-bottom-0'>{this.state.error.general}</Section>
             }
 
@@ -314,6 +339,9 @@ AddEditProject.propTypes = {
   closer: PropTypes.func.isRequired,
   modeEdit: PropTypes.bool,
   data: PropTypes.object.isRequired,
+  editData: PropTypes.shape(
+    PropTypes.string.name
+  ),
   addProjectMutation: PropTypes.func.isRequired,
   editProjectMutation: PropTypes.func.isRequired
 };
@@ -328,7 +356,7 @@ export const allTeamsQuery = gql`
 `;
 
 export const editProjectMutation = gql`
-  mutation editProject($project: EditProjectInput!) {
+  mutation editProject($project: ProjectInput!) {
     editProject(projectData: $project) {
       ok
     }
@@ -336,7 +364,7 @@ export const editProjectMutation = gql`
 `;
 
 export const addProjectMutation = gql`
-  mutation addProject($project: EditProjectInput!) {
+  mutation addProject($project: ProjectInput!) {
     addProject(projectData: $project) {
       ok
     }
@@ -351,6 +379,6 @@ const AddEditProjectWithMutations = compose(
     name: 'editProjectMutation'
   }),
   graphql(allTeamsQuery)
-);
+)(AddEditProject);
 
 export default AddEditProjectWithMutations;

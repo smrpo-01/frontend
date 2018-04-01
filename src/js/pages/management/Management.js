@@ -8,11 +8,13 @@ import ProjectManagement from './project/ProjectManagement';
 // Grommet components
 import Tabs from 'grommet/components/Tabs';
 import Tab from 'grommet/components/Tab';
+import Title from 'grommet/components/Title';
 
 class Management extends Component {
   render() {
     return (
       <PageTemplate
+        header={<Title>Vzdrževanje</Title>}
       >
         <Tabs justify='start'>
           <Tab title='Vzdrževanje razvojnih skupin'>
