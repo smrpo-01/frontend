@@ -11,6 +11,10 @@ import Notification from 'grommet/components/Notification';
 
 import CheckmarkIcon from 'grommet/components/icons/base/Checkmark';
 
+import { params } from '../../settings';
+
+const uri = (params.devMode) ? params.devUrl + '/login' : '/login';
+
 const duration = 200;
 
 const transitionStyles = {
@@ -58,7 +62,7 @@ class Login extends Component {
         errorDescription: 'Nepravilen vnos, poskusite ponovno.',
       });
     } else {
-      fetch('http://127.0.0.1:8000/login/', {
+      fetch(uri, {
         method: 'POST',
         headers: {
           Accept: 'application/json',
