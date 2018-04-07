@@ -22,6 +22,7 @@ import Loading from '../../../components/Loading';
 class TeamTable extends Component {
   render() {
     const { data: { loading, error, allTeams }, onEdit, onRemove } = this.props;
+    console.log(allTeams);
 
     if (loading) {
       return <Loading />;
@@ -39,10 +40,10 @@ class TeamTable extends Component {
           {allTeams.map(rowData => (
             <TableRow key={rowData.id}>
               <td>{rowData.name}</td>
-              <td>{rowData.kanbanMaster.firstName + ' ' + rowData.kanbanMaster.lastName}</td>
-              <td>{rowData.productOwner.firstName + ' ' + rowData.productOwner.lastName}</td>
+              <td>{(rowData.kanbanMaster !== null) && rowData.kanbanMaster.firstName + ' ' + rowData.kanbanMaster.lastName}</td>
+              <td>{(rowData.productOwner !== null) && rowData.productOwner.firstName + ' ' + rowData.productOwner.lastName}</td>
               <td>
-                {rowData.projectSet.map(project => <div key={project.id}>{project.name}</div>)}
+                {rowData.projects.map(project => <div key={project.id}>{project.name}</div>)}
               </td>
               <td>
                 <Button plain icon={<EditIcon />} onClick={() => onEdit(rowData)} />
@@ -68,37 +69,25 @@ export const allTeamsQuery = gql`
       id
       name
       kanbanMaster {
-        id
+        idUserTeam
         firstName
         lastName
-        roles {
-          name
-        }
       }
       productOwner {
-        id
+        idUserTeam
         firstName
         lastName
-        roles {
-          name
-        }
       }
-      userteamSet {
-        id
-        isActive
-        roles {
-          name
-        }
-        member {
-          id
-          firstName
-          lastName
-          email
-        }
-      }
-      projectSet {
+      projects {
         id
         name
+      }
+      developers {
+        idUserTeam
+        firstName
+        lastName
+        email
+        isActive
       }
     }
   }
