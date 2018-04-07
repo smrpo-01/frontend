@@ -22,7 +22,7 @@ import { allProjectsQuery } from './ProjectTable';
 import { allTeamsQuery } from '../team/TeamTable';
 
 const dateFormat = 'D/M/YYYY';
-const projectCodeRegex = /^[a-zA-Z0-9-/.]*$/;
+const projectCodeRegex = /^[a-zA-Z0-9-/. ]*$/;
 const alphaNumRegex = /^[a-zA-Z0-9šđčćžŠĐČĆŽ ]*$/;
 const alphaRegex = /^[a-zA-ZšđčćžŠĐČĆŽ ]*$/;
 
