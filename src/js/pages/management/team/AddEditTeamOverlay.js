@@ -46,10 +46,8 @@ class AddEditTeam extends Component {
       teamId: '',
       po: '',
       poId: '',
-      poObj: null,
       km: '',
       kmId: '',
-      kmObj: null,
       dev: '',
       developers: [],
       error: {
@@ -74,42 +72,25 @@ class AddEditTeam extends Component {
 
     if (this.props.modeEdit) {
       let data = this.props.editData;
-      let kmId = data.kanbanMaster.id;
-      let poId = data.productOwner.id;
 
       // Prepare array of devs with valid object structure
-      let tmpDevs = data.userteamSet.map((obj) => {
-        let newMember = {
-          isActive: obj.isActive,
-          email: obj.member.email,
-          firstName: obj.member.firstName,
-          id: obj.member.id,
-          lastName: obj.member.lastName,
-          userTeamId: obj.id,
-          roles: obj.roles.map(role => (this.mapRoles(role)))
-        };
-        return newMember;
-      });
-
-      // Remove user that do not have dev role (KM, PO)
-      tmpDevs = tmpDevs.filter(dev => (dev.roles.includes(4)));
-      let poObj = this.filterUserObject(data.productOwner);
-      poObj.roles = [2];
-      let kmObj = this.filterUserObject(data.kanbanMaster);
-      kmObj.roles = [3];
+      let devs = data.developers.map(obj => ({
+        isActive: obj.isActive,
+        email: obj.email,
+        firstName: obj.firstName,
+        lastName: obj.lastName,
+        userTeamId: obj.idUserTeam
+      }));
 
       this.setState({
         teamName: data.name,
         teamId: data.id,
         po: data.productOwner.firstName + ' ' + data.productOwner.lastName,
-        poId,
-        poObj,
+        poId: data.idUserTeam,
         km: data.kanbanMaster.firstName + ' ' + data.kanbanMaster.lastName,
-        kmId,
-        kmObj,
-        developers: tmpDevs
+        kmId: data.idUserTeam,
+        developers: devs
       });
-      // console.log('developers', tmpDevs);
     }
   }
 
@@ -135,26 +116,9 @@ class AddEditTeam extends Component {
           name: this.state.teamName,
           kmId: this.state.kmId,
           poId: this.state.poId,
-          members: this.state.developers.slice()
+          members: this.state.developers.map(dev => (this.filterUserObject(dev)))
         }
       };
-
-      let poAdded = false;
-      let kmAdded = false;
-      teamData.team.members = teamData.team.members.map((member) => {
-        if (member.id === this.state.kmId) {
-          if (!member.roles.includes(3)) member.roles.push(3);
-          kmAdded = true;
-        } else if (member.id === this.state.poId) {
-          if (!member.roles.includes(2)) member.roles.push(2);
-          poAdded = true;
-        }
-        return this.filterUserObject(member);
-      });
-
-
-      if (!poAdded) teamData.team.members.push(this.filterUserObject(this.state.poObj));
-      if (!kmAdded) teamData.team.members.push(this.filterUserObject(this.state.kmObj));
 
       if (this.props.modeEdit) {
         // add team id to mutation variable
@@ -187,14 +151,13 @@ class AddEditTeam extends Component {
    * @return {[Object]}      [Filtered user object]
    */
   filterUserObject(user) {
-    const allowedkeys = ['id', 'roles'];
+    const allowedkeys = ['id', 'email'];
     let tmp = Object.keys(user)
       .filter(key => allowedkeys.includes(key))
       .reduce((acc, key) => {
         acc[key] = user[key];
         return acc;
       }, {});
-    tmp.roles = tmp.roles.map(role => this.mapRoles(role));
     return tmp;
   }
 
@@ -218,7 +181,6 @@ class AddEditTeam extends Component {
 
   saveAllUsersData(nextProps) {
     const { data: { error, allUsers } } = nextProps;
-    // console.log(allUsers);
     if (error) console.error(error);
 
     if (this.state.allUsers.length === 0) {
@@ -227,8 +189,7 @@ class AddEditTeam extends Component {
           id: user.id,
           email: user.email,
           firstName: user.firstName,
-          lastName: user.lastName,
-          roles: []
+          lastName: user.lastName
         };
         return ({ value: tmpUser,
           label: <Box justify='between' pad={{ horizontal: 'medium' }} direction='row'>
@@ -237,7 +198,6 @@ class AddEditTeam extends Component {
           </Box>
         });
       });
-      // console.log('users', users);
       this.setState({ allUsers: users, options: users });
     }
   }
@@ -287,8 +247,6 @@ class AddEditTeam extends Component {
    */
   addDeveloper(dev) {
     let developers = this.state.developers.slice();
-    // Add role developer to obj
-    dev.roles.push(4);
     developers.push(dev);
     this.setState({ developers });
   }
@@ -307,10 +265,11 @@ class AddEditTeam extends Component {
     } else {
       this.setState({ onSubmit: null });
       this.props.deleteUserFromTeamMutation({
-        variables: { id: userId },
+        variables: { userTeamId: userId, isActive: false },
         refetchQueries: [{ query: allTeamsQuery }]
       })
         .then((res) => {
+          console.log(res);
           if (res.data.deleteUserTeam.ok) {
             let developers = this.state.developers.slice();
             developers[index].isActive = false;
@@ -386,10 +345,6 @@ class AddEditTeam extends Component {
                     this.setState({
                       po: event.option.value.firstName + ' ' + event.option.value.lastName,
                       poId: event.option.value.id,
-                      poObj: {
-                        id: event.option.value.id,
-                        roles: [2]
-                      },
                       options: this.state.allUsers
                     })}
                   onSearch={event => this.filterSuggestions(event.target.value)}
@@ -406,10 +361,6 @@ class AddEditTeam extends Component {
                     this.setState({
                       km: event.option.value.firstName + ' ' + event.option.value.lastName,
                       kmId: event.option.value.id,
-                      kmObj: {
-                        id: event.option.value.id,
-                        roles: [3]
-                      },
                       options: this.state.allUsers
                     })}
                   onSearch={event => this.filterSuggestions(event.target.value)}
@@ -512,8 +463,8 @@ const editTeamMutation = gql`
 `;
 
 export const deleteUserFromTeamMutation = gql`
-  mutation deleteUserTeam($id: Int!) {
-    deleteUserTeam(userTeamId: $id) {
+  mutation editTeamMemberStatus($id: Int!) {
+    editTeamMemberStatus(userTeamId: $id) {
       ok
     }
   }
