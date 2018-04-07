@@ -69,11 +69,13 @@ export const allTeamsQuery = gql`
       id
       name
       kanbanMaster {
+        idUser
         idUserTeam
         firstName
         lastName
       }
       productOwner {
+        idUser
         idUserTeam
         firstName
         lastName
@@ -83,6 +85,7 @@ export const allTeamsQuery = gql`
         name
       }
       developers {
+        idUser
         idUserTeam
         firstName
         lastName

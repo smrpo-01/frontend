@@ -79,6 +79,7 @@ class AddEditTeam extends Component {
         email: obj.email,
         firstName: obj.firstName,
         lastName: obj.lastName,
+        id: obj.idUser,
         userTeamId: obj.idUserTeam
       }));
 
@@ -86,9 +87,9 @@ class AddEditTeam extends Component {
         teamName: data.name,
         teamId: data.id,
         po: data.productOwner.firstName + ' ' + data.productOwner.lastName,
-        poId: data.idUserTeam,
+        poId: data.productOwner.idUser,
         km: data.kanbanMaster.firstName + ' ' + data.kanbanMaster.lastName,
-        kmId: data.idUserTeam,
+        kmId: data.kanbanMaster.idUser,
         developers: devs
       });
     }
@@ -123,7 +124,6 @@ class AddEditTeam extends Component {
       if (this.props.modeEdit) {
         // add team id to mutation variable
         teamData.team.teamId = this.state.teamId;
-
         this.props.editTeamMutation({
           variables: teamData,
           refetchQueries: [{ query: allTeamsQuery }]
@@ -151,7 +151,7 @@ class AddEditTeam extends Component {
    * @return {[Object]}      [Filtered user object]
    */
   filterUserObject(user) {
-    const allowedkeys = ['id', 'email'];
+    const allowedkeys = ['id', 'email', 'isActive'];
     let tmp = Object.keys(user)
       .filter(key => allowedkeys.includes(key))
       .reduce((acc, key) => {
@@ -168,6 +168,7 @@ class AddEditTeam extends Component {
    */
   handleError(err) {
     console.error('handleError:', err);
+    let errMsg = err.split(':');
     let error = {
       teamName: '',
       po: '',
@@ -175,7 +176,7 @@ class AddEditTeam extends Component {
       dev: '',
       general: ''
     };
-    error.general = err.toString();
+    error.general = errMsg[1].toString();
     this.setState({ error, onSubmit: this.onSubmit });
   }
 
@@ -257,7 +258,7 @@ class AddEditTeam extends Component {
    * If mode is edit we have to call mutation to remove user.]
    * @param  {[String]} id [user id]
    */
-  removeDev(userId, index = 0) {
+  removeDev(userId, index = 0, isActive) {
     if (!this.props.modeEdit) {
       let developers = this.state.developers.slice();
       developers = developers.filter(dev => dev.id !== userId);
@@ -265,14 +266,14 @@ class AddEditTeam extends Component {
     } else {
       this.setState({ onSubmit: null });
       this.props.deleteUserFromTeamMutation({
-        variables: { userTeamId: userId, isActive: false },
+        variables: { id: userId, isActive: !isActive },
         refetchQueries: [{ query: allTeamsQuery }]
       })
         .then((res) => {
-          console.log(res);
-          if (res.data.deleteUserTeam.ok) {
+          let resData = res.data.editTeamMemberStatus;
+          if (resData.ok) {
             let developers = this.state.developers.slice();
-            developers[index].isActive = false;
+            developers[index].isActive = resData.userTeam.isActive;
             this.setState({ developers, onSubmit: this.onSubmit });
           }
         })
@@ -386,7 +387,7 @@ class AddEditTeam extends Component {
               <List>
                 {this.state.developers.map((dev, index) => (
                   <ListItem
-                    key={dev.id}
+                    key={'dev-id-' + dev.id}
                     justify='between'
                     pad={(this.props.modeEdit) ? { horizontal: 'small', vertical: 'small' } : { horizontal: 'small' }}>
                     {dev.firstName + ' ' + dev.lastName}
@@ -394,7 +395,7 @@ class AddEditTeam extends Component {
                       <CheckBox
                         toggle={true}
                         checked={dev.isActive}
-                        onChange={() => this.removeDev(dev.userTeamId, index)}
+                        onChange={() => this.removeDev(dev.userTeamId, index, dev.isActive)}
                       />
                       :
                       <Button plain icon={<TrashIcon />} onClick={() => this.removeDev(dev.id)} />
@@ -413,7 +414,7 @@ class AddEditTeam extends Component {
                 secondary={true}
                 onClick={() => this.props.closer()}
               />
-              <Button label='Dodaj'
+              <Button label={(this.props.modeEdit) ? 'Shrani' : 'Dodaj'}
                 primary={true}
                 onClick={this.state.onSubmit}
               />
@@ -463,9 +464,13 @@ const editTeamMutation = gql`
 `;
 
 export const deleteUserFromTeamMutation = gql`
-  mutation editTeamMemberStatus($id: Int!) {
-    editTeamMemberStatus(userTeamId: $id) {
+  mutation editTeamMemberStatus($id: Int!, $isActive: Boolean!) {
+    editTeamMemberStatus(userTeamId: $id, isActive: $isActive) {
       ok
+      userTeam {
+        id
+        isActive
+      }
     }
   }
 `;
