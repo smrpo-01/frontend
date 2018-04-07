@@ -120,7 +120,6 @@ class AddEditTeam extends Component {
           members: this.state.developers.map(dev => (this.filterUserObject(dev)))
         }
       };
-
       if (this.props.modeEdit) {
         // add team id to mutation variable
         teamData.team.teamId = this.state.teamId;
@@ -248,7 +247,9 @@ class AddEditTeam extends Component {
    */
   addDeveloper(dev) {
     let developers = this.state.developers.slice();
-    developers.push(dev);
+    let tmpDev = dev;
+    tmpDev.isActive = true;
+    developers.push(tmpDev);
     this.setState({ developers });
   }
 
