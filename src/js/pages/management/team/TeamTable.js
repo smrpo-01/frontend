@@ -22,7 +22,6 @@ import Loading from '../../../components/Loading';
 class TeamTable extends Component {
   render() {
     const { data: { loading, error, allTeams }, onEdit, onRemove } = this.props;
-    console.log(allTeams);
 
     if (loading) {
       return <Loading />;
