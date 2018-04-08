@@ -38,18 +38,21 @@ class AddEditTeam extends Component {
     this.validateForm = this.validateForm.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
     this.saveAllUsersData = this.saveAllUsersData.bind(this);
+    this.saveUserDataFromProps = this.saveUserDataFromProps.bind(this);
 
     this.state = {
-      allUsers: [],
-      options: [],
+      allDev: [],
+      allDevOptions: [],
+      allPo: [],
+      allPoOptions: [],
+      allKm: [],
+      allKmOptions: [],
       teamName: '',
       teamId: '',
       po: '',
       poId: '',
-      poObj: null,
       km: '',
       kmId: '',
-      kmObj: null,
       dev: '',
       developers: [],
       error: {
@@ -70,46 +73,30 @@ class AddEditTeam extends Component {
    * Check if allUsers need to be set to state.]
    */
   componentWillMount() {
-    if (this.props.data.allUsers !== undefined) this.saveAllUsersData(this.props);
+    this.saveUserDataFromProps(this.props);
 
     if (this.props.modeEdit) {
       let data = this.props.editData;
-      let kmId = data.kanbanMaster.id;
-      let poId = data.productOwner.id;
 
       // Prepare array of devs with valid object structure
-      let tmpDevs = data.userteamSet.map((obj) => {
-        let newMember = {
-          isActive: obj.isActive,
-          email: obj.member.email,
-          firstName: obj.member.firstName,
-          id: obj.member.id,
-          lastName: obj.member.lastName,
-          userTeamId: obj.id,
-          roles: obj.roles.map(role => (this.mapRoles(role)))
-        };
-        return newMember;
-      });
-
-      // Remove user that do not have dev role (KM, PO)
-      tmpDevs = tmpDevs.filter(dev => (dev.roles.includes(4)));
-      let poObj = this.filterUserObject(data.productOwner);
-      poObj.roles = [2];
-      let kmObj = this.filterUserObject(data.kanbanMaster);
-      kmObj.roles = [3];
+      let devs = data.developers.map(obj => ({
+        isActive: obj.isActive,
+        email: obj.email,
+        firstName: obj.firstName,
+        lastName: obj.lastName,
+        id: obj.idUser,
+        userTeamId: obj.idUserTeam
+      }));
 
       this.setState({
         teamName: data.name,
         teamId: data.id,
         po: data.productOwner.firstName + ' ' + data.productOwner.lastName,
-        poId,
-        poObj,
+        poId: data.productOwner.idUser,
         km: data.kanbanMaster.firstName + ' ' + data.kanbanMaster.lastName,
-        kmId,
-        kmObj,
-        developers: tmpDevs
+        kmId: data.kanbanMaster.idUser,
+        developers: devs
       });
-      // console.log('developers', tmpDevs);
     }
   }
 
@@ -120,7 +107,7 @@ class AddEditTeam extends Component {
    * @param  {[Object]} nextProps [Next props]
    */
   componentWillReceiveProps(nextProps) {
-    this.saveAllUsersData(nextProps);
+    this.saveUserDataFromProps(nextProps);
   }
 
 
@@ -135,31 +122,12 @@ class AddEditTeam extends Component {
           name: this.state.teamName,
           kmId: this.state.kmId,
           poId: this.state.poId,
-          members: this.state.developers.slice()
+          members: this.state.developers.map(dev => (this.filterUserObject(dev)))
         }
       };
-
-      let poAdded = false;
-      let kmAdded = false;
-      teamData.team.members = teamData.team.members.map((member) => {
-        if (member.id === this.state.kmId) {
-          if (!member.roles.includes(3)) member.roles.push(3);
-          kmAdded = true;
-        } else if (member.id === this.state.poId) {
-          if (!member.roles.includes(2)) member.roles.push(2);
-          poAdded = true;
-        }
-        return this.filterUserObject(member);
-      });
-
-
-      if (!poAdded) teamData.team.members.push(this.filterUserObject(this.state.poObj));
-      if (!kmAdded) teamData.team.members.push(this.filterUserObject(this.state.kmObj));
-
       if (this.props.modeEdit) {
         // add team id to mutation variable
         teamData.team.teamId = this.state.teamId;
-
         this.props.editTeamMutation({
           variables: teamData,
           refetchQueries: [{ query: allTeamsQuery }]
@@ -187,14 +155,13 @@ class AddEditTeam extends Component {
    * @return {[Object]}      [Filtered user object]
    */
   filterUserObject(user) {
-    const allowedkeys = ['id', 'roles'];
+    const allowedkeys = ['id', 'email', 'isActive'];
     let tmp = Object.keys(user)
       .filter(key => allowedkeys.includes(key))
       .reduce((acc, key) => {
         acc[key] = user[key];
         return acc;
       }, {});
-    tmp.roles = tmp.roles.map(role => this.mapRoles(role));
     return tmp;
   }
 
@@ -205,6 +172,7 @@ class AddEditTeam extends Component {
    */
   handleError(err) {
     console.error('handleError:', err);
+    let errMsg = err.split(':');
     let error = {
       teamName: '',
       po: '',
@@ -212,58 +180,66 @@ class AddEditTeam extends Component {
       dev: '',
       general: ''
     };
-    error.general = err.toString();
+    error.general = errMsg[1].toString();
     this.setState({ error, onSubmit: this.onSubmit });
   }
 
-  saveAllUsersData(nextProps) {
-    const { data: { error, allUsers } } = nextProps;
-    // console.log(allUsers);
-    if (error) console.error(error);
 
-    if (this.state.allUsers.length === 0) {
-      let users = allUsers.map((user) => {
-        let tmpUser = {
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          roles: []
-        };
-        return ({ value: tmpUser,
-          label: <Box justify='between' pad={{ horizontal: 'medium' }} direction='row'>
-            <span>{user.firstName + ' ' + user.lastName}</span>
-            <span>{user.email}</span>
-          </Box>
-        });
-      });
-      // console.log('users', users);
-      this.setState({ allUsers: users, options: users });
+  /**
+   * [Save data from queries]
+   * @param  {[Object]} nextProps [Next props]
+   */
+  saveUserDataFromProps(nextProps) {
+    if (nextProps.queryAllDevs !== undefined) {
+      if (nextProps.queryAllDevs.loading) return;
+      this.saveAllUsersData(nextProps.queryAllDevs.allUsers, 'dev');
+    }
+
+    if (nextProps.queryAllKm !== undefined) {
+      if (nextProps.queryAllKm.loading) return;
+      this.saveAllUsersData(nextProps.queryAllKm.allUsers, 'km');
+    }
+
+    if (nextProps.queryAllPo !== undefined) {
+      if (nextProps.queryAllPo.loading) return;
+      this.saveAllUsersData(nextProps.queryAllPo.allUsers, 'po');
     }
   }
 
 
   /**
-   * Map roles to numbers
-   * ADMIN = 1
-   * PRODUCT_OWNER = 2
-   * KANBAN_MASTER = 3
-   * DEV = 4
-   * @param  {[object]} roles [Roles object to map]
-   * @return {[Integer]}       [Role id]
+   * [Saves all users for specific role.
+   * Select component will display only valid roles for specific field.]
+   * @param  {[Array]} allUsers [Array of user objects]
+   * @param  {[String]} type     [User role (dev, km, po)]
    */
-  mapRoles(role) {
-    switch (role.name) {
-      case 'Administrator':
-        return 1;
-      case 'Product Owner':
-        return 2;
-      case 'KanbanMaster':
-        return 3;
-      case 'Razvijalec':
-        return 4;
-      default:
-        return role;
+  saveAllUsersData(allUsers, type) {
+    if (allUsers === undefined) {
+      console.error('Failed to load users for role ' + type);
+      return;
+    }
+
+    let users = allUsers.map((user) => {
+      let tmpUser = {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName
+      };
+      return ({ value: tmpUser,
+        label: <Box justify='between' pad={{ horizontal: 'medium' }} direction='row'>
+          <span>{user.firstName + ' ' + user.lastName}</span>
+          <span>{user.email}</span>
+        </Box>
+      });
+    });
+
+    if (type === 'dev') { // save Devs
+      this.setState({ allDev: users, allDevOptions: users });
+    } else if (type === 'km') { // save KM's
+      this.setState({ allKm: users, allKmOptions: users });
+    } else { // save PO's
+      this.setState({ allPo: users, allPoOptions: users });
     }
   }
 
@@ -272,25 +248,42 @@ class AddEditTeam extends Component {
    * [Filters suggestions according to query input]
    * @param  {[type]} query [Search input - what user types into input field]
    */
-  filterSuggestions(query) {
-    let options = this.state.allUsers.filter((obj) => {
-      let name = obj.value.firstName + ' ' + obj.value.lastName;
-      return name.toLowerCase().indexOf(query.toLowerCase()) !== -1;
-    });
-    this.setState({ options });
+  filterSuggestions(query, type) {
+    if (type === 'dev') {
+      let options = this.state.allDev.filter((obj) => {
+        let name = obj.value.firstName + ' ' + obj.value.lastName;
+        return name.toLowerCase().indexOf(query.toLowerCase()) !== -1;
+      });
+      this.setState({ allDevOptions: options });
+    } else if (type === 'po') {
+      let options = this.state.allPo.filter((obj) => {
+        let name = obj.value.firstName + ' ' + obj.value.lastName;
+        return name.toLowerCase().indexOf(query.toLowerCase()) !== -1;
+      });
+      this.setState({ allPoOptions: options });
+    } else {
+      let options = this.state.allKm.filter((obj) => {
+        let name = obj.value.firstName + ' ' + obj.value.lastName;
+        return name.toLowerCase().indexOf(query.toLowerCase()) !== -1;
+      });
+      this.setState({ allKmOptions: options });
+    }
   }
 
 
   /**
-   * [Adds developer to state array]
+   * [Adds developer to state array. Reset dev options after selection]
    * @param {[type]} dev [description]
    */
   addDeveloper(dev) {
     let developers = this.state.developers.slice();
-    // Add role developer to obj
-    dev.roles.push(4);
-    developers.push(dev);
-    this.setState({ developers });
+    // check if developer already exists in developers array
+    if (developers.findIndex(arrEl => arrEl.id === dev.id) === -1) {
+      let tmpDev = dev;
+      tmpDev.isActive = true;
+      developers.push(tmpDev);
+      this.setState({ developers, allDevOptions: this.state.allDev });
+    }
   }
 
 
@@ -299,7 +292,7 @@ class AddEditTeam extends Component {
    * If mode is edit we have to call mutation to remove user.]
    * @param  {[String]} id [user id]
    */
-  removeDev(userId, index = 0) {
+  removeDev(userId, index = 0, isActive) {
     if (!this.props.modeEdit) {
       let developers = this.state.developers.slice();
       developers = developers.filter(dev => dev.id !== userId);
@@ -307,13 +300,14 @@ class AddEditTeam extends Component {
     } else {
       this.setState({ onSubmit: null });
       this.props.deleteUserFromTeamMutation({
-        variables: { id: userId },
+        variables: { id: userId, isActive: !isActive },
         refetchQueries: [{ query: allTeamsQuery }]
       })
         .then((res) => {
-          if (res.data.deleteUserTeam.ok) {
+          let resData = res.data.editTeamMemberStatus;
+          if (resData.ok) {
             let developers = this.state.developers.slice();
-            developers[index].isActive = false;
+            developers[index].isActive = resData.userTeam.isActive;
             this.setState({ developers, onSubmit: this.onSubmit });
           }
         })
@@ -381,18 +375,14 @@ class AddEditTeam extends Component {
                   id='po'
                   value={this.state.po}
                   placeHolder='Janez Novak'
-                  options={this.state.options}
+                  options={this.state.allPoOptions}
                   onChange={event =>
                     this.setState({
                       po: event.option.value.firstName + ' ' + event.option.value.lastName,
                       poId: event.option.value.id,
-                      poObj: {
-                        id: event.option.value.id,
-                        roles: [2]
-                      },
-                      options: this.state.allUsers
+                      allPoOptions: this.state.allPo
                     })}
-                  onSearch={event => this.filterSuggestions(event.target.value)}
+                  onSearch={event => this.filterSuggestions(event.target.value, 'po')}
                 />
               </FormField>
 
@@ -401,18 +391,14 @@ class AddEditTeam extends Component {
                   id='km'
                   value={this.state.km}
                   placeHolder='Janez Novak'
-                  options={this.state.options}
+                  options={this.state.allKmOptions}
                   onChange={event =>
                     this.setState({
                       km: event.option.value.firstName + ' ' + event.option.value.lastName,
                       kmId: event.option.value.id,
-                      kmObj: {
-                        id: event.option.value.id,
-                        roles: [3]
-                      },
-                      options: this.state.allUsers
+                      allKmOptions: this.state.allKm
                     })}
-                  onSearch={event => this.filterSuggestions(event.target.value)}
+                  onSearch={event => this.filterSuggestions(event.target.value, 'km')}
                 />
               </FormField>
             </FormFields>
@@ -425,9 +411,9 @@ class AddEditTeam extends Component {
                     id='dev'
                     value={this.state.dev}
                     placeHolder='Janez Novak'
-                    options={this.state.options}
+                    options={this.state.allDevOptions}
                     onChange={event => this.addDeveloper(event.option.value)}
-                    onSearch={event => this.filterSuggestions(event.target.value)}
+                    onSearch={event => this.filterSuggestions(event.target.value, 'dev')}
                   />
                 </FormField>
               </Section>
@@ -435,7 +421,7 @@ class AddEditTeam extends Component {
               <List>
                 {this.state.developers.map((dev, index) => (
                   <ListItem
-                    key={dev.id}
+                    key={'dev-id-' + dev.id}
                     justify='between'
                     pad={(this.props.modeEdit) ? { horizontal: 'small', vertical: 'small' } : { horizontal: 'small' }}>
                     {dev.firstName + ' ' + dev.lastName}
@@ -443,7 +429,7 @@ class AddEditTeam extends Component {
                       <CheckBox
                         toggle={true}
                         checked={dev.isActive}
-                        onChange={() => this.removeDev(dev.userTeamId, index)}
+                        onChange={() => this.removeDev(dev.userTeamId, index, dev.isActive)}
                       />
                       :
                       <Button plain icon={<TrashIcon />} onClick={() => this.removeDev(dev.id)} />
@@ -462,7 +448,7 @@ class AddEditTeam extends Component {
                 secondary={true}
                 onClick={() => this.props.closer()}
               />
-              <Button label='Dodaj'
+              <Button label={(this.props.modeEdit) ? 'Shrani' : 'Dodaj'}
                 primary={true}
                 onClick={this.state.onSubmit}
               />
@@ -489,10 +475,15 @@ AddEditTeam.propTypes = {
     productOwner: PropTypes.object,
     members: PropTypes.array
   }),
-  data: PropTypes.object.isRequired,
   addTeamMutation: PropTypes.func.isRequired,
   editTeamMutation: PropTypes.func.isRequired,
-  deleteUserFromTeamMutation: PropTypes.func.isRequired
+  deleteUserFromTeamMutation: PropTypes.func.isRequired,
+  // eslint-disable-next-line
+  queryAllKm: PropTypes.object.isRequired,
+  // eslint-disable-next-line
+  queryAllPo: PropTypes.object.isRequired,
+  // eslint-disable-next-line
+  queryAllDevs: PropTypes.object.isRequired
 };
 
 const addTeamMutation = gql`
@@ -512,17 +503,21 @@ const editTeamMutation = gql`
 `;
 
 export const deleteUserFromTeamMutation = gql`
-  mutation deleteUserTeam($id: Int!) {
-    deleteUserTeam(userTeamId: $id) {
+  mutation editTeamMemberStatus($id: Int!, $isActive: Boolean!) {
+    editTeamMemberStatus(userTeamId: $id, isActive: $isActive) {
       ok
+      userTeam {
+        id
+        isActive
+      }
     }
   }
 `;
 
 
 export const allUsersQuery = gql`
-  query AllUsersQuery {
-    allUsers {
+  query AllUsersQuery($userRole: Int!) {
+    allUsers(userRole: $userRole) {
       id
       firstName
       lastName
@@ -530,6 +525,7 @@ export const allUsersQuery = gql`
     }
   }
 `;
+
 
 const AddEditTeamWithMutations = compose(
   graphql(addTeamMutation, {
@@ -541,7 +537,30 @@ const AddEditTeamWithMutations = compose(
   graphql(deleteUserFromTeamMutation, {
     name: 'deleteUserFromTeamMutation'
   }),
-  graphql(allUsersQuery)
+  graphql((allUsersQuery), {
+    name: 'queryAllDevs',
+    options: () => ({
+      variables: {
+        userRole: 4
+      }
+    })
+  }),
+  graphql((allUsersQuery), {
+    name: 'queryAllKm',
+    options: () => ({
+      variables: {
+        userRole: 3
+      }
+    })
+  }),
+  graphql((allUsersQuery), {
+    name: 'queryAllPo',
+    options: () => ({
+      variables: {
+        userRole: 2
+      }
+    })
+  })
 )(AddEditTeam);
 
 export default AddEditTeamWithMutations;

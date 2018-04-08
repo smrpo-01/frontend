@@ -33,7 +33,6 @@ class DeleteTeam extends Component {
    */
   onConfirm() {
     this.setState({ onConfirm: null });
-    console.log(this.props);
     if (this.props.type === 'team') {
       // console.log('deleting team');
       this.props.deleteTeamMutation({
@@ -43,7 +42,7 @@ class DeleteTeam extends Component {
         .then(() => this.props.closer())
         .catch((err) => {
           console.error(err);
-          this.setState({ onConfirm: this.onConfirm, error: err.message });
+          this.setState({ onConfirm: this.onConfirm, error: err.message.split(':')[1] });
         });
     } else {
       // console.log('deleting project');
@@ -54,7 +53,7 @@ class DeleteTeam extends Component {
         .then(() => this.props.closer())
         .catch((err) => {
           console.error(err);
-          this.setState({ onConfirm: this.onConfirm, error: err.message });
+          this.setState({ onConfirm: this.onConfirm, error: err.message.split(':')[1] });
         });
     }
   }

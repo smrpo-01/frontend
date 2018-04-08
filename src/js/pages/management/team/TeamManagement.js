@@ -46,17 +46,14 @@ class TeamManagement extends Component {
   }
 
   addNewTeam() {
-    console.log('newTema');
     this.setState({ showAddEditOverlay: true });
   }
 
   editTeam(editData) {
-    // console.log('editing team', editData);
     this.setState({ showAddEditOverlay: true, modeEdit: true, editData });
   }
 
   deleteTeam(teamId) {
-    console.log('deleting team', teamId);
     this.setState({ showDeleteOverlay: true, teamId });
   }
 
