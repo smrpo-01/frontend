@@ -23,8 +23,8 @@ import { allTeamsQuery } from '../team/TeamTable';
 
 const dateFormat = 'D/M/YYYY';
 const projectCodeRegex = /^[a-zA-Z0-9-/. ]*$/;
-const alphaNumRegex = /^[a-zA-Z0-9šđčćžŠĐČĆŽ ]*$/;
-const alphaRegex = /^[a-zA-ZšđčćžŠĐČĆŽ ]*$/;
+const alphaNumRegex = /^[a-zA-Z0-9šđčćžŠĐČĆŽ ()/]*$/;
+const alphaRegex = /^[a-zA-ZšđčćžŠĐČĆŽ ()/]*$/;
 
 class AddEditProject extends Component {
   constructor() {
@@ -102,6 +102,7 @@ class AddEditProject extends Component {
    * Sets error to state if mutaion is not OK, otherwise close overlay.]
    */
   onSubmit() {
+    console.log('oajfsiokdfasjdijas');
     // Disable submit button
     this.setState({ onSubmit: null });
 
@@ -147,6 +148,7 @@ class AddEditProject extends Component {
       }
     } else {
       // Reenable submit button
+      console.log('forma ni valid');
       this.setState({ onSubmit: this.onSubmit });
     }
   }
@@ -187,7 +189,7 @@ class AddEditProject extends Component {
     let formIsValid = true;
 
     if (!this.state.projectCode.match(projectCodeRegex)) { error.projectCode = 'Nepravilen format'; formIsValid = false; }
-    if (!this.state.name.match(alphaNumRegex)) { error.projectnameCode = 'Nepravilen format'; formIsValid = false; }
+    if (!this.state.name.match(alphaNumRegex)) { error.name = 'Nepravilen format'; formIsValid = false; }
     if (!this.state.customer.match(alphaRegex)) { error.customer = 'Nepravilen format'; formIsValid = false; }
 
     let start = new Date(this.formatDate(this.state.dateStart));
@@ -204,7 +206,7 @@ class AddEditProject extends Component {
     if (this.state.customer === '') { error.customer = 'Obvezno polje'; formIsValid = false; }
     if (this.state.dateStart === '') { error.dateStart = 'Obvezno polje'; formIsValid = false; }
     if (this.state.dateEnd === '') { error.dateEnd = 'Obvezno polje'; formIsValid = false; }
-
+    console.log('form err', error);
     this.setState({ error });
     return formIsValid;
   }
