@@ -193,7 +193,21 @@ class AddEditProject extends Component {
 
     let start = new Date(this.formatDate(this.state.dateStart));
     let end = new Date(this.formatDate(this.state.dateEnd));
+    let now = new Date();
 
+    // datum pričetka mora biti manjši ali enak trenutnemu
+    if (start > now) {
+      error.dateStart = 'Začetni datum mora biti manjši ali enak trenutnemu';
+      formIsValid = false;
+    }
+
+    // datum zaključka mora biti večji od trenutnega datuma
+    if (end <= now) {
+      error.dateEnd = 'Končni datum mora biti večji kot trenutni';
+      formIsValid = false;
+    }
+
+    // predvideni datum zaključka mora biti večji od datuma pričetka
     if (start >= end) {
       error.dateStart = 'Nepravilna izbira';
       error.dateEnd = 'Nepravilna izbira';
