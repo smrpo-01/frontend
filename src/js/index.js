@@ -6,6 +6,7 @@ import { createHttpLink } from 'apollo-link-http';
 import { setContext } from 'apollo-link-context';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { BrowserRouter } from 'react-router-dom';
+import { params } from './settings';
 
 // Main scss file
 import '../scss/index.scss';
@@ -17,7 +18,7 @@ import { ApolloProvider } from 'react-apollo';
 import App from 'grommet/components/App';
 import MainApp from './App';
 
-const uri = process.env.NODE_ENV === 'development' ? 'http://127.0.0.1:8000/graphiql' : '/graphiql';
+const uri = (params.devMode) ? params.devUrl + '/graphiql' : '/graphiql';
 
 const httpLink = createHttpLink({
   uri,
