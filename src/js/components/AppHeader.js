@@ -20,7 +20,7 @@ import HomeIcon from 'grommet/components/icons/base/Home';
 import VmMaintenanceIcon from 'grommet/components/icons/base/VmMaintenance';
 import UserIcon from 'grommet/components/icons/base/User';
 
-const imgUri = process.env.NODE_ENV === 'development' ? './' : '/static/app/';
+const imgUri = process.env.NODE_ENV === 'development' ? '/' : '/static/app/';
 
 class AppHeader extends Component {
   constructor() {

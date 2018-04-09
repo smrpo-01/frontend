@@ -11,6 +11,8 @@ import EditIcon from 'grommet/components/icons/base/Edit';
 
 import CheckBox from 'grommet/components/CheckBox';
 
+const imgUri = process.env.NODE_ENV === 'development' ? '/' : '/static/app/';
+
 class ColumnEmpty extends Component {
   render() {
     const columnData = this.props.data;
@@ -25,15 +27,15 @@ class ColumnEmpty extends Component {
           <div style={{ display: 'flex', justifyContent: 'space-around', width: '100%', alignItems: 'center', width: '80%', marginBottom: 25, marginTop:10}}>
             <Image
               style={{height:25, width: 25, opacity: columnData.boundary ? 0.5 : 0.05}}
-              src='/img/fence.png'
+              src={imgUri + 'img/fence.png'}
               size='small' />
             <Image
               style={{height:25, width: 25, opacity: columnData.priority ? 0.5 : 0.05}}
-              src='/img/volume-level.png'
+              src={imgUri + 'img/volume-level.png'}
               size='small' />
             <Image
               style={{height:25, width: 25, opacity: columnData.acceptance ? 0.5 : 0.05}}
-              src='/img/verification-mark.png'
+              src={imgUri + 'img/verification-mark.png'}
               size='small' />
           </div>
           <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', width: '70%', marginBottom: 10}}>
