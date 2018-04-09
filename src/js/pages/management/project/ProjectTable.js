@@ -55,7 +55,7 @@ class TeamTable extends Component {
 
         <tbody>
           {allProjects.map(rowData => (
-            <TableRow key={rowData.id}>
+            <TableRow key={rowData.id} className={(rowData.isActive) ? '' : 'table-row-grey'}>
               <td>{rowData.projectCode}</td>
               <td>{rowData.name}</td>
               <td>{rowData.customer}</td>
@@ -89,6 +89,7 @@ export const allProjectsQuery = gql`
       customer
       dateEnd
       dateStart
+      isActive
       team {
         id
         name

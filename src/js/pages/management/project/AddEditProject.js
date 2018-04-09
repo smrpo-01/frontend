@@ -65,6 +65,7 @@ class AddEditProject extends Component {
   componentWillMount() {
     if (this.props.data.allTeams !== undefined) this.saveTeamData(this.props);
     if (this.props.modeEdit) {
+      console.log(this.props.editData);
       let initProps = this.props.editData;
       let teamId = (initProps.team !== null) ? initProps.team.id : '';
       let team = (initProps.team !== null) ? initProps.team.name : '';
@@ -325,7 +326,8 @@ class AddEditProject extends Component {
                 secondary={true}
                 onClick={() => this.props.closer()}
               />
-              <Button label='Dodaj'
+              {/* eslint-disable-next-line */}
+              <Button label={(this.props.modeEdit) ? ((!this.props.editData.isActive) ? 'Aktiviraj' : 'Shrani') : 'Dodaj'}
                 primary={true}
                 onClick={this.state.onSubmit}
               />
@@ -346,9 +348,16 @@ AddEditProject.propTypes = {
   closer: PropTypes.func.isRequired,
   modeEdit: PropTypes.bool,
   data: PropTypes.object.isRequired,
-  editData: PropTypes.shape(
-    PropTypes.string.name
-  ),
+  editData: PropTypes.shape({
+    customer: PropTypes.string.isRequired,
+    dateEnd: PropTypes.string.isRequired,
+    dateStart: PropTypes.string.isRequired,
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    projectCode: PropTypes.string.isRequired,
+    team: PropTypes.object.isRequired,
+    isActive: PropTypes.bool.isRequired
+  }),
   addProjectMutation: PropTypes.func.isRequired,
   editProjectMutation: PropTypes.func.isRequired
 };
