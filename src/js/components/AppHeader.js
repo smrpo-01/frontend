@@ -92,7 +92,7 @@ class AppHeader extends Component {
         >
           {(this.props.sidebarVisible) ?
             null :
-            <Title onClick={this.props.toggleSidebar} >
+            <Title onClick={null} >
               <Image
                 className='header-logo'
                 src={imgUri + 'img/random-logo2.png'}
@@ -141,6 +141,7 @@ AppHeader.defaultProps = {
 };
 
 AppHeader.propTypes = {
+  // eslint-disable-next-line
   toggleSidebar: PropTypes.func.isRequired,
   sidebarVisible: PropTypes.bool.isRequired,
   logoutUser: PropTypes.func,
