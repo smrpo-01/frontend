@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 
 // Grommmet Components
 import Anchor from 'grommet/components/Anchor';
+import Box from 'grommet/components/Box';
+import Label from 'grommet/components/Label';
 import Header from 'grommet/components/Header';
 import Title from 'grommet/components/Title';
 import Image from 'grommet/components/Image';
@@ -16,6 +18,7 @@ import UserSettingsIcon from 'grommet/components/icons/base/UserSettings';
 import TableIcon from 'grommet/components/icons/base/Table';
 import HomeIcon from 'grommet/components/icons/base/Home';
 import VmMaintenanceIcon from 'grommet/components/icons/base/VmMaintenance';
+import UserIcon from 'grommet/components/icons/base/User';
 
 const imgUri = process.env.NODE_ENV === 'development' ? './' : '/static/app/';
 
@@ -29,7 +32,8 @@ class AppHeader extends Component {
         { id: 3, itemName: 'Tabla', route: '/board', icon: <TableIcon /> },
         { id: 4, itemName: 'Administracija uporabnikov', route: '/administration', icon: <UserSettingsIcon /> }
       ],
-      userRoles: []
+      userRoles: [],
+      email: ''
     };
   }
 
@@ -39,7 +43,8 @@ class AppHeader extends Component {
     // eslint-disable-next-line no-undef
     const user = sessionStorage.getItem('user');
     const userRoles = JSON.parse(user).roles;
-    this.setState({ userRoles });
+    const email = JSON.parse(user).email;
+    this.setState({ userRoles, email });
   }
 
 
@@ -119,6 +124,11 @@ class AppHeader extends Component {
             })}
           </Menu>
         </Section>
+        {/* Show username */}
+        <Box direction='row' justify='between' size='small'>
+          <UserIcon />
+          <Label margin='none'>{this.state.email}</Label>
+        </Box>
 
         {/* Logout button */}
         <Button
