@@ -31,7 +31,6 @@ class BoardNew extends Component {
     this.cancel = this.cancel.bind(this);
     this.setColumns = this.setColumns.bind(this);
     this.closeErr = this.closeErr.bind(this);
-    this.changeAndCheckProjects = this.changeAndCheckProjects.bind(this);
 
     this.state = {
       boardName: 'Tabla',
@@ -45,12 +44,6 @@ class BoardNew extends Component {
       selectedProjects: [],
       showError: false,
     };
-  }
-
-
-  changeAndCheckProjects(change) {
-    console.log(this.props.data.allProjects)
-    this.setState({ selectedProjects: change.value})
   }
 
   setColumns(data, columns) {
@@ -143,7 +136,7 @@ class BoardNew extends Component {
       variables: {
         jsonString: JSON.stringify(board),
       },
-      refetchQueries: [{ query: getBoardsQuery }]
+      //refetchQueries: [{ query: getBoardsQuery }]
     }).then(res => {
       this.props.history.goBack();
     }).catch(err => {
@@ -162,6 +155,14 @@ class BoardNew extends Component {
     let options = [];
     if (this.props.data.allProjects) {
       options = this.props.data.allProjects.map(pr => ({ value: pr.name, id: pr.id}));
+    }
+    let legal = true;
+    if (this.state.selectedProjects.length > 0) { 
+      const checker = this.state.selectedProjects[0].teamId
+      const teams = this.state.selectedProjects.filter(proj => proj.teamId !== checker);
+      if(teams.length > 0) {
+        legal = false;
+      }
     }
     return (
       <div style={{position: 'relative'}}>
@@ -192,10 +193,10 @@ class BoardNew extends Component {
             <Select placeHolder='None'
               options={options}
               multiple={true}
-              onChange={(change) => this.changeAndCheckProjects(change)}
+              onChange={(change) => this.setState({ selectedProjects: change.value})}
               value={this.state.selectedProjects}
             />
-            <p style={{ opacity: this.state.selectedProjects.length > 1 ? 1 : 0, color: 'red', marginLeft: 20 }}>
+            <p style={{ opacity: legal ? 0 : 1, color: 'red', marginLeft: 20 }}>
               Pozor izbranih je vec projektov!
             </p>
           </div>
@@ -249,8 +250,8 @@ BoardNew.propTypes = {
 };
 
 const allProjectsQuery = gql`
-  query allProjectsQuery {
-    allProjects {
+  query allProjectsQuery($filtered: Int!, $userId: Int!) {
+    allProjects(filtered: $filtered, userId: $userId) {
       id
       name
     }
@@ -265,6 +266,11 @@ const addBoardMutation = gql`
   }
 `;
 
-export default compose(graphql(allProjectsQuery), graphql(addBoardMutation, {
+export default compose(graphql(allProjectsQuery, {
+  options: (props) => {
+    const user = sessionStorage.getItem('user');
+    return ({ variables: { userId: parseInt(JSON.parse(user).id), filtered: 1, boardId: -1 }});
+  }
+}), graphql(addBoardMutation, {
   name: 'addBoardMutation'
 }))(BoardNew);
