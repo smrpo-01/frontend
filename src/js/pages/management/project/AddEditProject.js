@@ -65,7 +65,6 @@ class AddEditProject extends Component {
   componentWillMount() {
     if (this.props.data.allTeams !== undefined) this.saveTeamData(this.props);
     if (this.props.modeEdit) {
-      console.log(this.props.editData);
       let initProps = this.props.editData;
       let teamId = (initProps.team !== null) ? initProps.team.id : '';
       let team = (initProps.team !== null) ? initProps.team.name : '';
@@ -351,14 +350,14 @@ AddEditProject.propTypes = {
   modeEdit: PropTypes.bool,
   data: PropTypes.object.isRequired,
   editData: PropTypes.shape({
-    customer: PropTypes.string.isRequired,
-    dateEnd: PropTypes.string.isRequired,
-    dateStart: PropTypes.string.isRequired,
-    id: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-    projectCode: PropTypes.string.isRequired,
-    team: PropTypes.object.isRequired,
-    isActive: PropTypes.bool.isRequired
+    customer: PropTypes.string,
+    dateEnd: PropTypes.string,
+    dateStart: PropTypes.string,
+    id: PropTypes.string,
+    name: PropTypes.string,
+    projectCode: PropTypes.string,
+    team: PropTypes.object,
+    isActive: PropTypes.bool
   }),
   addProjectMutation: PropTypes.func.isRequired,
   editProjectMutation: PropTypes.func.isRequired
