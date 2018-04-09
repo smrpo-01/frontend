@@ -55,11 +55,13 @@ class Login extends Component {
       this.setState({
         in: true,
         errorDescription: 'Izpolnite obe polji.',
+        onSubmit: this.handleForm,
       });
     } else if (!this.state.email.match(emailRegex) || this.state.password.length < 6) {
       this.setState({
         in: true,
         errorDescription: 'Nepravilen vnos, poskusite ponovno.',
+        onSubmit: this.handleForm,
       });
     } else {
       fetch(uri, {
