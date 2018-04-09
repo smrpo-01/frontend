@@ -5,11 +5,9 @@ import PropTypes from 'prop-types';
 import Anchor from 'grommet/components/Anchor';
 import Header from 'grommet/components/Header';
 import Title from 'grommet/components/Title';
-// import Box from 'grommet/components/Box';
 import Image from 'grommet/components/Image';
 import Section from 'grommet/components/Section';
 import Menu from 'grommet/components/Menu';
-
 import Button from 'grommet/components/Button';
 
 // Icons
@@ -62,7 +60,7 @@ class AppHeader extends Component {
   // Validates user role for specific route
   checkRoleForPath(route) {
     const roles = this.state.userRoles;
-    const rolesForManagement = ['po', 'km', 'admin'];
+    const rolesForManagement = ['km'];
 
     switch (route) {
       case '/home':
