@@ -101,7 +101,6 @@ class AddEditProject extends Component {
    * Sets error to state if mutaion is not OK, otherwise close overlay.]
    */
   onSubmit() {
-    console.log('oajfsiokdfasjdijas');
     // Disable submit button
     this.setState({ onSubmit: null });
 
@@ -147,7 +146,6 @@ class AddEditProject extends Component {
       }
     } else {
       // Reenable submit button
-      console.log('forma ni valid');
       this.setState({ onSubmit: this.onSubmit });
     }
   }
@@ -219,7 +217,6 @@ class AddEditProject extends Component {
     if (this.state.customer === '') { error.customer = 'Obvezno polje'; formIsValid = false; }
     if (this.state.dateStart === '') { error.dateStart = 'Obvezno polje'; formIsValid = false; }
     if (this.state.dateEnd === '') { error.dateEnd = 'Obvezno polje'; formIsValid = false; }
-    console.log('form err', error);
     this.setState({ error });
     return formIsValid;
   }
