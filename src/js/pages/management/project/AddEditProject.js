@@ -23,8 +23,8 @@ import { allTeamsQuery } from '../team/TeamTable';
 
 const dateFormat = 'D/M/YYYY';
 const projectCodeRegex = /^[a-zA-Z0-9-/. ]*$/;
-const alphaNumRegex = /^[a-zA-Z0-9šđčćžŠĐČĆŽ ]*$/;
-const alphaRegex = /^[a-zA-ZšđčćžŠĐČĆŽ ]*$/;
+const alphaNumRegex = /^[a-zA-Z0-9šđčćžŠĐČĆŽ ()/]*$/;
+const alphaRegex = /^[a-zA-ZšđčćžŠĐČĆŽ ()/]*$/;
 
 class AddEditProject extends Component {
   constructor() {
@@ -130,7 +130,7 @@ class AddEditProject extends Component {
           .then(() => this.props.closer())
           .catch((err) => {
             console.error(err);
-            this.setState({ onSubmit: this.onSubmit, error: { general: err.message } });
+            this.setState({ onSubmit: this.onSubmit, error: { general: err.message.split(':')[1] } });
           });
       } else {
         // We're adding new project
@@ -141,7 +141,7 @@ class AddEditProject extends Component {
           .then(() => this.props.closer())
           .catch((err) => {
             console.error(err);
-            this.setState({ onSubmit: this.onSubmit, error: { general: err.message } });
+            this.setState({ onSubmit: this.onSubmit, error: { general: err.message.split(':')[1] } });
           });
       }
     } else {
@@ -186,12 +186,26 @@ class AddEditProject extends Component {
     let formIsValid = true;
 
     if (!this.state.projectCode.match(projectCodeRegex)) { error.projectCode = 'Nepravilen format'; formIsValid = false; }
-    if (!this.state.name.match(alphaNumRegex)) { error.projectnameCode = 'Nepravilen format'; formIsValid = false; }
+    if (!this.state.name.match(alphaNumRegex)) { error.name = 'Nepravilen format'; formIsValid = false; }
     if (!this.state.customer.match(alphaRegex)) { error.customer = 'Nepravilen format'; formIsValid = false; }
 
     let start = new Date(this.formatDate(this.state.dateStart));
     let end = new Date(this.formatDate(this.state.dateEnd));
+    let now = new Date();
 
+    // datum pričetka mora biti manjši ali enak trenutnemu
+    if (start > now) {
+      error.dateStart = 'Začetni datum mora biti manjši ali enak trenutnemu';
+      formIsValid = false;
+    }
+
+    // datum zaključka mora biti večji od trenutnega datuma
+    if (end <= now) {
+      error.dateEnd = 'Končni datum mora biti večji kot trenutni';
+      formIsValid = false;
+    }
+
+    // predvideni datum zaključka mora biti večji od datuma pričetka
     if (start >= end) {
       error.dateStart = 'Nepravilna izbira';
       error.dateEnd = 'Nepravilna izbira';
@@ -203,7 +217,6 @@ class AddEditProject extends Component {
     if (this.state.customer === '') { error.customer = 'Obvezno polje'; formIsValid = false; }
     if (this.state.dateStart === '') { error.dateStart = 'Obvezno polje'; formIsValid = false; }
     if (this.state.dateEnd === '') { error.dateEnd = 'Obvezno polje'; formIsValid = false; }
-
     this.setState({ error });
     return formIsValid;
   }
@@ -325,7 +338,8 @@ class AddEditProject extends Component {
                 secondary={true}
                 onClick={() => this.props.closer()}
               />
-              <Button label='Dodaj'
+              {/* eslint-disable-next-line */}
+              <Button label={(this.props.modeEdit) ? ((!this.props.editData.isActive) ? 'Aktiviraj' : 'Shrani') : 'Dodaj'}
                 primary={true}
                 onClick={this.state.onSubmit}
               />
@@ -346,9 +360,16 @@ AddEditProject.propTypes = {
   closer: PropTypes.func.isRequired,
   modeEdit: PropTypes.bool,
   data: PropTypes.object.isRequired,
-  editData: PropTypes.shape(
-    PropTypes.string.name
-  ),
+  editData: PropTypes.shape({
+    customer: PropTypes.string,
+    dateEnd: PropTypes.string,
+    dateStart: PropTypes.string,
+    id: PropTypes.string,
+    name: PropTypes.string,
+    projectCode: PropTypes.string,
+    team: PropTypes.object,
+    isActive: PropTypes.bool
+  }),
   addProjectMutation: PropTypes.func.isRequired,
   editProjectMutation: PropTypes.func.isRequired
 };

@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 // Template
 import PageTemplate from '../../templates/PageTemplate';
@@ -32,10 +33,25 @@ class Administration extends Component {
     };
   }
 
+
+  // Redirect if necessary
+  componentWillMount() {
+    // eslint-disable-next-line no-undef
+    const user = sessionStorage.getItem('user');
+    const userRoles = JSON.parse(user).roles;
+    if (userRoles.indexOf('admin') === -1) {
+      this.props.history.push('/home');
+    }
+  }
+
+
+  // show add user overlay
   addNewUser() {
     this.setState({ showAddEditUser: true });
   }
 
+
+  // show edit user overlay
   editUser(modeEdit, editData) {
     this.setState({ showAddEditUser: true, modeEdit, editData });
   }
@@ -96,6 +112,7 @@ Administration.defaultProps = {
 };
 
 Administration.propTypes = {
+  history: PropTypes.object.isRequired
 };
 
 export default Administration;

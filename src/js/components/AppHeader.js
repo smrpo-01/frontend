@@ -3,13 +3,13 @@ import PropTypes from 'prop-types';
 
 // Grommmet Components
 import Anchor from 'grommet/components/Anchor';
+import Box from 'grommet/components/Box';
+import Label from 'grommet/components/Label';
 import Header from 'grommet/components/Header';
 import Title from 'grommet/components/Title';
-// import Box from 'grommet/components/Box';
 import Image from 'grommet/components/Image';
 import Section from 'grommet/components/Section';
 import Menu from 'grommet/components/Menu';
-
 import Button from 'grommet/components/Button';
 
 // Icons
@@ -18,6 +18,7 @@ import UserSettingsIcon from 'grommet/components/icons/base/UserSettings';
 import TableIcon from 'grommet/components/icons/base/Table';
 import HomeIcon from 'grommet/components/icons/base/Home';
 import VmMaintenanceIcon from 'grommet/components/icons/base/VmMaintenance';
+import UserIcon from 'grommet/components/icons/base/User';
 
 const imgUri = process.env.NODE_ENV === 'development' ? './' : '/static/app/';
 
@@ -31,7 +32,8 @@ class AppHeader extends Component {
         { id: 3, itemName: 'Tabla', route: '/board', icon: <TableIcon /> },
         { id: 4, itemName: 'Administracija uporabnikov', route: '/administration', icon: <UserSettingsIcon /> }
       ],
-      userRoles: []
+      userRoles: [],
+      email: ''
     };
   }
 
@@ -41,7 +43,8 @@ class AppHeader extends Component {
     // eslint-disable-next-line no-undef
     const user = sessionStorage.getItem('user');
     const userRoles = JSON.parse(user).roles;
-    this.setState({ userRoles });
+    const email = JSON.parse(user).email;
+    this.setState({ userRoles, email });
   }
 
 
@@ -62,7 +65,7 @@ class AppHeader extends Component {
   // Validates user role for specific route
   checkRoleForPath(route) {
     const roles = this.state.userRoles;
-    const rolesForManagement = ['po', 'km', 'admin'];
+    const rolesForManagement = ['km'];
 
     switch (route) {
       case '/home':
@@ -92,7 +95,7 @@ class AppHeader extends Component {
         >
           {(this.props.sidebarVisible) ?
             null :
-            <Title onClick={this.props.toggleSidebar} >
+            <Title onClick={null} >
               <Image
                 className='header-logo'
                 src={imgUri + 'img/random-logo2.png'}
@@ -121,6 +124,11 @@ class AppHeader extends Component {
             })}
           </Menu>
         </Section>
+        {/* Show username */}
+        <Box direction='row' justify='between' size='small'>
+          <UserIcon />
+          <Label margin='none'>{this.state.email}</Label>
+        </Box>
 
         {/* Logout button */}
         <Button
@@ -141,6 +149,7 @@ AppHeader.defaultProps = {
 };
 
 AppHeader.propTypes = {
+  // eslint-disable-next-line
   toggleSidebar: PropTypes.func.isRequired,
   sidebarVisible: PropTypes.bool.isRequired,
   logoutUser: PropTypes.func,

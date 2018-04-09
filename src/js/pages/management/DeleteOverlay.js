@@ -48,7 +48,7 @@ class DeleteTeam extends Component {
       // console.log('deleting project');
       this.props.deleteProjectMutation({
         variables: { id: this.props.id },
-        refetchQueries: [{ query: allProjectsQuery }]
+        refetchQueries: [{ query: allProjectsQuery }, { query: allTeamsQuery }]
       })
         .then(() => this.props.closer())
         .catch((err) => {

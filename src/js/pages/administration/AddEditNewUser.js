@@ -333,7 +333,7 @@ class AddEditNewUser extends Component {
                 secondary={true}
                 onClick={() => this.props.closer()}
               />
-              <Button label='Dodaj'
+              <Button label={(this.props.modeEdit) ? 'Shrani' : 'Dodaj'}
                 primary={true}
                 onClick={this.state.onSubmit}
               />
