@@ -11,6 +11,10 @@ import Notification from 'grommet/components/Notification';
 
 import CheckmarkIcon from 'grommet/components/icons/base/Checkmark';
 
+import { params } from '../../settings';
+
+const uri = (params.devMode) ? params.devUrl + '/login' : '/login';
+
 const duration = 200;
 
 const transitionStyles = {
@@ -25,57 +29,72 @@ const transitionStylesTransform = {
   exited: 0,
 };
 
+const imgUri = process.env.NODE_ENV === 'development' ? './' : '/static/app/';
+
 class Login extends Component {
   constructor() {
     super();
+    this.handleForm = this.handleForm.bind(this);
+
     this.state = {
       email: '',
       password: '',
       in: false,
       errorDescription: '',
+      onSubmit: this.handleForm
     };
   }
 
-  async handleForm() {
+
+  handleForm() {
     const emailRegex = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}/;
 
-    await this.setState({ in: false });
+    this.setState({ in: false, onSubmit: null });
 
     if (this.state.email === '' || this.state.password === '') {
       this.setState({
         in: true,
         errorDescription: 'Izpolnite obe polji.',
+        onSubmit: this.handleForm,
       });
     } else if (!this.state.email.match(emailRegex) || this.state.password.length < 6) {
       this.setState({
         in: true,
         errorDescription: 'Nepravilen vnos, poskusite ponovno.',
+        onSubmit: this.handleForm,
       });
     } else {
-      try {
-        const res = await fetch('http://127.0.0.1:8000/login/', { method: 'POST', headers: {
+      fetch(uri, {
+        method: 'POST',
+        headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json'
-        }, body: JSON.stringify({ email: this.state.email, password: this.state.password }) });
-        const json = await res.json();
-        console.log(json);
-        const { token, user } = json;
-        if (!token) {
+        },
+        body: JSON.stringify({ email: this.state.email, password: this.state.password })
+      })
+        .then(res => res.json())
+        .then((json) => {
+          // console.log(json);
+          const { token, user } = json;
+          if (!token) {
+            this.setState({
+              in: true,
+              errorDescription: json.non_field_errors[0],
+              onSubmit: this.handleForm
+            });
+          } else {
+            this.props.saveUserData(user);
+            this.props.handler(token);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
           this.setState({
             in: true,
-            errorDescription: json.non_field_errors[0],
+            errorDescription: 'Povezava na strežnik neuspešna.',
+            onSubmit: this.handleForm
           });
-        } else {
-          this.props.saveUserData(user);
-          this.props.handler(token);
-        }
-      } catch (err) {
-        console.log(err);
-        this.setState({
-          in: true,
-          errorDescription: 'Povezava na strežnik neuspešna.',
         });
-      }
     }
   }
 
@@ -107,11 +126,11 @@ class Login extends Component {
           className='container'>
           <Image
             className='logo'
-            src='./img/random-logo2.png'
+            src={imgUri + 'img/random-logo2.png'}
             size='small' />
           <Box className='form' justify='center'>
             <Box direction='row' className='formBox' align='center' justify='center'>
-              <Image src='./img/user.png' className='formLogo' />
+              <Image src={imgUri + 'img/user.png'} className='formLogo' />
               <TextInput
                 placeHolder='Email naslov'
                 value={this.state.email}
@@ -119,7 +138,7 @@ class Login extends Component {
               />
             </Box>
             <Box direction='row' className='formBox' align='center' justify='center'>
-              <Image src='./img/padlock.png' className='formLogo' />
+              <Image src={imgUri + 'img/padlock.png'} className='formLogo' />
               <TextInput
                 type='password'
                 placeHolder='Geslo'
@@ -133,7 +152,7 @@ class Login extends Component {
             className='loginButton'
             icon={<CheckmarkIcon />}
             label='Prijava'
-            onClick={() => this.handleForm()}
+            onClick={this.state.onSubmit}
           />
         </Section>
       </Box>
