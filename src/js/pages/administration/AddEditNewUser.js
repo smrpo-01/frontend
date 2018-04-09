@@ -14,7 +14,6 @@ import FormField from 'grommet/components/FormField';
 import Footer from 'grommet/components/Footer';
 import Layer from 'grommet/components/Layer';
 import TextInput from 'grommet/components/TextInput';
-import PasswordInput from 'grommet/components/PasswordInput';
 import CheckBox from 'grommet/components/CheckBox';
 import Section from 'grommet/components/Section';
 
@@ -295,11 +294,7 @@ class AddEditNewUser extends Component {
 
 
               <FormField label='Geslo' error={this.state.error.password}>
-                <PasswordInput
-                  id='password'
-                  value={this.state.password}
-                  onChange={event => this.setState({ password: event.target.value })}
-                />
+                
               </FormField>
 
 

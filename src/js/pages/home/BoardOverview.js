@@ -23,7 +23,7 @@ class BoardOverview extends Component {
         </div>
         <div>
           <ul>
-            { this.props.board.projectSet.map(project => (<li key={project.id}>{project.name}</li>))}
+            { this.props.board.projects.map(project => (<li key={project.id}>{project.name}</li>))}
           </ul>
         </div>
       </div>

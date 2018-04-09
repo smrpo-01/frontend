@@ -34,6 +34,7 @@ class BoardNew extends Component {
     this.cancel = this.cancel.bind(this);
     this.setColumns = this.setColumns.bind(this);
     this.closeErr = this.closeErr.bind(this);
+    this.changeProjectsAndCheck = this.changeProjectsAndCheck.bind(this);
 
     this.state = {
       boardName: 'Tabla',
@@ -46,6 +47,7 @@ class BoardNew extends Component {
       columnData: {},
       selectedProjects: [],
       showError: false,
+      legalProjects: true,
     };
   }
 
@@ -54,12 +56,12 @@ class BoardNew extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    console.log(nextProps.data.allBoards);
     if (nextProps.data.allBoards && nextProps.data.allBoards.length > 0) {
       const board = nextProps.data.allBoards[0];
-      const projects = board.projectSet;
+      const projects = board.projects;
       const { columns } = JSON.parse(board.columns);
-      const selectedProjects = projects.map(pr => ({ value: pr.name, id: pr.id}));
+      console.log(projects)
+      const selectedProjects = projects.map(pr => ({ value: pr.name, id: pr.id, teamId: pr.team.id }));
       this.setState({
         id: board.id,
         boardName: board.name,
@@ -160,7 +162,7 @@ class BoardNew extends Component {
       variables: {
         jsonString: JSON.stringify(board),
       },
-      refetchQueries: [{ query: getBoardsQuery }]
+      //refetchQueries: [{ query: getBoardsQuery }]
     }).then(res => {
       this.props.history.goBack();
     }).catch(err => {
@@ -175,10 +177,22 @@ class BoardNew extends Component {
     this.props.history.goBack();
   }
 
+  changeProjectsAndCheck(event) {
+    this.setState({ boardName: event.target.value })
+  }
+
   render() {
     let options = [];
     if (this.props.data.allProjects) {
-      options = this.props.data.allProjects.map(pr => ({ value: pr.name, id: pr.id}));
+      options = this.props.data.allProjects.map(pr => ({ value: pr.name, id: pr.id, teamId: pr.team.id}));
+    }
+    let legal = true;
+    if (this.state.selectedProjects.length > 0) { 
+      const checker = this.state.selectedProjects[0].teamId
+      const teams = this.state.selectedProjects.filter(proj => proj.teamId !== checker);
+      if(teams.length > 0) {
+        legal = false;
+      }
     }
     return (
       <div>
@@ -211,6 +225,9 @@ class BoardNew extends Component {
               multiple={true}
               onChange={(change) => this.setState({ selectedProjects: change.value})}
               value={this.state.selectedProjects} />
+            <p style={{ opacity: legal ? 0 : 1, color: 'red', marginLeft: 20 }}>
+              Pozor na projektu so različne ekipe!
+            </p>
           </div>
           <div>
             <Button icon={<CheckmarkIcon />}
@@ -275,14 +292,20 @@ const allBoards = gql`
       id
       name
       columns
-      projectSet {
+      projects {
         id
         name
+        team {
+          id
+        }
       }
     }
-    allProjects(filtered: $filtered, userId: $userId) {
+    allProjects(filtered: $filtered, userId: $userId, boardId: $id) {
       id
       name
+      team {
+        id
+      }
     }
   }
 `;
@@ -291,8 +314,6 @@ export default compose(
   graphql(allBoards, {
     options: (props) => {
       const user = sessionStorage.getItem('user');
-      console.log(JSON.parse(user).id)
-      console.log({ variables: { id: parseInt(props.boardId), userId: parseInt(user.id), filtered: 1 }})
       return ({ variables: { id: parseInt(props.boardId), userId: parseInt(JSON.parse(user).id), filtered: 1 }});
     }
   }),

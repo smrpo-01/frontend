@@ -23,6 +23,7 @@ class Home extends Component {
   componentWillMount() {
     const user = sessionStorage.getItem('user');
     const userRoles = JSON.parse(user).roles;
+    this.props.data.refetch()
     this.setState({ userRoles });
   }
 
@@ -37,7 +38,7 @@ class Home extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    let boards = nextProps.data.allBoards.map(board => {
+    let boards = nextProps.data.getUserBoards.map(board => {
       return ({ ...board });
     });
     this.setState({
@@ -46,7 +47,6 @@ class Home extends Component {
   }
 
   render() {
-    console.log(this.state.boards)
     return (
       <PageTemplate
         header={<Title>Domov</Title>}
@@ -75,15 +75,20 @@ Home.defaultProps = {
 Home.propTypes = {
 };
 
-export const getBoardsQuery = gql`query {
-  allBoards {
+export const getBoardsQuery = gql`query getUserBoards($userId: Int!){
+  getUserBoards(userId: $userId) {
     id
     name
-    projectSet {
+    projects {
       id
       name
     }
   }
 }`;
 
-export default graphql(getBoardsQuery)(Home);
+export default graphql(getBoardsQuery, {
+  options: (props) => {
+    const user = sessionStorage.getItem('user');
+    return ({variables: { userId: parseInt(JSON.parse(user).id) }});
+  }
+})(Home);
