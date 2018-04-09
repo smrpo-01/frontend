@@ -131,7 +131,7 @@ class AddEditProject extends Component {
           .then(() => this.props.closer())
           .catch((err) => {
             console.error(err);
-            this.setState({ onSubmit: this.onSubmit, error: { general: err.message } });
+            this.setState({ onSubmit: this.onSubmit, error: { general: err.message.split(':')[1] } });
           });
       } else {
         // We're adding new project
@@ -142,7 +142,7 @@ class AddEditProject extends Component {
           .then(() => this.props.closer())
           .catch((err) => {
             console.error(err);
-            this.setState({ onSubmit: this.onSubmit, error: { general: err.message } });
+            this.setState({ onSubmit: this.onSubmit, error: { general: err.message.split(':')[1] } });
           });
       }
     } else {
