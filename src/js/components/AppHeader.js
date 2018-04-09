@@ -82,6 +82,7 @@ class AppHeader extends Component {
       <Header
         justify='between'
         colorIndex='neutral-1'
+        fixed={true}
       >
         <Section
           direction='row'

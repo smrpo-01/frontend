@@ -38,7 +38,7 @@ class Card extends Component {
   render() {
     const { isDragging, connectDragSource, text } = this.props;
     return connectDragSource(
-      <div style={{ backgroundColor: 'white', width: '95%', borderStyle: 'solid', borderColor: '#dbd9d9', borderWidth: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 15, opacity: isDragging ? 0.3 : 1, cursor: 'move', borderRadius: 10 }}>
+      <div style={{ backgroundColor: 'white', width: '95%', maxWidth: 250, borderStyle: 'solid', borderColor: '#dbd9d9', borderWidth: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 15, opacity: isDragging ? 0.3 : 1, cursor: 'move', borderRadius: 10, marginTop: 10 }}>
         <div style={{ display: 'flex', width: '90%', justifyContent: 'space-between', marginBottom: 8, marginTop: 5 }}>
           <h style={{ opacity: 0.5 }}>
             {this.props.id}
@@ -53,7 +53,7 @@ class Card extends Component {
         <div style={{ borderColor: 'black', borderWidth: 0, borderBottomWidth: 1, width: '100%', borderStyle: 'solid', marginBottom: 10, opacity: 0.2 }} />
         <div style={{ display: 'flex', justifyContent: 'center', width: '95%', marginBottom: 10, flexDirection: 'column' }}>
           <h>
-            {this.props.title}
+            {this.props.name}
           </h>
           <h style={{ display: 'flex', justifyContent: 'flex-end', fontSize: 14, opacity: 0.6, marginRight: 5 }}>
             {this.props.owner}
@@ -71,14 +71,14 @@ class Card extends Component {
 
 Card.defaultProps = {
   id: '',
-  title: '',
+  name: '',
   owner: '',
   tasks: [],
 };
 
 Card.propTypes = {
   id: PropTypes.string,
-  title: PropTypes.string,
+  name: PropTypes.string,
   owner: PropTypes.string,
   tasks: PropTypes.array,
   // Injected by React DnD:

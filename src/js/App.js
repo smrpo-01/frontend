@@ -17,6 +17,8 @@ import Home from './pages/home/Home';
 import Board from './pages/board/Board';
 import Management from './pages/management/Management';
 import Administration from './pages/administration/Administration';
+import BoardNew from './pages/board/BoardNew';
+import BoardEdit from './pages/board/BoardEdit';
 
 class MainApp extends Component {
   constructor() {
@@ -24,14 +26,16 @@ class MainApp extends Component {
     this.authenticateUser = this.authenticateUser.bind(this);
     this.saveUserData = this.saveUserData.bind(this);
     this.toggleSidebar = this.toggleSidebar.bind(this);
+    this.changeBoard = this.changeBoard.bind(this);
 
     this.state = {
       sidebarVisible: false,
       userAuthenticated: true,
       appState: {
         token: '',
-        userData: null
-      }
+        userData: null,
+        defaultBoard: '18',
+      },
     };
   }
 
@@ -85,6 +89,14 @@ class MainApp extends Component {
     sessionStorage.clear();
   }
 
+  changeBoard(boardId) {
+    this.setState({
+      appState: {
+        ...this.state.appState,
+        defaultBoard: boardId
+      }
+    });
+  }
 
   render() {
     // eslint-disable-next-line no-undef
@@ -107,6 +119,7 @@ class MainApp extends Component {
             toggleSidebar={this.toggleSidebar}
             logoutUser={this.logoutUser}
             sidebarVisible={this.state.sidebarVisible}
+            style={{position: 'absolute'}}
           />
 
           {/* Main application content */}
@@ -114,9 +127,11 @@ class MainApp extends Component {
             pad={{ horizontal: 'medium', vertical: 'none' }}
           >
             <Switch>
-              <Route exact path='/home' render={props => (<Home {...props} />)} />
+              <Route exact path='/home' render={props => (<Home {...props} changeBoard={this.changeBoard} />)} />
               <Route exact path='/management' render={props => (<Management {...props} />)} />
-              <Route exact path='/board' render={props => (<Board {...props} />)} />
+              <Route exact path='/board' render={props => (<Board {...props} board={this.state.appState.defaultBoard} />)} />
+              <Route exact path='/board/new' render={props => (<BoardNew {...props} />)} />
+              <Route exact path='/board/edit' render={props => (<BoardEdit {...props} boardId={this.state.appState.defaultBoard} />)} />
               <Route path='/administration' render={props => (<Administration {...props} />)} />
               <Redirect to='/home' />
             </Switch>

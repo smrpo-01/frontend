@@ -4,11 +4,11 @@ import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 
 const columns = [{
-  title: 'Product backlog',
+  name: 'Product backlog',
   color: '#00A0B0',
   cards: [{
     id: '1234',
-    title: '#10 Kreiranje nove table s kopiranjem strukture (Must have)',
+    name: '#10 Kreiranje nove table s kopiranjem strukture (Must have)',
     expiration: 2,
     owner: 'nejcsm',
     tasks: [{
@@ -29,7 +29,7 @@ const columns = [{
     }]
   }, {
     id: '5555',
-    title: '#3 Vzdrževanje projektov (Must have)',
+    name: '#3 Vzdrževanje projektov (Must have)',
     expiration: 2,
     owner: 'lukap',
     tasks: [{
@@ -47,11 +47,11 @@ const columns = [{
     }]
   }]
   }, {
-  title: 'Sprint backlog',
+  name: 'Sprint backlog',
   color: '#00A0B0',
   cards: [{
     id: '5556',
-    title: '#3 Vzdrževanje projektov (Must have)',
+    name: '#3 Vzdrževanje projektov (Must have)',
     expiration: 2,
     owner: 'lukap',
     tasks: [{
@@ -69,11 +69,11 @@ const columns = [{
     }]
   }]
   }, {
-  title: 'Product backlog',
+  name: 'Product backlog',
   color: '#AA001E',
   cards: []
   }, {
-  title: 'jajajaja backlog',
+  name: 'jajajaja backlog',
   color: '#AA001E',
   cards: []
 }];
@@ -81,9 +81,9 @@ const columns = [{
 class BoardCustom extends Component {
   render() {
     return (
-      <div style={{ backgroundColor: '#f5fbef', display: 'flex', minHeight: 800 }}>
+      <div style={{ backgroundColor: '#f5fbef', display: 'flex', minHeight: 1200 }}>
         {columns.map((column, i) =>
-          <Column title={column.title} color={column.color} cards={column.cards} key={i} />
+          <Column name={column.name} color={column.color} cards={column.cards} key={i} />
         )}
       </div>
     );
