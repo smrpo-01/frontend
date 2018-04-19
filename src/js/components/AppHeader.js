@@ -13,6 +13,7 @@ import Menu from 'grommet/components/Menu';
 import Button from 'grommet/components/Button';
 
 // Icons
+import AnalyticsIcon from 'grommet/components/icons/base/Analytics';
 import LogoutIcon from 'grommet/components/icons/base/Logout';
 import UserSettingsIcon from 'grommet/components/icons/base/UserSettings';
 import TableIcon from 'grommet/components/icons/base/Table';
@@ -30,7 +31,8 @@ class AppHeader extends Component {
         { id: 1, itemName: 'Domov', route: '/home', icon: <HomeIcon /> },
         { id: 2, itemName: 'Vzdrževanje', route: '/management', icon: <VmMaintenanceIcon /> },
         { id: 3, itemName: 'Tabla', route: '/board', icon: <TableIcon /> },
-        { id: 4, itemName: 'Administracija uporabnikov', route: '/administration', icon: <UserSettingsIcon /> }
+        { id: 4, itemName: 'Administracija uporabnikov', route: '/administration', icon: <UserSettingsIcon /> },
+        { id: 5, itemName: 'Analiza', route: '/analitycs', icon: <AnalyticsIcon /> },
       ],
       userRoles: [],
       email: ''
@@ -76,6 +78,8 @@ class AppHeader extends Component {
         return ((roles.find(el => el === 'admin')) !== undefined);
       case '/management':
         return this.arrIntersection(roles, rolesForManagement);
+      case '/analitycs':
+        return ((roles.find(el => el === 'km')) !== undefined);
       default:
         return false;
     }

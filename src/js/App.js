@@ -17,6 +17,7 @@ import Home from './pages/home/Home';
 import Board from './pages/board/Board';
 import Management from './pages/management/Management';
 import Administration from './pages/administration/Administration';
+import Analitycs from './pages/analitycs/Analitycs';
 import BoardNew from './pages/board/BoardNew';
 import BoardEdit from './pages/board/BoardEdit';
 
@@ -119,7 +120,7 @@ class MainApp extends Component {
             toggleSidebar={this.toggleSidebar}
             logoutUser={this.logoutUser}
             sidebarVisible={this.state.sidebarVisible}
-            style={{position: 'absolute'}}
+            style={{ position: 'absolute' }}
           />
 
           {/* Main application content */}
@@ -133,6 +134,7 @@ class MainApp extends Component {
               <Route exact path='/board/new' render={props => (<BoardNew {...props} />)} />
               <Route exact path='/board/edit' render={props => (<BoardEdit {...props} boardId={this.state.appState.defaultBoard} />)} />
               <Route path='/administration' render={props => (<Administration {...props} />)} />
+              <Route path='/analitycs' render={props => (<Analitycs {...props} />)} />
               <Redirect to='/home' />
             </Switch>
 
