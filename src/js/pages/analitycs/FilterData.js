@@ -32,6 +32,7 @@ class FilterData extends Component {
     super();
     this.filterSuggestions = this.filterSuggestions.bind(this);
     this.updateParent = this.updateParent.bind(this);
+    this.prepareData = this.prepareData.bind(this);
 
     this.state = {
       project: '',
@@ -63,6 +64,7 @@ class FilterData extends Component {
 
 
   componentDidMount() {
+    /*
     const projectData = '{"allProjects":[{"id":"1","name":"Projekt 1 (s karticami)"},{"id":"2","name":"Projekt 2 (s karticami)"},{"id":"3","name":"Projekt 3"},{"id":"4","name":"Projekt 4"}]}';
     const cardTypeTmp = '{"allCardTypes":[{"id":"A_0","name":"Navadna kartica"},{"id":"A_1","name":"Nujna zahteva"}]}';
     let data = JSON.parse(projectData);
@@ -81,6 +83,46 @@ class FilterData extends Component {
 
     // eslint-disable-next-line
     this.setState({ projectOptions, projectOptionsAll: projectOptions,  cardTypeOptions, cardTypeOptionsAll: cardTypeOptions });
+    */
+
+    if (this.props.queryBoardData.allBoards !== undefined) {
+      this.prepareData(this.props.queryBoardData.allBoards[0]);
+    }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    console.log(nextProps);
+    if (nextProps.queryBoardData.allBoards !== undefined) {
+      this.prepareData(nextProps.queryBoardData.allBoards[0]);
+    }
+  }
+
+
+  prepareData(data) {
+    let projectOptions = data.projects.map(project => ({
+      value: project,
+      label: project.name,
+    }));
+
+    console.log(projectOptions);
+
+    let cardTypeOptions = data.cardTypes.map(type => ({
+      value: type,
+      label: type.name,
+    }));
+
+    const estimateMin = data.estimateMin;
+    const estimateMax = data.estimateMax;
+
+
+    this.setState({
+      projectOptions,
+      projectOptionsAll: projectOptions,
+      cardTypeOptions,
+      cardTypeOptionsAll: cardTypeOptions,
+      estimateMin,
+      estimateMax,
+    });
   }
 
 
@@ -266,16 +308,14 @@ FilterData.propTypes = {
 
 export const getBoardDataQuery = gql`
   query getBoardData($boardId: Int!) {
-    allUsers(boardId: $boardId) {
+    allBoards(id: $boardId) {
       projects {
         id
         name
       },
       estimateMin,
-      estimatemax,
-      projectStartDate,
-      projectEndDate,
-      cardType {
+      estimateMax,
+      cardTypes {
         id,
         name
       }
@@ -283,32 +323,16 @@ export const getBoardDataQuery = gql`
   }
 `;
 
+// TODO popravi boardId -> iz app stata
 const FilterDataWithQuery = compose(
   graphql((getBoardDataQuery), {
     name: 'queryBoardData',
     options: () => ({
       variables: {
-        boardId: 2
+        boardId: 1
       }
     })
   })
 )(FilterData);
-
-/*
-
-Query za pridobitev podatkov o tabli.
-Te podatke uporabiva za izgradnjo filtra za graf
-
-getBoardData(boardId: $boardId)
-{
-projects: [{id: 1, name: "Projekt 1"}],
-estimateMin: 1,
-estimateMax: 15,
-projectStartDate: Date // format DD.MM.YYYY,
-projectEndDate: Date // format DD.MM.YYYY,
-cardType: [{id, typeName}]
-}
-
-*/
 
 export default FilterDataWithQuery;

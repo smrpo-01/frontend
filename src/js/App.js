@@ -35,7 +35,7 @@ class MainApp extends Component {
       appState: {
         token: '',
         userData: null,
-        defaultBoard: '18',
+        defaultBoard: '1',
       },
     };
   }
