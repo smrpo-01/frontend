@@ -48,7 +48,7 @@ class SidebarColumn extends Component {
       id: uuid(),
       name: '',
       columns: [],
-      wip: '',
+      wip: '0',
       boundary: false,
       priority: false,
       acceptance: false,
@@ -74,7 +74,7 @@ class SidebarColumn extends Component {
     this.setState({
       in: false,
     }, () => {
-      if (this.state.name === '' || this.state.wip === '' ) {
+      if (this.state.name === '' || this.state.wip === '') {
         this.setState({
           in: true,
         });
@@ -93,7 +93,6 @@ class SidebarColumn extends Component {
   }
 
   render() {
-    console.log(this.state)
     return (
       <Layer
         closer
@@ -173,10 +172,24 @@ class SidebarColumn extends Component {
   }
 }
 
-SidebarColumn.defaultProps = {
+SidebarColumn.propTypes = {
+  columnData: PropTypes.shape({
+    id: PropTypes.string,
+    name: PropTypes.string,
+    columns: PropTypes.array,
+    wip: PropTypes.string,
+    boundary: PropTypes.bool,
+    priority: PropTypes.bool,
+    acceptance: PropTypes.bool,
+  }),
+  modeEdit: PropTypes.bool,
+  completeAddEditColumn: PropTypes.func.isRequired,
+  closer: PropTypes.func.isRequired,
 };
 
-SidebarColumn.propTypes = {
+SidebarColumn.defaultProps = {
+  modeEdit: false,
+  columnData: null,
 };
 
 

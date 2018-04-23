@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import ColumnEmpty from './ColumnEmpty';
 import { graphql, compose } from 'react-apollo';
 import gql from 'graphql-tag';
+import PropTypes from 'prop-types';
 
 import SidebarColumn from './SidebarColumn';
 
@@ -18,7 +19,7 @@ import EditIcon from 'grommet/components/icons/base/Edit';
 import CheckmarkIcon from 'grommet/components/icons/base/Checkmark';
 
 import CloseIcon from 'grommet/components/icons/base/Close';
-import { getBoardsQuery } from './../home/Home';
+// import { getBoardsQuery } from './../home/Home';
 
 class BoardNew extends Component {
   constructor() {
@@ -136,15 +137,15 @@ class BoardNew extends Component {
       variables: {
         jsonString: JSON.stringify(board),
       },
-      //refetchQueries: [{ query: getBoardsQuery }]
-    }).then(res => {
+      // refetchQueries: [{ query: getBoardsQuery }]
+    }).then((res) => {
       this.props.history.goBack();
-    }).catch(err => {
+    }).catch((err) => {
       this.setState({
         showError: true,
         error: err.message.split(':')[1],
       });
-    })
+    });
   }
 
   cancel() {
@@ -154,25 +155,25 @@ class BoardNew extends Component {
   render() {
     let options = [];
     if (this.props.data.allProjects) {
-      options = this.props.data.allProjects.map(pr => ({ value: pr.name, id: pr.id}));
+      options = this.props.data.allProjects.map(pr => ({ value: pr.name, id: pr.id }));
     }
     let legal = true;
-    if (this.state.selectedProjects.length > 0) { 
-      const checker = this.state.selectedProjects[0].teamId
+    if (this.state.selectedProjects.length > 0) {
+      const checker = this.state.selectedProjects[0].teamId;
       const teams = this.state.selectedProjects.filter(proj => proj.teamId !== checker);
-      if(teams.length > 0) {
+      if (teams.length > 0) {
         legal = false;
       }
     }
     return (
-      <div style={{position: 'relative'}}>
+      <div style={{ position: 'relative' }}>
         <div style={{ display: 'flex', marginLeft: 20, height: 80, justifyContent: 'space-between', alignItems: 'center' }}>
           { !this.state.editBoardName &&
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <Title>
                 {this.state.boardName}
               </Title>
-              <EditIcon style={{marginLeft: 10, cursor: 'pointer' }} onClick={() => this.setState({ editBoardName: true })} />
+              <EditIcon style={{ marginLeft: 10, cursor: 'pointer' }} onClick={() => this.setState({ editBoardName: true })} />
             </div>
           }
           { this.state.editBoardName &&
@@ -193,7 +194,7 @@ class BoardNew extends Component {
             <Select placeHolder='None'
               options={options}
               multiple={true}
-              onChange={(change) => this.setState({ selectedProjects: change.value})}
+              onChange={change => this.setState({ selectedProjects: change.value })}
               value={this.state.selectedProjects}
             />
             <p style={{ opacity: legal ? 0 : 1, color: 'red', marginLeft: 20 }}>
@@ -213,16 +214,18 @@ class BoardNew extends Component {
               onClick={() => this.cancel()} />
           </div>
         </div>
-        <div style={{display: 'flex', flexDirection: 'row', minHeight: 1200, position: 'relative' }}>
+        <div style={{ display: 'flex', flexDirection: 'row', minHeight: 1200, position: 'relative' }}>
           <div style={{ height: 'inherit', minWidth: 20, justifyContent: 'space-around', display: 'flex', alignItems: 'center', borderWidth: 1, borderColor: '#d6d6d6', borderStyle: 'solid', flexDirection: 'column' }}>
-            {this.state.selectedProjects.map(pr => <h key={pr.id} style={{writingMode: 'tb-rl', transform: 'rotate(180deg)'}}>
-              {pr.value}
-            </h>)}
+            {this.state.selectedProjects.map(pr =>
+              (<h key={pr.id} style={{ writingMode: 'tb-rl', transform: 'rotate(180deg)' }}>
+                {pr.value}
+              </h>)
+            )}
           </div>
-          { this.state.selectedProjects.map((pr, i) => (i !== 0 &&<div key={pr.id} style={{ position: 'absolute', width: '100%', height: 1, backgroundColor: 'black', opacity: 0.3, top: `${i/this.state.selectedProjects.length*100}%` }} />) ) }
+          { this.state.selectedProjects.map((pr, i) => (i !== 0 && <div key={pr.id} style={{ position: 'absolute', width: '100%', height: 1, backgroundColor: 'black', opacity: 0.3, top: `${(i / this.state.selectedProjects.length) * 100}%` }} />)) }
           <div style={{ backgroundColor: '#f5fbef', minHeight: 800, minWidth: '99%', width: 'auto', display: 'inline-flex' }}>
             { !this.state.columns.length !== 0 && this.state.columns.map((column, i) =>
-              <ColumnEmpty data={column} addEditColumn={this.addEditColumn} key={i} />
+              <ColumnEmpty data={column} addEditColumn={this.addEditColumn} key={column.id} />
             )}
             { this.state.columns.length === 0 &&
             <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 200 }}>
@@ -243,10 +246,25 @@ class BoardNew extends Component {
   }
 }
 
-BoardNew.defaultProps = {
+BoardNew.propTypes = {
+  data: PropTypes.shape({
+    allProjects: PropTypes.array,
+    allBoards: PropTypes.array,
+    refetch: PropTypes.func.isRequired,
+    id: PropTypes.string,
+    name: PropTypes.string,
+    columns: PropTypes.array,
+    wip: PropTypes.string,
+    boundary: PropTypes.bool,
+    priority: PropTypes.bool,
+    acceptance: PropTypes.bool,
+  }),
+  history: PropTypes.func.isRequired,
 };
 
-BoardNew.propTypes = {
+
+BoardNew.defaultProps = {
+  data: null,
 };
 
 const allProjectsQuery = gql`
@@ -267,9 +285,9 @@ const addBoardMutation = gql`
 `;
 
 export default compose(graphql(allProjectsQuery, {
-  options: (props) => {
+  options: props => {
     const user = sessionStorage.getItem('user');
-    return ({ variables: { userId: parseInt(JSON.parse(user).id), filtered: 1, boardId: -1 }});
+    return ({ variables: { userId: parseInt(JSON.parse(user).id, 10), filtered: 1, boardId: -1 } });
   }
 }), graphql(addBoardMutation, {
   name: 'addBoardMutation'

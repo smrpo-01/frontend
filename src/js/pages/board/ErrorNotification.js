@@ -9,20 +9,11 @@ import Header from 'grommet/components/Header';
 import Heading from 'grommet/components/Heading';
 import Footer from 'grommet/components/Footer';
 import Layer from 'grommet/components/Layer';
-import Section from 'grommet/components/Section';
 
 class ErrorNotification extends Component {
   constructor() {
     super();
     this.onConfirm = this.onConfirm.bind(this);
-
-    this.state = {
-      error: 'SLABA'
-    };
-  }
-
-  onConfirm() {
-    console.log('our')
   }
 
   render() {
@@ -30,7 +21,7 @@ class ErrorNotification extends Component {
       <Layer>
         <Article pad='small'>
           <Header><Heading tag='h3'>Napaka pri shranjevanju</Heading></Header>
-          <div style={{display: 'flex', justifyContent: 'center'}}>
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
             <p2>
               {this.props.error}
             </p2>
@@ -49,6 +40,13 @@ class ErrorNotification extends Component {
 
 
 ErrorNotification.propTypes = {
+  closer: PropTypes.func.isRequired,
+  error: PropTypes.string.isRequired,
+};
+
+
+ErrorNotification.defaultProps = {
+  error: '',
 };
 
 export default ErrorNotification;

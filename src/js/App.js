@@ -34,7 +34,7 @@ class MainApp extends Component {
       appState: {
         token: '',
         userData: null,
-        defaultBoard: '18',
+        defaultBoard: '1',
       },
     };
   }
@@ -119,7 +119,7 @@ class MainApp extends Component {
             toggleSidebar={this.toggleSidebar}
             logoutUser={this.logoutUser}
             sidebarVisible={this.state.sidebarVisible}
-            style={{position: 'absolute'}}
+            style={{ position: 'absolute' }}
           />
 
           {/* Main application content */}

@@ -10,7 +10,7 @@ class BoardOverview extends Component {
   }
   render() {
     return (
-      <div style={{ backgroundColor: '#fbfff7', height: 200, width: 300, margin: 10, borderRadius: 10, borderColor: '#cbd0c4', borderStyle: 'solid', borderWidth: 1, cursor: 'pointer' }} >
+      <div style={{ backgroundColor: '#fbfff7', height: 200, width: 300, margin: 10, borderRadius: 10, borderColor: '#cbd0c4', borderStyle: 'solid', borderWidth: 1, cursor: 'pointer' }} onClick={() => this.props.changeBoard(this.props.board.id)} >
         <div style={{ display: 'flex', margin: 20, justifyContent: 'space-between', flexDirection: 'row' }} >
           <h4>
             {this.props.board.name}
