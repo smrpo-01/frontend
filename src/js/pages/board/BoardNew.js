@@ -133,7 +133,7 @@ class BoardNew extends Component {
       projects: this.state.selectedProjects.map(pr => pr.id),
       columns: this.state.columns,
     };
-
+    // eslint-disable-next-line
     const user = sessionStorage.getItem('user');
 
     this.props.addBoardMutation({
@@ -142,9 +142,9 @@ class BoardNew extends Component {
       },
       refetchQueries: [{
         query: getBoardsQuery,
-        variables: { userId: parseInt(JSON.parse(user).id) }
+        variables: { userId: parseInt(JSON.parse(user).id, 10) }
       }]
-    }).then((res) => {
+    }).then(() => {
       this.props.history.goBack();
     }).catch((err) => {
       this.setState({
@@ -230,7 +230,7 @@ class BoardNew extends Component {
           </div>
           { this.state.selectedProjects.map((pr, i) => (i !== 0 && <div key={pr.id} style={{ position: 'absolute', width: '100%', height: 1, backgroundColor: 'black', opacity: 0.3, top: `${(i / this.state.selectedProjects.length) * 100}%` }} />)) }
           <div style={{ backgroundColor: '#f5fbef', minHeight: 800, minWidth: '99%', width: 'auto', display: 'inline-flex' }}>
-            { !this.state.columns.length !== 0 && this.state.columns.map((column, i) =>
+            { !this.state.columns.length !== 0 && this.state.columns.map(column =>
               <ColumnEmpty data={column} addEditColumn={this.addEditColumn} key={column.id} />
             )}
             { this.state.columns.length === 0 &&
@@ -242,11 +242,17 @@ class BoardNew extends Component {
             </div>
             }
             { this.state.addEditColumn &&
-              <SidebarColumn modeEdit={this.state.modeEdit} closer={this.closer} completeAddEditColumn={this.completeAddEditColumn} columnData={this.state.columnData} />
+              <SidebarColumn
+                modeEdit={this.state.modeEdit}
+                closer={this.closer}
+                completeAddEditColumn={this.completeAddEditColumn}
+                columnData={this.state.columnData} />
             }
           </div>
         </div>
-        { this.state.showError && <ErrorNotification error={this.state.error} closer={this.closeErr} /> }
+        { this.state.showError &&
+          <ErrorNotification error={this.state.error} closer={this.closeErr} />
+        }
       </div>
     );
   }
@@ -265,7 +271,8 @@ BoardNew.propTypes = {
     priority: PropTypes.bool,
     acceptance: PropTypes.bool,
   }),
-  history: PropTypes.func,
+  history: PropTypes.func.isRequired,
+  addBoardMutation: PropTypes.func.isRequired,
 };
 
 
@@ -291,7 +298,8 @@ const addBoardMutation = gql`
 `;
 
 export default compose(graphql(allProjectsQuery, {
-  options: props => {
+  options: () => {
+    // eslint-disable-next-line
     const user = sessionStorage.getItem('user');
     return ({ variables: { userId: parseInt(JSON.parse(user).id, 10), filtered: 1, boardId: -1 } });
   }

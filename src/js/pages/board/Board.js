@@ -6,6 +6,7 @@ import Column from './Column';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import Image from 'grommet/components/Image';
+import PropTypes from 'prop-types';
 
 const colors = ['#a4b3a2', '#c87d5d', '#008080'];
 
@@ -31,7 +32,7 @@ class Board extends Component {
       const { name, projects } = board;
       const { columns } = JSON.parse(board.columns);
 
-      const cards = nextProps.data.allCards
+      const cards = nextProps.data.allCards;
 
       this.setState({
         name,
@@ -95,7 +96,9 @@ class Board extends Component {
   }
 
   renderColumns(column, project) {
-    const cards = this.state.cards.filter(card => card.project.id === project.id && column.id === card.column.id);
+    const cards = this.state.cards.filter(card =>
+      card.project.id === project.id && column.id === card.column.id
+    );
 
     if (column.columns.length === 0) {
       return (<Column data={column} project={project} key={`${column.id}${project.id}`} cards={cards} />);
@@ -149,6 +152,7 @@ Board.defaultProps = {
 };
 
 Board.propTypes = {
+  data: PropTypes.object.isRequired,
 };
 
 const getBoardQuery = gql`query allBoards($id: Int!) {
@@ -196,6 +200,3 @@ const boardGraphql = graphql(getBoardQuery, {
 })(Board);
 
 export default DragDropContext(HTML5Backend)(boardGraphql);
-
-
-//export default DragDropContext(HTML5Backend)(Board)

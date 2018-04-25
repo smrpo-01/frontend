@@ -11,10 +11,6 @@ import Footer from 'grommet/components/Footer';
 import Layer from 'grommet/components/Layer';
 
 class ErrorNotification extends Component {
-  constructor() {
-    super();
-  }
-
   render() {
     return (
       <Layer>

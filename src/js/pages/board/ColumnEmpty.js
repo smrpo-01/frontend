@@ -20,7 +20,7 @@ class ColumnEmpty extends Component {
               {columnData.name}
             </h>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-around', width: '100%', alignItems: 'center', width: '80%', marginBottom: 25, marginTop: 10 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', width: '80%', marginBottom: 25, marginTop: 10 }}>
             <Image
               style={{ height: 25, width: 25, opacity: columnData.boundary ? 0.5 : 0.05 }}
               src='/img/fence.png'
@@ -34,7 +34,7 @@ class ColumnEmpty extends Component {
               src='/img/verification-mark.png'
               size='small' />
           </div>
-          <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', width: '70%', marginBottom: 10 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', width: '70%', marginBottom: 10 }}>
             <CaretPreviousIcon style={{ cursor: 'pointer' }} onClick={() => this.props.addEditColumn(columnData, 'left')} />
             <EditIcon style={{ cursor: 'pointer' }} onClick={() => this.props.addEditColumn(columnData, 'edit')} />
             <CaretNextIcon style={{ cursor: 'pointer' }} onClick={() => this.props.addEditColumn(columnData, 'right')} />
@@ -47,7 +47,12 @@ class ColumnEmpty extends Component {
           { columnData.columns.length !== 0 &&
             <div style={{ display: 'flex', width: '100%', height: '100%', marginTop: 10 }}>
               {
-                columnData.columns.map(subcolumn => <ColumnEmpty data={subcolumn} key={subcolumn.id} addEditColumn={this.props.addEditColumn} />)
+                columnData.columns.map(subcolumn =>
+                  (<ColumnEmpty
+                    data={subcolumn}
+                    key={subcolumn.id}
+                    addEditColumn={this.props.addEditColumn} />)
+                )
               }
             </div>
           }
