@@ -30,6 +30,10 @@ class TeamTable extends Component {
     if (format === 'django') {
       let d = dateToFormat.split('-'); // YYYY-MM-DD
       return (d[2] + '/' + d[1] + '/' + d[0]); // DD/MM/YYYY
+    } else if (format === 'slo') {
+      let d = dateToFormat.split('-');
+      // return (<span>{d[2]}<span>&#10084;</span>{d[1]}<span>&#128169;</span>{d[0]}</span>);
+      return (d[2] + '.' + d[1] + '.' + d[0]);
     }
     let d = dateToFormat.split('/'); // DD/MM/YYYY
     return (d[2] + '-' + d[1] + '-' + d[0]); // YYYY-MM-DD
@@ -59,8 +63,8 @@ class TeamTable extends Component {
               <td>{rowData.projectCode}</td>
               <td>{rowData.name}</td>
               <td>{rowData.customer}</td>
-              <td>{this.formatDate(rowData.dateStart, 'django')}</td>
-              <td>{this.formatDate(rowData.dateEnd, 'django')}</td>
+              <td>{this.formatDate(rowData.dateStart, 'slo')}</td>
+              <td>{this.formatDate(rowData.dateEnd, 'slo')}</td>
               <td>{(rowData.team !== null) ? rowData.team.name : ''}</td>
               <td>
                 <Button plain icon={<EditIcon />} onClick={() => onEdit(rowData)} />

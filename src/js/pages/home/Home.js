@@ -10,6 +10,8 @@ import Title from 'grommet/components/Title';
 import BoardOverview from './BoardOverview';
 import BoardAdd from './BoardAdd';
 
+import Loading from '../../components/Loading';
+
 class Home extends Component {
   constructor() {
     super();
@@ -47,22 +49,34 @@ class Home extends Component {
 
 
   render() {
+    const { data: { loading, error, getUserBoards } } = this.props;
+
+    if (loading) {
+      return <Loading />;
+    } else if (error) {
+      return <p style={{ color: 'red' }}>Error!</p>;
+    } else if (getUserBoards === undefined) {
+      console.log('No data from getUserBoards received.');
+      return null;
+    }
+
+
     return (
       <PageTemplate
-        header={<Title>Domov</Title>}
+        header={<Title>Moje table</Title>}
       >
-        <div>
-          <Title>
-            Moje table
-          </Title>
-        </div>
         <div style={{ display: 'flex', marginTop: 20, flexWrap: 'wrap', alignContent: 'flex-start' }}>
-          {
-            this.state.boards.map(board => <BoardOverview board={board} key={board.id} changeBoard={this.changeAndSetBoard} editBoard={this.changeAndSetBoardEdit} push={this.props.history.push} canEdit={this.state.userRoles.includes('km')} />)
-          }
-          { this.state.userRoles.includes('km') &&
-            <BoardAdd push={this.props.history.push} />
-          }
+          {getUserBoards.map(board => (
+            <BoardOverview
+              key={board.id}
+              board={board}
+              changeBoard={this.changeAndSetBoard}
+              editBoard={this.changeAndSetBoardEdit}
+              push={this.props.history.push}
+              canEdit={this.state.userRoles.includes('km')}
+            />)
+          )}
+          {this.state.userRoles.includes('km') && <BoardAdd push={this.props.history.push} />}
         </div>
       </PageTemplate>
     );
