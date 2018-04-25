@@ -8,8 +8,6 @@ import CaretPreviousIcon from 'grommet/components/icons/base/CaretPrevious';
 import CaretDownIcon from 'grommet/components/icons/base/CaretDown';
 import EditIcon from 'grommet/components/icons/base/Edit';
 
-
-
 const imgUri = process.env.NODE_ENV === 'development' ? '/' : '/static/app/';
 
 class ColumnEmpty extends Component {
@@ -25,15 +23,15 @@ class ColumnEmpty extends Component {
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', width: '80%', marginBottom: 25, marginTop: 10 }}>
             <Image
-              style={{height:25, width: 25, opacity: columnData.boundary ? 0.5 : 0.05}}
+              style={{ height: 25, width: 25, opacity: columnData.boundary ? 0.5 : 0.05 }}
               src={imgUri + 'img/fence.png'}
               size='small' />
             <Image
-              style={{height:25, width: 25, opacity: columnData.priority ? 0.5 : 0.05}}
+              style={{ height: 25, width: 25, opacity: columnData.priority ? 0.5 : 0.05 }}
               src={imgUri + 'img/volume-level.png'}
               size='small' />
             <Image
-              style={{height:25, width: 25, opacity: columnData.acceptance ? 0.5 : 0.05}}
+              style={{ height: 25, width: 25, opacity: columnData.acceptance ? 0.5 : 0.05 }}
               src={imgUri + 'img/verification-mark.png'}
               size='small' />
           </div>
