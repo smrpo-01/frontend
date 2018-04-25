@@ -44,29 +44,30 @@ class Board extends Component {
 
   renderNames(column, color) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', backgroundColor: '#cbd0c4', minWidth: width, flexDirection: 'column', alignItems: 'center', height: '100%', borderColor: 'white', borderStyle: 'solid', borderTopWidth: 2, borderRightWidth: 2, borderLeftWidth: 2, borderBottomWidth: 0, position: 'relative' }} key={column.id}>
-        <h style={{ fontSize: 16, width: '100%', display: 'flex', justifyContent: 'center', minHeight: 25 }}>
+      <div style={{ display: 'flex', justifyContent: 'center', backgroundColor: '#cbd0c4', minWidth: width, flexDirection: 'column', alignItems: 'center', height: '100%', borderColor: 'white', borderStyle: 'solid', borderTopWidth: 2, borderRightWidth: 2, borderLeftWidth: 2, borderBottomWidth: 0 }} key={column.id}>
+        <h style={{ fontSize: 16, width: '100%', display: 'flex', justifyContent: 'center', minHeight: 25, position: 'relative' }}>
           {column.name}
-        </h>
-        <div style={{ right: 5, position: 'absolute' }}>
-          { column.boundary && <Image
-            style={{ height: 18, width: 18, opacity: 0.3, margin: 2 }}
-            src='/img/fence.png'
-            size='small' /> }
-          { column.priority && <Image
-            style={{ height: 18, width: 18, opacity: 0.3, margin: 2 }}
-            src='/img/volume-level.png'
-            size='small' /> }
-          { column.acceptance && <Image
-            style={{ height: 18, width: 18, opacity: 0.3, margin: 2 }}
-            src='/img/verification-mark.png'
-            size='small' /> }
-        </div>
-        { column.columns.length === 0 &&
-          <div style={{ left: 5, position: 'absolute', opacity: 0.5 }}>
-            {column.wip}
+          <div style={{ right: 5, top: 0, position: 'absolute' }}>
+            { column.boundary && <Image
+              style={{ height: 18, width: 18, opacity: 0.3, margin: 2 }}
+              src='/img/fence.png'
+              size='small' /> }
+            { column.priority && <Image
+              style={{ height: 18, width: 18, opacity: 0.3, margin: 2 }}
+              src='/img/volume-level.png'
+              size='small' /> }
+            { column.acceptance && <Image
+              style={{ height: 18, width: 18, opacity: 0.3, margin: 2 }}
+              src='/img/verification-mark.png'
+              size='small' /> }
           </div>
-        }
+          { column.columns.length === 0 &&
+            <div style={{ left: 5, top: 0, position: 'absolute', opacity: 0.5 }}>
+              {column.wip}
+            </div>
+          }
+        </h>
+
 
         { column.columns.length > 0 &&
           <div style={{ display: 'flex', justifyContent: 'space-around', width: '100%', height: '100%' }}>
@@ -97,7 +98,7 @@ class Board extends Component {
     const cards = this.state.cards.filter(card => card.project.id === project.id && column.id === card.column.id);
 
     if (column.columns.length === 0) {
-      return (<Column data={column} project={project} key={`${column.id}${project}`} cards={cards} />);
+      return (<Column data={column} project={project} key={`${column.id}${project.id}`} cards={cards} />);
     }
     return (
       <div style={{ display: 'flex', borderRightWidth: 2, borderLeftWidth: 2, borderTopWidth: 2, borderBottomWidth: 0, borderStyle: 'solid', borderColor: 'white', }}>
@@ -132,7 +133,10 @@ class Board extends Component {
               {this.state.columns.map((col, i) => this.renderNames(col, colors[i]))}
             </div>
           </div>
-          <div style={{ display: 'flex', minWidth: '100%', flexDirection: 'column', minHeight: 800, }}>
+          <div style={{ display: 'flex', minWidth: '100%', flexDirection: 'column', minHeight: 600, }}>
+            {this.state.projects.length === 0 && this.renderProjects({
+              id: '',
+            })}
             {this.state.projects.map(proj => this.renderProjects(proj))}
           </div>
         </div>
