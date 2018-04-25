@@ -13,7 +13,6 @@ import Layer from 'grommet/components/Layer';
 class ErrorNotification extends Component {
   constructor() {
     super();
-    this.onConfirm = this.onConfirm.bind(this);
   }
 
   render() {

@@ -19,7 +19,7 @@ import EditIcon from 'grommet/components/icons/base/Edit';
 import CheckmarkIcon from 'grommet/components/icons/base/Checkmark';
 
 import CloseIcon from 'grommet/components/icons/base/Close';
-// import { getBoardsQuery } from './../home/Home';
+import { getBoardsQuery } from './../home/Home';
 
 class BoardNew extends Component {
   constructor() {
@@ -133,11 +133,17 @@ class BoardNew extends Component {
       projects: this.state.selectedProjects.map(pr => pr.id),
       columns: this.state.columns,
     };
+
+    const user = sessionStorage.getItem('user');
+
     this.props.addBoardMutation({
       variables: {
         jsonString: JSON.stringify(board),
       },
-      // refetchQueries: [{ query: getBoardsQuery }]
+      refetchQueries: [{
+        query: getBoardsQuery,
+        variables: { userId: parseInt(JSON.parse(user).id) }
+      }]
     }).then((res) => {
       this.props.history.goBack();
     }).catch((err) => {
@@ -259,7 +265,7 @@ BoardNew.propTypes = {
     priority: PropTypes.bool,
     acceptance: PropTypes.bool,
   }),
-  history: PropTypes.func.isRequired,
+  history: PropTypes.func,
 };
 
 

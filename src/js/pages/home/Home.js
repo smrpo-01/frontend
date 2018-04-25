@@ -23,7 +23,6 @@ class Home extends Component {
   componentWillMount() {
     const user = sessionStorage.getItem('user');
     const userRoles = JSON.parse(user).roles;
-    this.props.data.refetch()
     this.setState({ userRoles });
   }
 
