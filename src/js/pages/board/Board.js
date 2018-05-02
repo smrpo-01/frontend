@@ -82,7 +82,7 @@ class Board extends Component {
   renderProjects(project) {
     return (
       <div style={{ display: 'flex', flexGrow: 1, flexDirection: 'column' }}>
-        <div style={{ display: 'flex', minHeight: 500 }} key={project}>
+        <div style={{ display: 'flex', minHeight: 600 }} key={project}>
           <div style={{ width: 15, display: 'flex', justifyContent: 'center', alignItems: 'center', borderBottomWidth: 2, borderRightWidth: 0, borderLeftWidth: 0, borderTopWidth: 0, borderStyle: 'solid', borderColor: 'white', backgroundColor: '#f5fbef' }}>
             <h style={{ writingMode: 'tb-rl', transform: 'rotate(180deg)', }}>
               {project.name}
@@ -190,6 +190,7 @@ const getBoardQuery = gql`query allBoards($id: Int!) {
     tasks {
       id
       description
+      done
     }
   }
 }`;

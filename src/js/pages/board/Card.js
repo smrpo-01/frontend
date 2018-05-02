@@ -13,15 +13,16 @@ import Meter from 'grommet/components/Meter';
  */
 const cardSource = {
   beginDrag(props, monitor, component) {
+    // eslint-disable-next-line no-find-dom-node
     const node = findDOMNode(component).getBoundingClientRect();
     return {
       height: node.height,
       width: node.width,
     };
   },
-  endDrag(props, monitor, component) {
-    //console.log(monitor, component);
-  }
+  // endDrag(props, monitor, component) {
+  // console.log(monitor, component);
+  // }
 };
 
 /**
@@ -35,9 +36,8 @@ const collect = (connect, monitor) => ({
 
 class Card extends Component {
   render() {
-    const { isDragging, connectDragSource, text } = this.props;
+    const { isDragging, connectDragSource } = this.props;
     const data = this.props.data;
-    console.log(data)
     return connectDragSource(
       <div style={{ backgroundColor: 'white', width: '95%', maxWidth: 250, borderStyle: 'solid', borderColor: '#dbd9d9', borderWidth: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 5, opacity: isDragging ? 0.3 : 1, cursor: 'move', borderRadius: 10, marginTop: 5, }}>
         <div style={{ display: 'flex', width: '90%', justifyContent: 'space-between', marginBottom: 8, marginTop: 5 }}>
@@ -61,12 +61,12 @@ class Card extends Component {
               nejc Smolej
             </h>
           </div>
-          <div style={{ minHeight: '100%', minWidth: 3, backgroundColor: /*Set color*/ 'red', display: 'inline-block', borderTopLeftRadius: 5, borderBottomLeftRadius: 5 }} />
+          <div style={{ minHeight: '100%', minWidth: 3, backgroundColor: 'red', display: 'inline-block', borderTopLeftRadius: 5, borderBottomLeftRadius: 5 }} />
         </div>
         <div style={{ borderColor: 'black', borderWidth: 0, borderBottomWidth: 1, width: '100%', borderStyle: 'solid', marginBottom: 10, opacity: 0.2 }} />
         <div style={{ display: 'flex', width: '95%', marginBottom: 10, flexDirection: 'column' }}>
-          {data.tasks.map((task, i) => <CheckBox
-            label={task.description} defaultChecked={task.done} key={i} />)}
+          {data.tasks.map(task => (<CheckBox
+            label={task.description} defaultChecked={task.done} key={task.id} />))}
         </div>
       </div>
     );
@@ -74,17 +74,11 @@ class Card extends Component {
 }
 
 Card.defaultProps = {
-  id: '',
-  name: '',
-  owner: '',
-  tasks: [],
+  data: null,
 };
 
 Card.propTypes = {
-  id: PropTypes.string,
-  name: PropTypes.string,
-  owner: PropTypes.string,
-  tasks: PropTypes.array,
+  data: PropTypes.object,
   // Injected by React DnD:
   isDragging: PropTypes.bool.isRequired,
   connectDragSource: PropTypes.func.isRequired
