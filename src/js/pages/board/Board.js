@@ -10,6 +10,8 @@ import PropTypes from 'prop-types';
 
 const colors = ['#a4b3a2', '#c87d5d', '#008080'];
 
+const imgUri = process.env.NODE_ENV === 'development' ? '/' : '/static/app/';
+
 const width = 250;
 
 class Board extends Component {
@@ -51,15 +53,15 @@ class Board extends Component {
           <div style={{ right: 5, top: 0, position: 'absolute' }}>
             { column.boundary && <Image
               style={{ height: 18, width: 18, opacity: 0.3, margin: 2 }}
-              src='/img/fence.png'
+              src={imgUri + 'img/fence.png'}
               size='small' /> }
             { column.priority && <Image
               style={{ height: 18, width: 18, opacity: 0.3, margin: 2 }}
-              src='/img/volume-level.png'
+              src={imgUri + 'img/volume-level.png'}
               size='small' /> }
             { column.acceptance && <Image
               style={{ height: 18, width: 18, opacity: 0.3, margin: 2 }}
-              src='/img/verification-mark.png'
+              src={imgUri + 'img/verification-mark.png'}
               size='small' /> }
           </div>
           { column.columns.length === 0 &&
