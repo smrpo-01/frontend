@@ -198,6 +198,7 @@ export const getBoardQuery = gql`query allBoards($id: Int!) {
       id
       name
       team {
+        id
         members {
           id
           firstName
@@ -233,6 +234,7 @@ export const allCardsQuery = gql`query allCards($id: Int!) {
     expiration
     owner {
       member {
+        id
         firstName
         lastName
       }
