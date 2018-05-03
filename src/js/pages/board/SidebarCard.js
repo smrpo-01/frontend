@@ -87,7 +87,7 @@ class SidebarColumn extends Component {
     this.setState({
       km,
       po,
-      type: !po ? 0 : 1,
+      type: km ? 1 : 0,
       projects,
       userId,
     });
@@ -239,14 +239,14 @@ class SidebarColumn extends Component {
     let projectOptions = [];
     let memberOptions = [];
     if (this.state.projects) {
-      if (this.state.type === 0) {
+      if (this.state.type === 1) {
         projectOptions = this.state.projects.filter(pr => pr.team.kanbanMaster.idUser === this.state.userId);
       } else {
         projectOptions = this.state.projects.filter(pr => pr.team.productOwner.idUser === this.state.userId);
       }
 
       projectOptions = projectOptions.map(pr => ({ value: pr.name, id: pr.id }));
-      console.log(this.state.projects)
+
       const currentProject = this.state.projects.filter(pr => this.state.selectedProject && pr.id === this.state.selectedProject.id);
       if (currentProject.length > 0) {
         const members = currentProject[0].team.members.filter((obj, pos, arr) =>
@@ -274,13 +274,13 @@ class SidebarColumn extends Component {
                 <div style={{ display: 'flex', justifyContent: 'space-around', margin: 20 }}>
                   <CheckBox label='Navadna kartica'
                     toggle={false}
-                    disabled={!this.state.km}
-                    checked={this.state.type === 0 && this.state.km}
+                    disabled={!this.state.po}
+                    checked={this.state.type === 0 && this.state.po}
                     onChange={() => this.changeType(0)} />
                   <CheckBox label='Silver bullet'
                     toggle={false}
-                    disabled={!this.state.po}
-                    checked={this.state.type === 1 && this.state.po}
+                    disabled={!this.state.km}
+                    checked={this.state.type === 1 && this.state.km}
                     onChange={() => this.changeType(1)} />
                 </div>
               </FormField>
