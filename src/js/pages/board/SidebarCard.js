@@ -103,7 +103,7 @@ class SidebarColumn extends Component {
           typeId: parseInt(this.state.type, 10),
           projectId: parseInt(this.state.selectedProject.id, 10),
           expiration: this.formatDate(this.state.expiration),
-          estimate: parseInt(this.state.estimate, 10),
+          estimate: parseFloat(this.state.estimate),
           ownerUserteamId: parseInt(this.state.owner.id, 10),
           tasks: filteredTasks,
           columnId: column.id,
@@ -278,6 +278,7 @@ class SidebarColumn extends Component {
                   min={0}
                   defaultValue={0}
                   value={this.state.estimate}
+                  step={0.1}
                   onChange={event => this.setState({ estimate: event.target.value })}
                 />
               </FormField>
