@@ -1,12 +1,16 @@
 import React, { Component } from 'react';
 import Title from 'grommet/components/Title';
-import { graphql } from 'react-apollo';
+import { graphql, compose } from 'react-apollo';
 import gql from 'graphql-tag';
 import Column from './Column';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import Image from 'grommet/components/Image';
 import PropTypes from 'prop-types';
+import AddChapterIcon from 'grommet/components/icons/base/AddChapter';
+import Button from 'grommet/components/Button';
+import SidebarCard from './SidebarCard';
+
 
 const colors = ['#a4b3a2', '#c87d5d', '#008080'];
 
@@ -29,12 +33,12 @@ class Board extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.data.allBoards && nextProps.data.allCards) {
-      const board = nextProps.data.allBoards[0];
+    if (nextProps.allBoardsQuery.allBoards && nextProps.allCardsQuery.allCards) {
+      const board = nextProps.allBoardsQuery.allBoards[0];
       const { name, projects } = board;
       const { columns } = JSON.parse(board.columns);
 
-      const cards = nextProps.data.allCards;
+      const cards = nextProps.allCardsQuery.allCards;
 
       this.setState({
         name,
@@ -44,6 +48,11 @@ class Board extends Component {
       });
     }
   }
+
+  //componentWillMount() {
+    //this.props.allBoardsQuery.refetch();
+    //this.props.allCardsQuery.refetch();
+  //}
 
   renderNames(column, color) {
     return (
@@ -81,10 +90,10 @@ class Board extends Component {
     );
   }
 
-  renderProjects(project) {
+  renderProjects(project, oneProject) {
     return (
       <div style={{ display: 'flex', flexGrow: 1, flexDirection: 'column' }}>
-        <div style={{ display: 'flex', minHeight: 600 }} key={project}>
+        <div style={{ display: 'flex', minHeight: oneProject ? 800 : 500 }} key={project}>
           <div style={{ width: 15, display: 'flex', justifyContent: 'center', alignItems: 'center', borderBottomWidth: 2, borderRightWidth: 0, borderLeftWidth: 0, borderTopWidth: 0, borderStyle: 'solid', borderColor: 'white', backgroundColor: '#f5fbef' }}>
             <h style={{ writingMode: 'tb-rl', transform: 'rotate(180deg)', }}>
               {project.name}
@@ -113,9 +122,10 @@ class Board extends Component {
   }
 
   render() {
+    if (this.props.data && this.props.data.allCards) console.log(this.props.data.allCards.length);
     return (
       <div>
-        <div style={{ display: 'inline-block', minWidth: '100%' }}>
+        <div style={{ display: 'inline-block', minWidth: '100%', }}>
           <div style={{ display: 'flex', minWidth: '100%', marginTop: 10, marginBottom: 15, alignItems: 'center' }}>
             <Title style={{ marginLeft: 20, flexGrow: 1 }}>
               {this.state.name}
@@ -131,6 +141,13 @@ class Board extends Component {
               )
               )}
             </div>
+            <div style={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end' }}>
+              <Button icon={<AddChapterIcon />}
+                style={{ marginRight: 30 }}
+                label='Dodaj kartico'
+                primary={false}
+                onClick={() => this.setState({ toggleSidebard: true, modeEdit: false })} />
+            </div>
           </div>
           <div style={{ display: 'flex', minWidth: '98%' }}>
             <div style={{ backgroundColor: 'white', width: 15, maxHeight: '100%' }} />
@@ -138,13 +155,23 @@ class Board extends Component {
               {this.state.columns.map((col, i) => this.renderNames(col, colors[i]))}
             </div>
           </div>
-          <div style={{ display: 'flex', minWidth: '100%', flexDirection: 'column', minHeight: 600, }}>
+          <div style={{ display: 'flex', minWidth: '100%', flexDirection: 'column', minHeight: 700 }}>
             {this.state.projects.length === 0 && this.renderProjects({
               id: '',
             })}
-            {this.state.projects.map(proj => this.renderProjects(proj))}
+            {this.state.projects.map(proj => this.renderProjects(proj, this.state.projects.length === 1))}
           </div>
         </div>
+        { this.state.toggleSidebard &&
+          <SidebarCard
+            closer={() => this.setState({ toggleSidebard: false })}
+            columns={this.state.columns}
+            boardId={parseInt(this.props.board, 10)}
+            data={{
+              projects: this.state.projects,
+
+            }}/>
+        }
       </div>
     );
   }
@@ -157,7 +184,7 @@ Board.propTypes = {
   data: PropTypes.object.isRequired,
 };
 
-const getBoardQuery = gql`query allBoards($id: Int!) {
+export const getBoardQuery = gql`query allBoards($id: Int!) {
   allBoards(id: $id) {
     id
     name
@@ -165,9 +192,18 @@ const getBoardQuery = gql`query allBoards($id: Int!) {
     projects {
       id
       name
+      team {
+        members {
+          id
+          firstName
+          lastName
+        }
+      }
     }
   }
-  
+}`;
+
+export const allCardsQuery = gql`query allCards($id: Int!) {
   allCards(boardId: $id) {
     id
     column {
@@ -198,8 +234,15 @@ const getBoardQuery = gql`query allBoards($id: Int!) {
 }`;
 
 
-const boardGraphql = graphql(getBoardQuery, {
-  options: props => ({ variables: { id: parseInt(props.board, 10) } })
-})(Board);
+const boardGraphql = compose(
+  graphql(getBoardQuery, {
+    name: 'allBoardsQuery',
+    options: props => ({ variables: { id: parseInt(props.board, 10) } })
+  }),
+  graphql(allCardsQuery, {
+    name: 'allCardsQuery',
+    options: props => ({ variables: { id: parseInt(props.board, 10) } })
+  })
+)(Board);
 
 export default DragDropContext(HTML5Backend)(boardGraphql);

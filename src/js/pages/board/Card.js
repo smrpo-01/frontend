@@ -58,10 +58,10 @@ class Card extends Component {
               {data.name}
             </h>
             <h style={{ display: 'flex', justifyContent: 'flex-end', fontSize: 14, opacity: 0.6, marginRight: 5 }}>
-              nejc Smolej
+              {data.owner.member.firstName} {data.owner.member.lastName}
             </h>
           </div>
-          <div style={{ minHeight: '100%', minWidth: 3, backgroundColor: 'red', display: 'inline-block', borderTopLeftRadius: 5, borderBottomLeftRadius: 5 }} />
+          <div style={{ minHeight: '100%', minWidth: 3, backgroundColor: data.type && data.type.id === 'A_0' ? 'white' : '#0F3641', display: 'inline-block', borderTopLeftRadius: 5, borderBottomLeftRadius: 5 }} />
         </div>
         <div style={{ borderColor: 'black', borderWidth: 0, borderBottomWidth: 1, width: '100%', borderStyle: 'solid', marginBottom: 10, opacity: 0.2 }} />
         <div style={{ display: 'flex', width: '95%', marginBottom: 10, flexDirection: 'column' }}>
