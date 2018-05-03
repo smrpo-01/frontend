@@ -36,26 +36,34 @@ class LeadTimeGraph extends Component {
     this.setState({ width: (window.innerWidth * 0.66), height: (window.innerHeight * 0.66) });
   }
 
+
   prepareData(data) {
-    let tmp = Object.keys(data).map(key => (
-      { x: key, y: data[key] }
-    ));
-    console.log(tmp);
+    let tmp = [];
+    for (let i = 0; i < data.length; i++) {
+      let cardId = data[i].id;
+      let cardTime = data[i].cardPerColumnTime;
+      // we need to init 2d array
+
+      Object.keys(cardTime).forEach((time, j) => {
+        let newEl = { x: cardId, y: cardTime[time] };
+        if (i === 0) {
+          tmp.push([newEl]);
+        } else {
+          tmp[j].push(newEl);
+        }
+      });
+    }
     return tmp;
   }
 
   render() {
-    console.log(this.props);
     const { queryGraphData: { loading, error, filterCards } } = this.props;
-    // console.log(loading, error, allUsers);
 
     if (loading) {
       return <Loading />;
     } else if (error) {
       return <p style={{ color: 'red' }}>Error!</p>;
     }
-    console.log('filterCards');
-    console.log(filterCards);
 
     return (
       <XYPlot
@@ -67,50 +75,20 @@ class LeadTimeGraph extends Component {
         <DiscreteColorLegend
           style={{ position: 'absolute', left: '40px', top: '0px' }}
           orientation='horizontal'
-          items={[
-            {
-              title: 'Apples',
-              color: '#12939A'
-            },
-            {
-              title: 'Oranges',
-              color: '#79C7E3'
-            }
-          ]}
+          items={Object.keys(filterCards[0].cardPerColumnTime).map(key => ({ title: key }))}
         />
         <VerticalGridLines />
         <HorizontalGridLines />
         <XAxis />
         <YAxis />
 
-        <VerticalBarSeries
-          color='#12939A'
-          data={[
-            { x: 'Q1', y: 3 },
-            { x: 'Q2', y: 8 },
-            { x: 'Q3', y: 11 },
-            { x: 'Q4', y: 19 }
-          ]} />
-        <VerticalBarSeries
-          color='#79C7E3'
-          data={[
-            { x: 'Q1', y: 22 },
-            { x: 'Q2', y: 2 },
-            { x: 'Q3', y: 22 },
-            { x: 'Q4', y: 18 }
-          ]} />
 
-        {filterCards.map(cardObj => (
+        {this.prepareData(filterCards).map((bar, i) => (
           <VerticalBarSeries
-            key={cardObj.id}
-            cluster={cardObj.name}
-            data={this.prepareData(cardObj.cardPerColumnTime)}
+            key={filterCards[i].id}
+            data={bar}
           />
         ))}
-
-        {filterCards.map((cardObj) => {
-          cardObj.cardPerColumnTime.map()
-        })}
 
 
       </XYPlot>

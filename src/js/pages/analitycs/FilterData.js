@@ -64,34 +64,12 @@ class FilterData extends Component {
 
 
   componentDidMount() {
-    /*
-    const projectData = '{"allProjects":[{"id":"1","name":"Projekt 1 (s karticami)"},{"id":"2","name":"Projekt 2 (s karticami)"},{"id":"3","name":"Projekt 3"},{"id":"4","name":"Projekt 4"}]}';
-    const cardTypeTmp = '{"allCardTypes":[{"id":"A_0","name":"Navadna kartica"},{"id":"A_1","name":"Nujna zahteva"}]}';
-    let data = JSON.parse(projectData);
-    let cardTypeData = JSON.parse(cardTypeTmp);
-
-
-    let projectOptions = data.allProjects.map(project => ({
-      value: project,
-      label: project.name,
-    }));
-
-    let cardTypeOptions = cardTypeData.allCardTypes.map(type => ({
-      value: type,
-      label: type.name,
-    }));
-
-    // eslint-disable-next-line
-    this.setState({ projectOptions, projectOptionsAll: projectOptions,  cardTypeOptions, cardTypeOptionsAll: cardTypeOptions });
-    */
-
     if (this.props.queryBoardData.allBoards !== undefined) {
       this.prepareData(this.props.queryBoardData.allBoards[0]);
     }
   }
 
   componentWillReceiveProps(nextProps) {
-    console.log(nextProps);
     if (nextProps.queryBoardData.allBoards !== undefined) {
       this.prepareData(nextProps.queryBoardData.allBoards[0]);
     }
@@ -103,8 +81,6 @@ class FilterData extends Component {
       value: project,
       label: project.name,
     }));
-
-    console.log(projectOptions);
 
     let cardTypeOptions = data.cardTypes.map(type => ({
       value: type,
@@ -303,6 +279,7 @@ class FilterData extends Component {
 FilterData.defaultProps = {};
 FilterData.propTypes = {
   setGraphFilter: PropTypes.func.isRequired,
+  queryBoardData: PropTypes.object.isRequired,
 };
 
 
