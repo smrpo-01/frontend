@@ -48,14 +48,14 @@ class Card extends Component {
             style={{ marginTop: 6 }}
             size='xsmall'
             colorIndex='graph-1'
-            value={30} />
+            value={data.estimate * 15} />
           <MoreIcon />
         </div>
         <div style={{ borderColor: 'black', borderWidth: 0, borderBottomWidth: 1, width: '100%', borderStyle: 'solid', opacity: 0.2 }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', height: '100%' }}>
           <div style={{ display: 'flex', justifyContent: 'center', width: '95%', marginBottom: 10, flexDirection: 'column', marginTop: 10, marginLeft: 5 }}>
             <h>
-              {data.name}
+              #{data.cardNumber} {data.name}
             </h>
             <h style={{ display: 'flex', justifyContent: 'flex-end', fontSize: 14, opacity: 0.6, marginRight: 5 }}>
               {data.owner.member.firstName} {data.owner.member.lastName}

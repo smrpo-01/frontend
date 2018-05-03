@@ -132,7 +132,7 @@ class MainApp extends Component {
               } />
               <Route exact path='/management' render={props => (<Management {...props} />)} />
               <Route exact path='/board' render={props =>
-                (<Board {...props} board={this.state.appState.defaultBoard} />)
+                (<Board {...props} board={this.state.appState.defaultBoard} userRoles={this.state.userData} />)
               } />
               <Route exact path='/board/new' render={props => (<BoardNew {...props} />)} />
               <Route exact path='/board/edit' render={props =>

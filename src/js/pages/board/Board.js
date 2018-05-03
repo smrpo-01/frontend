@@ -123,6 +123,10 @@ class Board extends Component {
 
   render() {
     if (this.props.data && this.props.data.allCards) console.log(this.props.data.allCards.length);
+    const user = sessionStorage.getItem('user');
+
+    const roles = JSON.parse(user).roles;
+
     return (
       <div>
         <div style={{ display: 'inline-block', minWidth: '100%', }}>
@@ -135,19 +139,21 @@ class Board extends Component {
                 Projekti:
               </Title>
               { this.state.projects.map(pr => (
-                <h style={{ backgroundColor: '#e1e1e0', borderRadius: 5, marginRight: 10, padding: 5 }}>
+                <h style={{ backgroundColor: '#e1e1e0', borderRadius: 5, marginRight: 10, padding: 5 }} key={pr.id}>
                   {pr.name}
                 </h>
               )
               )}
             </div>
-            <div style={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end' }}>
-              <Button icon={<AddChapterIcon />}
-                style={{ marginRight: 30 }}
-                label='Dodaj kartico'
-                primary={false}
-                onClick={() => this.setState({ toggleSidebard: true, modeEdit: false })} />
-            </div>
+            { (roles.includes('km') || roles.includes('po')) &&
+              <div style={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end' }}>
+                <Button icon={<AddChapterIcon />}
+                  style={{ marginRight: 30 }}
+                  label='Dodaj kartico'
+                  primary={false}
+                  onClick={() => this.setState({ toggleSidebard: true, modeEdit: false })} />
+              </div>
+            }
           </div>
           <div style={{ display: 'flex', minWidth: '98%' }}>
             <div style={{ backgroundColor: 'white', width: 15, maxHeight: '100%' }} />
@@ -158,7 +164,7 @@ class Board extends Component {
           <div style={{ display: 'flex', minWidth: '100%', flexDirection: 'column', minHeight: 700 }}>
             {this.state.projects.length === 0 && this.renderProjects({
               id: '',
-            })}
+            }, true)}
             {this.state.projects.map(proj => this.renderProjects(proj, this.state.projects.length === 1))}
           </div>
         </div>
@@ -181,7 +187,6 @@ Board.defaultProps = {
 };
 
 Board.propTypes = {
-  data: PropTypes.object.isRequired,
 };
 
 export const getBoardQuery = gql`query allBoards($id: Int!) {
@@ -198,6 +203,12 @@ export const getBoardQuery = gql`query allBoards($id: Int!) {
           firstName
           lastName
         }
+        kanbanMaster {
+          idUser
+        }
+        productOwner {
+          idUser
+        }
       }
     }
   }
@@ -206,6 +217,7 @@ export const getBoardQuery = gql`query allBoards($id: Int!) {
 export const allCardsQuery = gql`query allCards($id: Int!) {
   allCards(boardId: $id) {
     id
+    cardNumber
     column {
       id
     }

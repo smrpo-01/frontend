@@ -62,8 +62,35 @@ class SidebarColumn extends Component {
       name: '',
       tasks: [],
       type: 0,
-      errors: {}
+      errors: {},
+      estimate: 0,
     };
+  }
+
+  componentWillMount() {
+    const user = sessionStorage.getItem('user');
+    const userId = JSON.parse(user).id;
+    let km = false;
+    let po = false;
+    const projects = this.props.data.projects.filter(project => {
+      const { kanbanMaster } = project.team;
+      const { productOwner } = project.team;
+      if (kanbanMaster.idUser === userId) km = true;
+
+      if (productOwner.idUser === userId) po = true;
+
+      if (km || po) return true;
+
+      return false;
+    });
+
+    this.setState({
+      km,
+      po,
+      type: !po ? 0 : 1,
+      projects,
+      userId,
+    });
   }
 
   onSubmit() {
@@ -108,7 +135,7 @@ class SidebarColumn extends Component {
           tasks: filteredTasks,
           columnId: column.id,
         };
-        console.log(cardData)
+
         this.props.addCardMutation({
           variables: {
             cardData,
@@ -119,7 +146,12 @@ class SidebarColumn extends Component {
             variables: { id: this.props.boardId }
           }],
         }).then(res => this.props.closer())
-          .catch(err => console.log(err));
+          .catch(err => {
+            this.setState({
+              in: true,
+              notificationError: err.message.split(':')[1],
+            });
+          });
       }
     });
   }
@@ -152,15 +184,15 @@ class SidebarColumn extends Component {
     return (d[2] + '-' + d[1] + '-' + d[0]); // YYYY-MM-DD
   }
 
-  changeProject(change) {
-    if (this.state.selectedProject && this.state.selectedProject.id !== change.value.id) {
+  changeProject(value) {
+    if (this.state.selectedProject && this.state.selectedProject.id !== value.id) {
       const tasks = this.state.tasks.map(task => ({
         ...task,
         owner: null,
       }));
-      this.setState({ selectedProject: change.value, owner: null, tasks });
+      this.setState({ selectedProject: value, owner: null, tasks });
     } else {
-      this.setState({ selectedProject: change.value });
+      this.setState({ selectedProject: value });
     }
   }
 
@@ -196,13 +228,26 @@ class SidebarColumn extends Component {
     });
   }
 
+  changeType(value) {
+    if (this.state.type !== value) {
+      this.changeProject({ id: null, value: null });
+      this.setState({ type: value });
+    }
+  }
+
   render() {
     let projectOptions = [];
     let memberOptions = [];
-    if (this.props.data.projects) {
-      projectOptions = this.props.data.projects.map(pr => ({ value: pr.name, id: pr.id }));
+    if (this.state.projects) {
+      if (this.state.type === 0) {
+        projectOptions = this.state.projects.filter(pr => pr.team.kanbanMaster.idUser === this.state.userId);
+      } else {
+        projectOptions = this.state.projects.filter(pr => pr.team.productOwner.idUser === this.state.userId);
+      }
 
-      const currentProject = this.props.data.projects.filter(pr => this.state.selectedProject && pr.id === this.state.selectedProject.id);
+      projectOptions = projectOptions.map(pr => ({ value: pr.name, id: pr.id }));
+      console.log(this.state.projects)
+      const currentProject = this.state.projects.filter(pr => this.state.selectedProject && pr.id === this.state.selectedProject.id);
       if (currentProject.length > 0) {
         const members = currentProject[0].team.members.filter((obj, pos, arr) =>
           arr.map(mapObj => mapObj.id).indexOf(obj.id) === pos
@@ -216,7 +261,7 @@ class SidebarColumn extends Component {
         closer
         align='right'
       >
-        <Article pad='small' size='xlarge'>
+        <Article pad='small' size='large'>
           <Form>
             <Header pad={{ vertical: 'medium' }}>
               <Heading>
@@ -229,12 +274,14 @@ class SidebarColumn extends Component {
                 <div style={{ display: 'flex', justifyContent: 'space-around', margin: 20 }}>
                   <CheckBox label='Navadna kartica'
                     toggle={false}
-                    checked={this.state.type === 0}
-                    onChange={() => this.setState({ type: 0 })} />
+                    disabled={!this.state.km}
+                    checked={this.state.type === 0 && this.state.km}
+                    onChange={() => this.changeType(0)} />
                   <CheckBox label='Silver bullet'
                     toggle={false}
-                    checked={this.state.type === 1}
-                    onChange={() => this.setState({ type: 1 })} />
+                    disabled={!this.state.po}
+                    checked={this.state.type === 1 && this.state.po}
+                    onChange={() => this.changeType(1)} />
                 </div>
               </FormField>
               <FormField label='Ime kartice' error={this.state.errors.name}>
@@ -255,7 +302,7 @@ class SidebarColumn extends Component {
                 <Select placeHolder='/'
                   options={projectOptions}
                   multiple={false}
-                  onChange={change => this.changeProject(change)}
+                  onChange={change => this.changeProject(change.value)}
                   value={this.state.selectedProject} />
               </FormField>
               <FormField label='Izberite uporabnika' error={this.state.errors.owner}>
@@ -323,8 +370,8 @@ class SidebarColumn extends Component {
             </Footer>
           </Form>
           <Transition in={this.state.in} timeout={duration}>
-            {status => (<Notification message='Vsi podatki morajo biti pravilno vnešeni'
-              size='large'
+            {status => (<Notification message={this.state.notificationError}
+              size='small'
               status='critical'
               style={{
                 opacity: transitionStyles[status],
