@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-// import PropTypes from 'prop-types';
+import PropTypes from 'prop-types';
 
 // Template
 import PageTemplate from '../../templates/PageTemplate';
@@ -29,17 +29,31 @@ class LeadTime extends Component {
   }
 
   setGraphFilter(filterData) {
-    this.setState({ filterData });
+    this.setState({ filterData: null }, () => {
+      this.setState({ filterData });
+      console.log(this);
+    });
+    // console.log(filterData);
+    //this.setState({ filterData });
+
   }
 
   render() {
     return (
       <PageTemplate>
         <Section direction='row' pad='none' >
-          <FilterData setGraphFilter={this.setGraphFilter} />
-          <Box pad='medium' full>
-            <LeadTimeGraph />
-          </Box>
+          <FilterData
+            setGraphFilter={this.setGraphFilter}
+            boardId={this.props.boardId}
+          />
+          {(this.state.filterData !== null) &&
+            <Box pad='medium' full>
+              <LeadTimeGraph
+                boardId={this.props.boardId}
+                filterData={this.state.filterData}
+              />
+            </Box>
+          }
         </Section>
 
       </PageTemplate>
@@ -48,6 +62,8 @@ class LeadTime extends Component {
 }
 
 LeadTime.defaultProps = {};
-LeadTime.propTypes = {};
+LeadTime.propTypes = {
+  boardId: PropTypes.string.isRequired,
+};
 
 export default LeadTime;

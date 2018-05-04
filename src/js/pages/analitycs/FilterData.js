@@ -40,8 +40,14 @@ class FilterData extends Component {
       projectOptions: [],
       projectOptionsAll: [],
 
-      cardCreatedStart: '',
-      cardCreatedEnd: '',
+      creationStart: '',
+      creationEnd: '',
+
+      doneStart: '',
+      doneEnd: '',
+
+      devStart: '',
+      devEnd: '',
 
       estimateMin: 1,
       estimateMax: 1,
@@ -125,8 +131,20 @@ class FilterData extends Component {
 
   updateParent() {
     const filterData = {};
-    filterData.projectId = this.state.projectId;
+    filterData.projectId = parseInt(this.state.projectId);
     filterData.cardTypeId = this.state.cardTypeId;
+    // estimate
+    filterData.estimateFrom = parseFloat(this.state.estimateFrom);
+    filterData.estimateTo = parseFloat(this.state.estimateTo);
+    // creation
+    filterData.creationStart = this.state.creationStart;
+    filterData.creationEnd = this.state.creationEnd;
+    // done
+    filterData.doneStart = this.state.doneStart;
+    filterData.doneEnd = this.state.doneEnd;
+    // done
+    filterData.devStart = this.state.devStart;
+    filterData.devEnd = this.state.devEnd;
 
     this.props.setGraphFilter(filterData);
   }
@@ -206,17 +224,17 @@ class FilterData extends Component {
             <DateTime
               id='cardDateStart'
               format={dateFormat}
-              value={this.state.cardCreatedStart}
-              onChange={e => this.setState({ cardCreatedStart: e })}
+              value={this.state.creationStart}
+              onChange={e => this.setState({ creationStart: e })}
             />
           </FormField>
 
-          <FormField label='Do' error={this.state.error.cardCreatedEnd}>
+          <FormField label='Do' error={this.state.error.creationEnd}>
             <DateTime
               id='cardDateStart'
               format={dateFormat}
-              value={this.state.cardCreatedEnd}
-              onChange={e => this.setState({ cardCreatedEnd: e })}
+              value={this.state.creationEnd}
+              onChange={e => this.setState({ creationEnd: e })}
             />
           </FormField>
 
@@ -227,17 +245,17 @@ class FilterData extends Component {
             <DateTime
               id='cardDateStart'
               format={dateFormat}
-              value={this.state.cardCreatedStart}
-              onChange={e => this.setState({ cardCreatedStart: e })}
+              value={this.state.doneStart}
+              onChange={e => this.setState({ doneStart: e })}
             />
           </FormField>
 
-          <FormField label='Do' error={this.state.error.cardCreatedEnd}>
+          <FormField label='Do' error={this.state.error.creationEnd}>
             <DateTime
               id='cardDateStart'
               format={dateFormat}
-              value={this.state.cardCreatedEnd}
-              onChange={e => this.setState({ cardCreatedEnd: e })}
+              value={this.state.doneEnd}
+              onChange={e => this.setState({ doneEnd: e })}
             />
           </FormField>
 
@@ -248,17 +266,17 @@ class FilterData extends Component {
             <DateTime
               id='cardDateStart'
               format={dateFormat}
-              value={this.state.cardCreatedStart}
-              onChange={e => this.setState({ cardCreatedStart: e })}
+              value={this.state.devStart}
+              onChange={e => this.setState({ devStart: e })}
             />
           </FormField>
 
-          <FormField label='Do' error={this.state.error.cardCreatedEnd}>
+          <FormField label='Do' error={this.state.error.creationEnd}>
             <DateTime
               id='cardDateStart'
               format={dateFormat}
-              value={this.state.cardCreatedEnd}
-              onChange={e => this.setState({ cardCreatedEnd: e })}
+              value={this.state.devEnd}
+              onChange={e => this.setState({ devEnd: e })}
             />
           </FormField>
 
@@ -300,13 +318,12 @@ export const getBoardDataQuery = gql`
   }
 `;
 
-// TODO popravi boardId -> iz app stata
 const FilterDataWithQuery = compose(
   graphql((getBoardDataQuery), {
     name: 'queryBoardData',
-    options: () => ({
+    options: props => ({
       variables: {
-        boardId: 1
+        boardId: props.boardId,
       }
     })
   })

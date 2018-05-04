@@ -140,7 +140,7 @@ class MainApp extends Component {
                 (<BoardEdit {...props} boardId={this.state.appState.defaultBoard} />)
               } />
               <Route path='/administration' render={props => (<Administration {...props} />)} />
-              <Route path='/analitycs' render={props => (<Analitycs {...props} />)} />
+              <Route path='/analitycs' render={props => (<Analitycs {...props} boardId={this.state.appState.defaultBoard} />)} />
               <Redirect to='/home' />
             </Switch>
 

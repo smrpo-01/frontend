@@ -24,13 +24,14 @@ class Analitycs extends Component {
   }
 
   render() {
+    console.log(this.props.boardId);
     return (
       <PageTemplate
         header={<Title>Analiza Tabla 1</Title>}
       >
         <Tabs justify='start'>
           <Tab title='Povprečni čas izdelave'>
-            <LeadTime />
+            <LeadTime boardId={this.props.boardId} />
           </Tab>
 
           {/*
@@ -48,7 +49,8 @@ Analitycs.defaultProps = {
 };
 
 Analitycs.propTypes = {
-  history: PropTypes.object.isRequired
+  history: PropTypes.object.isRequired,
+  boardId: PropTypes.string.isRequired,
 };
 
 export default Analitycs;

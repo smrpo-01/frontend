@@ -28,6 +28,11 @@ class LeadTimeGraph extends Component {
     window.addEventListener('resize', this.updateWindowDimensions);
   }
 
+  componentWillReceiveProps(nextProps) {
+    console.log(nextProps);
+    nextProps.queryGraphData.refetch();
+  }
+
   componentWillUnmount() {
     window.removeEventListener('resize', this.updateWindowDimensions);
   }
@@ -58,6 +63,7 @@ class LeadTimeGraph extends Component {
 
   render() {
     const { queryGraphData: { loading, error, filterCards } } = this.props;
+    console.log(filterCards);
 
     if (loading) {
       return <Loading />;
@@ -119,9 +125,18 @@ export const getGraphDataQuery = gql`
 const LeadTimeGraphWithQuery = compose(
   graphql((getGraphDataQuery), {
     name: 'queryGraphData',
-    options: () => ({
+    options: props => ({
       variables: {
-        projectId: 2
+        projectId: props.filterData.projectId,
+        creationStart: props.filterData.creationStart,
+        creationEnd: props.filterData.creationEnd,
+        doneStart: props.filterData.doneStart,
+        doneEnd: props.filterData.doneEnd,
+        devStart: props.filterData.devStart,
+        devEnd: props.filterData.devEnd,
+        estimateFrom: props.filterData.estimateFrom,
+        estimateTo: props.filterData.estimateTo,
+        cardType: props.filterData.cardType,
       }
     })
   })
