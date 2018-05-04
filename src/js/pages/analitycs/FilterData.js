@@ -49,12 +49,18 @@ class FilterData extends Component {
       devStart: '',
       devEnd: '',
 
+      columnFrom: null,
+      columnFromId: null,
+      columnTo: null,
+      columnToId: null,
+      columnsOptions: [],
+
       estimateMin: 1,
       estimateMax: 1,
       estimateFrom: 1,
       estimateTo: 1,
 
-      cardType: '',
+      cardType: null,
       cardTypeId: null,
       cardTypeOptions: [],
       cardTypeOptionsAll: [],
@@ -96,6 +102,10 @@ class FilterData extends Component {
     const estimateMin = data.estimateMin;
     const estimateMax = data.estimateMax;
 
+    let columns = data.columnsNoParents.map(column => ({
+      value: column,
+      label: column.name,
+    }));
 
     this.setState({
       projectOptions,
@@ -104,6 +114,7 @@ class FilterData extends Component {
       cardTypeOptionsAll: cardTypeOptions,
       estimateMin,
       estimateMax,
+      columnsOptions: columns,
     });
   }
 
@@ -131,7 +142,7 @@ class FilterData extends Component {
 
   updateParent() {
     const filterData = {};
-    filterData.projectId = parseInt(this.state.projectId);
+    filterData.projectId = parseInt(this.state.projectId, 10);
     filterData.cardTypeId = this.state.cardTypeId;
     // estimate
     filterData.estimateFrom = parseFloat(this.state.estimateFrom);
@@ -145,6 +156,9 @@ class FilterData extends Component {
     // done
     filterData.devStart = this.state.devStart;
     filterData.devEnd = this.state.devEnd;
+    // columns
+    filterData.columnFrom = this.state.columnFromId;
+    filterData.columnTo = this.state.columnToId;
 
     this.props.setGraphFilter(filterData);
   }
@@ -195,6 +209,38 @@ class FilterData extends Component {
               onSearch={event => this.filterSuggestions(event.target.value, 'cardType')}
             />
           </FormField>
+
+          <FormLegend label={'Mejna stolpca'} />
+          <FormField error={this.state.error.column}>
+            <Select
+              id='columnFrom'
+              placeHolder='Testiranje'
+              value={this.state.columnFrom}
+              options={this.state.columnsOptions}
+              onChange={event =>
+                this.setState({
+                  columnFrom: event.option.label,
+                  columnFromId: event.option.value.id,
+                })
+              }
+            />
+          </FormField>
+
+          <FormField error={this.state.error.column}>
+            <Select
+              id='columnTo'
+              placeHolder='Integracija'
+              value={this.state.columnTo}
+              options={this.state.columnsOptions}
+              onChange={event =>
+                this.setState({
+                  columnTo: event.option.label,
+                  columnToId: event.option.value.id,
+                })
+              }
+            />
+          </FormField>
+
 
           {/* zahtevnost kartice */}
           <FormLegend label={'Zahtevnost kartice'} />
@@ -305,6 +351,10 @@ export const getBoardDataQuery = gql`
   query getBoardData($boardId: Int!) {
     allBoards(id: $boardId) {
       projects {
+        id
+        name
+      },
+      columnsNoParents {
         id
         name
       },

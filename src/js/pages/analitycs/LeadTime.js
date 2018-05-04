@@ -7,7 +7,6 @@ import FilterData from './FilterData';
 import LeadTimeGraph from './LeadTimeGraph';
 
 // Grommet components
-import Box from 'grommet/components/Box';
 import Section from 'grommet/components/Section';
 
 
@@ -31,11 +30,7 @@ class LeadTime extends Component {
   setGraphFilter(filterData) {
     this.setState({ filterData: null }, () => {
       this.setState({ filterData });
-      console.log(this);
     });
-    // console.log(filterData);
-    //this.setState({ filterData });
-
   }
 
   render() {
@@ -47,12 +42,10 @@ class LeadTime extends Component {
             boardId={this.props.boardId}
           />
           {(this.state.filterData !== null) &&
-            <Box pad='medium' full>
-              <LeadTimeGraph
-                boardId={this.props.boardId}
-                filterData={this.state.filterData}
-              />
-            </Box>
+            <LeadTimeGraph
+              boardId={this.props.boardId}
+              filterData={this.state.filterData}
+            />
           }
         </Section>
 

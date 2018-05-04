@@ -3,6 +3,12 @@ import PropTypes from 'prop-types';
 import { graphql, compose } from 'react-apollo';
 import gql from 'graphql-tag';
 
+import Box from 'grommet/components/Box';
+import List from 'grommet/components/List';
+import ListItem from 'grommet/components/ListItem';
+import Heading from 'grommet/components/Heading';
+
+
 import {
   XYPlot,
   XAxis,
@@ -28,11 +34,6 @@ class LeadTimeGraph extends Component {
     window.addEventListener('resize', this.updateWindowDimensions);
   }
 
-  componentWillReceiveProps(nextProps) {
-    console.log(nextProps);
-    nextProps.queryGraphData.refetch();
-  }
-
   componentWillUnmount() {
     window.removeEventListener('resize', this.updateWindowDimensions);
   }
@@ -41,7 +42,7 @@ class LeadTimeGraph extends Component {
     this.setState({ width: (window.innerWidth * 0.66), height: (window.innerHeight * 0.66) });
   }
 
-
+  // do not touch
   prepareData(data) {
     let tmp = [];
     for (let i = 0; i < data.length; i++) {
@@ -62,42 +63,63 @@ class LeadTimeGraph extends Component {
   }
 
   render() {
-    const { queryGraphData: { loading, error, filterCards } } = this.props;
+    const { queryGraphData: { loading, error, filterCards, avgLeadTime } } = this.props;
     console.log(filterCards);
 
     if (loading) {
       return <Loading />;
     } else if (error) {
       return <p style={{ color: 'red' }}>Error!</p>;
-    }
+    } else if (filterCards.length === 0) return null;
 
     return (
-      <XYPlot
-        className='clustered-stacked-bar-chart-example'
-        xType='ordinal'
-        stackBy='y'
-        width={this.state.width}
-        height={this.state.height}>
-        <DiscreteColorLegend
-          style={{ position: 'absolute', left: '40px', top: '0px' }}
-          orientation='horizontal'
-          items={Object.keys(filterCards[0].cardPerColumnTime).map(key => ({ title: key }))}
-        />
-        <VerticalGridLines />
-        <HorizontalGridLines />
-        <XAxis />
-        <YAxis />
+      <Box pad='medium' >
+        <Heading margin='medium' style={{ marginTop: '0px' }} tag='h3' strong>
+          <span>{'Povprečni čas izdelave'}</span>
+        </Heading>
+        <List>
+          <ListItem justify='start' pad={{ between: 'small', vertical: 'small' }}>
+            <b>{'Povprečni čas izdelave:'}</b>
+            <b>{avgLeadTime}</b>
+            <span>{'h'}</span>
+          </ListItem>
+          {filterCards.map(card => (
+            <ListItem key={card.id} justify='start' pad={{ between: 'small', vertical: 'small' }}>
+              <span>{card.name + ':'}</span>
+              <b>{card.travelTime}</b>
+              <span>{'h'}</span>
+            </ListItem>
+          ))}
+        </List>
 
+        <Box pad='medium' />
 
-        {this.prepareData(filterCards).map((bar, i) => (
-          <VerticalBarSeries
-            key={filterCards[i].id}
-            data={bar}
+        <XYPlot
+          className='clustered-stacked-bar-chart-example'
+          xType='ordinal'
+          stackBy='y'
+          width={this.state.width}
+          height={this.state.height}>
+          <DiscreteColorLegend
+            style={{ position: 'absolute', left: '40px', top: '0px' }}
+            orientation='horizontal'
+            items={Object.keys(filterCards[0].cardPerColumnTime).map(key => ({ title: key }))}
           />
-        ))}
+          <VerticalGridLines />
+          <HorizontalGridLines />
+          <XAxis />
+          <YAxis />
 
-
-      </XYPlot>
+          {this.prepareData(filterCards).map(bar =>
+            (
+              <VerticalBarSeries
+                key={Math.random()}
+                data={bar}
+              />
+            )
+          )}
+        </XYPlot>
+      </Box>
     );
   }
 }
@@ -110,14 +132,38 @@ LeadTimeGraph.propTypes = {
 
 
 export const getGraphDataQuery = gql`
-  query getBoardData($projectId: Int!) {
-    filterCards(projectId: $projectId) {
+  query getBoardData(
+    $projectId: Int!,
+    $creationStart: String!,
+    $creationEnd: String!,
+    $doneStart: String!,
+    $doneEnd: String!,
+    $devStart: String!,
+    $devEnd: String!,
+    $estimateFrom: Float!,
+    $estimateTo: Float!,
+    $columnFrom: String!,
+    $columnTo: String!,
+    $cardType: [String]!,
+  ) {
+    filterCards(
+      projectId: $projectId,
+      creationStart: $creationStart,
+      creationEnd: $creationEnd,
+      doneStart: $doneStart,
+      doneEnd: $doneEnd,
+      devStart: $devStart,
+      devEnd: $devEnd,
+      estimateFrom: $estimateFrom,
+      estimateTo: $estimateTo,
+      cardType: $cardType,
+    ) {
       id
       name
       cardPerColumnTime(minimal: true)
-      totalTime(minimal: true)
+      travelTime(columnFrom: $columnFrom, columnTo: $columnTo)
     }
-    avgLeadTime
+    avgLeadTime(projectId: $projectId)
   }
 `;
 
@@ -128,6 +174,7 @@ const LeadTimeGraphWithQuery = compose(
     options: props => ({
       variables: {
         projectId: props.filterData.projectId,
+        cardType: [props.filterData.cardTypeId],
         creationStart: props.filterData.creationStart,
         creationEnd: props.filterData.creationEnd,
         doneStart: props.filterData.doneStart,
@@ -136,7 +183,8 @@ const LeadTimeGraphWithQuery = compose(
         devEnd: props.filterData.devEnd,
         estimateFrom: props.filterData.estimateFrom,
         estimateTo: props.filterData.estimateTo,
-        cardType: props.filterData.cardType,
+        columnFrom: props.filterData.columnFrom,
+        columnTo: props.filterData.columnTo,
       }
     })
   })
