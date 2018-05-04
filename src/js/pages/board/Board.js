@@ -10,6 +10,7 @@ import PropTypes from 'prop-types';
 import AddChapterIcon from 'grommet/components/icons/base/AddChapter';
 import Button from 'grommet/components/Button';
 import SidebarCard from './SidebarCard';
+import uuid from 'uuid/v4';
 
 
 const colors = ['#a4b3a2', '#c87d5d', '#008080'];
@@ -56,7 +57,7 @@ class Board extends Component {
 
   renderNames(column, color) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', backgroundColor: '#cbd0c4', minWidth: width, flexDirection: 'column', alignItems: 'center', height: '100%', borderColor: 'white', borderStyle: 'solid', borderTopWidth: 2, borderRightWidth: 2, borderLeftWidth: 2, borderBottomWidth: 0 }} key={column.id}>
+      <div style={{ display: 'flex', justifyContent: 'center', backgroundColor: '#cbd0c4', minWidth: width, flexDirection: 'column', alignItems: 'center', height: '100%', borderColor: 'white', borderStyle: 'solid', borderTopWidth: 2, borderRightWidth: 2, borderLeftWidth: 2, borderBottomWidth: 0 }} key={uuid()}>
         <h style={{ fontSize: 16, width: '100%', display: 'flex', justifyContent: 'center', minHeight: 25, position: 'relative' }}>
           {column.name}
           <div style={{ right: 5, top: 0, position: 'absolute' }}>
@@ -92,8 +93,8 @@ class Board extends Component {
 
   renderProjects(project, oneProject) {
     return (
-      <div style={{ display: 'flex', flexGrow: 1, flexDirection: 'column' }}>
-        <div style={{ display: 'flex', minHeight: oneProject ? 800 : 500 }} key={project}>
+      <div style={{ display: 'flex', flexGrow: 1, flexDirection: 'column' }} key={uuid()}>
+        <div style={{ display: 'flex', minHeight: oneProject ? 800 : 500 }} >
           <div style={{ width: 15, display: 'flex', justifyContent: 'center', alignItems: 'center', borderBottomWidth: 2, borderRightWidth: 0, borderLeftWidth: 0, borderTopWidth: 0, borderStyle: 'solid', borderColor: 'white', backgroundColor: '#f5fbef' }}>
             <h style={{ writingMode: 'tb-rl', transform: 'rotate(180deg)', }}>
               {project.name}
@@ -115,7 +116,7 @@ class Board extends Component {
       return (<Column data={column} project={project} key={`${column.id}${project.id}`} cards={cards} />);
     }
     return (
-      <div style={{ display: 'flex', borderRightWidth: 2, borderLeftWidth: 2, borderTopWidth: 2, borderBottomWidth: 0, borderStyle: 'solid', borderColor: 'white', }}>
+      <div style={{ display: 'flex', borderRightWidth: 2, borderLeftWidth: 2, borderTopWidth: 2, borderBottomWidth: 0, borderStyle: 'solid', borderColor: 'white', }} key={uuid()}>
         {column.columns.map(col => this.renderColumns(col, project))}
       </div>
     );
@@ -163,7 +164,7 @@ class Board extends Component {
           </div>
           <div style={{ display: 'flex', minWidth: '100%', flexDirection: 'column', minHeight: 700 }}>
             {this.state.projects.length === 0 && this.renderProjects({
-              id: '',
+              id: uuid(),
             }, true)}
             {this.state.projects.map(proj => this.renderProjects(proj, this.state.projects.length === 1))}
           </div>
