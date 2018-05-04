@@ -3,11 +3,11 @@ import PropTypes from 'prop-types';
 import { DropTarget } from 'react-dnd';
 
 import Card from './Card';
-import CardEmpty from './CardEmpty';
+// import CardEmpty from './CardEmpty';
 
 const columnSpec = {
   drop(props, monitor, component) {
-    console.log(component.props);
+    console.log(props, monitor, component);
   },
 };
 
@@ -27,39 +27,39 @@ const collect = (connect, monitor) => {
 
 
 class Column extends Component {
-  render() {
-    const { connectDropTarget, isOver, canDrop } = this.props;
-    return (
-      <div style={{ display: 'flex', minWidth: 300, borderColor: '#cbd0c4', borderStyle: 'solid', borderWidth: 1, marginLeft: 5, justifyContent: 'center', backgroundColor: '#fbfff7' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'center' }}>
-          <h style={{ fontSize: 20, backgroundColor: '#ececec', width: '90%', display: 'flex', alignItems: 'center', flexDirection: 'column', borderBottomLeftRadius: 6, borderBottomRightRadius: 6, borderStyle: 'solid', borderBottomWidth: 1, borderLeftWidth: 1, borderRightWidth: 1, borderTopWidth: 0, marginBottom: 15 }}>
-            {this.props.data.name}
-          </h>
-          <div style={{ display: 'flex', width: '100%', height: '100%', marginTop: 10 }}>
-            {this.props.data.columns.map((subcolumn, i) => <Column data={subcolumn} key={i} addEditColumn={this.props.addEditColumn} />)
-            }
-          </div>
-          {/*this.props.cards.map((card, i) => <Card id={card.id} name={card.name} expiration={card.expiration} owner={card.owner} tasks={card.tasks} key={i} />)*/}
+  constructor() {
+    super();
+    this.renderCards = this.renderCards.bind(this);
+  }
 
-          { isOver &&
-            <CardEmpty height={this.props.cardHeight} width={this.props.cardWidth} />
-          }
-        </div>
+  renderCards(cards) {
+    if (cards) {
+      return cards.map(card => <Card data={card} key={card.id} />);
+    }
+
+    return null;
+  }
+
+  render() {
+    // const { connectDropTarget, isOver, canDrop } = this.props;
+    const cards = this.props.cards;
+    return (
+      <div style={{ width: 250, borderRightWidth: 2, borderLeftWidth: 2, borderTopWidth: 2, borderStyle: 'solid', borderColor: 'white', display: 'flex', alignItems: 'center', flexDirection: 'column', backgroundColor: '#f5fbef' }}>
+        {this.renderCards(cards)}
+        {/* isOver &&
+          <CardEmpty height={this.props.cardHeight} width={this.props.cardWidth} />
+        */}
       </div>
     );
   }
 }
 
 Column.defaultProps = {
-  name: '',
-  cards: [],
-  color: '',
+  cards: []
 };
 
 Column.propTypes = {
-  name: PropTypes.string,
   cards: PropTypes.array,
-  color: PropTypes.string,
 };
 
 

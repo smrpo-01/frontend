@@ -128,11 +128,17 @@ class MainApp extends Component {
             pad={{ horizontal: 'medium', vertical: 'none' }}
           >
             <Switch>
-              <Route exact path='/home' render={props => (<Home {...props} changeBoard={this.changeBoard} />)} />
+              <Route exact path='/home' render={props =>
+                (<Home {...props} changeBoard={this.changeBoard} />)
+              } />
               <Route exact path='/management' render={props => (<Management {...props} />)} />
-              <Route exact path='/board' render={props => (<Board {...props} board={this.state.appState.defaultBoard} />)} />
+              <Route exact path='/board' render={props =>
+                (<Board {...props} board={this.state.appState.defaultBoard} userRoles={this.state.userData} />)
+              } />
               <Route exact path='/board/new' render={props => (<BoardNew {...props} />)} />
-              <Route exact path='/board/edit' render={props => (<BoardEdit {...props} boardId={this.state.appState.defaultBoard} />)} />
+              <Route exact path='/board/edit' render={props =>
+                (<BoardEdit {...props} boardId={this.state.appState.defaultBoard} />)
+              } />
               <Route path='/administration' render={props => (<Administration {...props} />)} />
               <Route path='/analitycs' render={props => (<Analitycs {...props} />)} />
               <Redirect to='/home' />
