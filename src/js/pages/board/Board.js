@@ -50,10 +50,10 @@ class Board extends Component {
     }
   }
 
-  //componentWillMount() {
-    //this.props.allBoardsQuery.refetch();
-    //this.props.allCardsQuery.refetch();
-  //}
+  componentWillMount() {
+    this.props.allBoardsQuery.refetch();
+    this.props.allCardsQuery.refetch();
+  }
 
   renderNames(column, color) {
     return (
