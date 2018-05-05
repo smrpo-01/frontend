@@ -2,3 +2,5 @@ node_modules/**
 dist/**
 dist-server/**
 coverage/**
+src/js/pages/board/**
+src/js/pages/home/**

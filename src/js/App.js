@@ -17,6 +17,7 @@ import Home from './pages/home/Home';
 import Board from './pages/board/Board';
 import Management from './pages/management/Management';
 import Administration from './pages/administration/Administration';
+import Analitycs from './pages/analitycs/Analitycs';
 import BoardNew from './pages/board/BoardNew';
 import BoardEdit from './pages/board/BoardEdit';
 
@@ -139,6 +140,7 @@ class MainApp extends Component {
                 (<BoardEdit {...props} boardId={this.state.appState.defaultBoard} />)
               } />
               <Route path='/administration' render={props => (<Administration {...props} />)} />
+              <Route path='/analitycs' render={props => (<Analitycs {...props} boardId={this.state.appState.defaultBoard} />)} />
               <Redirect to='/home' />
             </Switch>
 
