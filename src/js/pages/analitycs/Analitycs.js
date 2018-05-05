@@ -39,11 +39,11 @@ class Analitycs extends Component {
           </Tab>
 
           <Tab title='Pregled dela'>
-            <FilterGraphTemplate boardId={this.props.boardId} type={'kumulativeFlow'} />
+            <FilterGraphTemplate boardId={this.props.boardId} type={'devWork'} />
           </Tab>
 
           <Tab title='Kršitve WIP'>
-            <FilterGraphTemplate boardId={this.props.boardId} type={'kumulativeFlow'} />
+            <FilterGraphTemplate boardId={this.props.boardId} type={'wip'} />
           </Tab>
         </Tabs>
       </PageTemplate>

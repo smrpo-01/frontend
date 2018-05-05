@@ -179,8 +179,8 @@ class FilterData extends Component {
     };
 
     if (this.state.projectId === null) { error.project = ' '; valid = false; }
-    if (this.state.columnFromId === null) { error.columnFrom = ' '; valid = false; }
-    if (this.state.columnToId === null) { error.columnTo = ' '; valid = false; }
+    if (this.props.type !== 'devWork' && this.state.columnFromId === null) { error.columnFrom = ' '; valid = false; }
+    if (this.props.type !== 'devWork' && this.state.columnToId === null) { error.columnTo = ' '; valid = false; }
     if (this.props.type === 'kumulativeFlow' && this.state.dateFrom === '') {
       error.dateFrom = ' ';
       valid = false;
@@ -200,7 +200,8 @@ class FilterData extends Component {
     if (!this.validateForm()) return;
     const filterData = {};
     filterData.projectId = parseInt(this.state.projectId, 10);
-    filterData.cardTypeId = this.state.cardType.map(type => type.value.id);
+    if (this.state.cardType !== null) filterData.cardTypeId = this.state.cardType.map(type => type.value.id);
+    else filterData.cardTypeId = [];
     // estimate
     filterData.estimateFrom = parseFloat(this.state.estimateFrom);
     filterData.estimateTo = parseFloat(this.state.estimateTo);
@@ -276,37 +277,40 @@ class FilterData extends Component {
             />
           </FormField>
 
-          <FormLegend label={'Mejna stolpca'} />
-          <FormField error={this.state.error.columnFrom}>
-            <Select
-              id='columnFrom'
-              placeHolder='Testiranje'
-              value={this.state.columnFrom}
-              options={this.state.columnsOptions}
-              onChange={event =>
-                this.setState({
-                  columnFrom: event.option.label,
-                  columnFromId: event.option.value.id,
-                })
-              }
-            />
-          </FormField>
+          {(this.props.type !== 'devWork') &&
+          <div>
+            <FormLegend label={'Mejna stolpca'} />
+            <FormField error={this.state.error.columnFrom}>
+              <Select
+                id='columnFrom'
+                placeHolder='Testiranje'
+                value={this.state.columnFrom}
+                options={this.state.columnsOptions}
+                onChange={event =>
+                  this.setState({
+                    columnFrom: event.option.label,
+                    columnFromId: event.option.value.id,
+                  })
+                }
+              />
+            </FormField>
 
-          <FormField error={this.state.error.columnTo}>
-            <Select
-              id='columnTo'
-              placeHolder='Integracija'
-              value={this.state.columnTo}
-              options={this.state.columnsOptions}
-              onChange={event =>
-                this.setState({
-                  columnTo: event.option.label,
-                  columnToId: event.option.value.id,
-                })
-              }
-            />
-          </FormField>
-
+            <FormField error={this.state.error.columnTo}>
+              <Select
+                id='columnTo'
+                placeHolder='Integracija'
+                value={this.state.columnTo}
+                options={this.state.columnsOptions}
+                onChange={event =>
+                  this.setState({
+                    columnTo: event.option.label,
+                    columnToId: event.option.value.id,
+                  })
+                }
+              />
+            </FormField>
+          </div>
+          }
 
           {/* Časovni interval */}
           {(this.props.type === 'kumulativeFlow') &&

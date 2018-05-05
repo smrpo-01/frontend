@@ -6,6 +6,7 @@ import PageTemplate from '../../templates/PageTemplate';
 import FilterData from './FilterData';
 import LeadTimeGraph from './LeadTimeGraph';
 import KumulativeFlowGraph from './KumulativeFlowGraph';
+import WorkPerDevGraph from './WorkPerDevGraph';
 
 // Grommet components
 import Section from 'grommet/components/Section';
@@ -49,6 +50,15 @@ class FilterGraphTemplate extends Component {
           filterData={this.state.filterData}
         />
       );
+    } else if (type === 'devWork') {
+      return (
+        <WorkPerDevGraph
+          boardId={this.props.boardId}
+          filterData={this.state.filterData}
+        />
+      );
+    } else if (type === 'wip') {
+      return null;
     }
 
     return null;
@@ -73,7 +83,7 @@ class FilterGraphTemplate extends Component {
 FilterGraphTemplate.defaultProps = {};
 FilterGraphTemplate.propTypes = {
   boardId: PropTypes.string.isRequired,
-  type: PropTypes.oneOf(['leadTime', 'kumulativeFlow']).isRequired
+  type: PropTypes.oneOf(['leadTime', 'kumulativeFlow', 'devWork', 'wip']).isRequired
 };
 
 export default FilterGraphTemplate;
