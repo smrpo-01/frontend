@@ -117,7 +117,10 @@ class Board extends Component {
   }
 
   moveCard(column, card, force = '') {
-    console.log(force)
+    const user = sessionStorage.getItem('user');
+    const userId = JSON.parse(user).id;
+    console.log(userId);
+
     const cards = this.state.cards.map(c => {
       if (card.id === c.id) {
         c = {
@@ -141,6 +144,7 @@ class Board extends Component {
         cardId: parseInt(card.id, 10),
         toColumnId: column.id,
         force: force,
+        userId,
       },
       refetchQueries: [{
         query: allCardsQuery,
@@ -341,7 +345,7 @@ export const allCardsQuery = gql`query allCards($id: Int!) {
 }`;
 
 
-const moveCardMutation = gql`mutation moveCard($cardId: Int!, $toColumnId: String!, $force: String!) {
+const moveCardMutation = gql`mutation moveCard($cardId: Int!, $toColumnId: String!, $force: String!, $userId: userId) {
   moveCard(cardId: $cardId, toColumnId: $toColumnId, force: $force) {
     ok
   }
