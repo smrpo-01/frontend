@@ -52,7 +52,7 @@ class WipGraph extends Component {
               <TableRow key={rowData.id} >
                 <td>{rowData.card.cardNumber}</td>
                 <td>{rowData.card.name}</td>
-                <td>{rowData.timestamp}</td>
+                <td>{rowData.siTimestamp}</td>
                 <td>{rowData.toColumn.name}</td>
                 <td>{rowData.userTeam.member.firstName + ' ' + rowData.userTeam.member.lastName}</td>
                 <td>{rowData.userTeam.member.email}</td>
@@ -104,7 +104,7 @@ export const getGraphDataQuery = gql`
         cardNumber
         name
       }
-      timestamp
+      siTimestamp
       toColumn {
         id
         name
