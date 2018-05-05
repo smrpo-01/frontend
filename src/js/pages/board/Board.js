@@ -345,8 +345,8 @@ export const allCardsQuery = gql`query allCards($id: Int!) {
 }`;
 
 
-const moveCardMutation = gql`mutation moveCard($cardId: Int!, $toColumnId: String!, $force: String!, $userId: userId) {
-  moveCard(cardId: $cardId, toColumnId: $toColumnId, force: $force) {
+const moveCardMutation = gql`mutation moveCard($cardId: Int!, $toColumnId: String!, $force: String!, $userId: Int!) {
+  moveCard(cardId: $cardId, toColumnId: $toColumnId, force: $force, userId: $userId) {
     ok
   }
 }`;
