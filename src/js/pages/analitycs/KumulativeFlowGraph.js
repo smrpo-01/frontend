@@ -106,7 +106,7 @@ class LeadTimeGraph extends Component {
           />
           <VerticalGridLines />
           <HorizontalGridLines />
-          <XAxis />
+          <XAxis tickLabelAngle={-90} tickSize={0} tickPadding={0} />
           <YAxis />
 
           {this.prepareData(cardsPerDay).map((val, i) =>

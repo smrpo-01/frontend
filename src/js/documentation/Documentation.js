@@ -74,6 +74,22 @@ export const loginPage = (
 );
 
 
+export const graphsHelp = (
+  <Article>
+    <Header>
+      <Heading>Pomoč pri uporabi grafov</Heading>
+    </Header>
+    <Section>
+      Na strani izberite tip grafa, ki ga želite prikazati. Nato izpolnite formo z ustreznimi parametri.
+      Za izris grafa je potrebno pritisniti puščico zraven naslova "Filter podatkov".
+      Če želite posodobiti graf, spremenite ustrezna polja v formi in ponovno pritisnite puščico.
+    </Section>
+    <Footer>
+      Help footer
+    </Footer>
+  </Article>
+);
+
 export const helpTemplate = (
   <Article>
     <Header>
