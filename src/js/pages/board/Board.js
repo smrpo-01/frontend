@@ -156,7 +156,7 @@ class Board extends Component {
         moveCard: card,
         moveColumn: column,
       });
-    })
+    });
   }
 
   showMore(card) {

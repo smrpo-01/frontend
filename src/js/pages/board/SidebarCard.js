@@ -182,10 +182,14 @@ class SidebarCard extends Component {
               });
             });
         } else {
+          const user = sessionStorage.getItem('user');
+          const userId = JSON.parse(user).id;
+
           this.props.addCardMutation({
             variables: {
               cardData,
               boardId: this.props.boardId,
+              userId,
             },
             refetchQueries: [{
               query: allCardsQuery,
@@ -477,8 +481,8 @@ SidebarCard.defaultProps = {
   columnData: null,
 };
 
-const addCardMutation = gql`mutation addCard($cardData: CardInput!, $boardId: Int!){
-  addCard(cardData: $cardData, boardId: $boardId) {
+const addCardMutation = gql`mutation addCard($cardData: CardInput!, $boardId: Int!, $userId: Int!){
+  addCard(cardData: $cardData, boardId: $boardId, userId: $userId) {
     ok
   }
 }`;

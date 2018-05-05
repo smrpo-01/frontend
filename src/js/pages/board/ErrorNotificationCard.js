@@ -9,8 +9,16 @@ import Header from 'grommet/components/Header';
 import Heading from 'grommet/components/Heading';
 import Footer from 'grommet/components/Footer';
 import Layer from 'grommet/components/Layer';
+import TextInput from 'grommet/components/TextInput';
 
 class ErrorNotificationCard extends Component {
+  constructor() {
+    super();
+    this.state = {
+      force: '',
+    }
+  }
+
   render() {
     return (
       <Layer>
@@ -21,6 +29,15 @@ class ErrorNotificationCard extends Component {
               {this.props.error}
             </h>
           </div>
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <h style={{ color: 'red' }}>
+              Razlog za nadaljevanje:
+            </h>
+          </div>
+          <TextInput
+            value={this.state.force}
+            onDOMChange={event => this.setState({ force: event.target.value })}
+          />
           <Footer pad={{ vertical: 'medium', between: 'medium' }} justify='center'>
             <Button label='Prekliči'
               primary={false}
@@ -28,7 +45,7 @@ class ErrorNotificationCard extends Component {
             />
             <Button label='Nadaljuj'
               primary={true}
-              onClick={() => this.props.continue('For Real')}
+              onClick={() => this.props.continue(this.state.force)}
             />
           </Footer>
         </Article>
