@@ -15,7 +15,7 @@ import {
   VerticalGridLines,
   HorizontalGridLines,
   VerticalBarSeries,
-  DiscreteColorLegend
+  DiscreteColorLegend,
 } from 'react-vis';
 
 // Custom
@@ -60,7 +60,7 @@ class LeadTimeGraph extends Component {
   prepareData(data) {
     let tmp = [];
     for (let i = 0; i < data.length; i++) {
-      let cardId = data[i].id;
+      let cardId = data[i].name;
       let cardTime = data[i].cardPerColumnTime;
       // we need to init 2d array
 
@@ -83,7 +83,7 @@ class LeadTimeGraph extends Component {
     if (loading) {
       return <Loading />;
     } else if (error) {
-      // return <p style={{ color: 'red' }}>{'Ni podatkov za prikaz grafa. Posodobite iskalni niz. Preverite izbor stolpcev.'}</p>;
+      console.error(error);
       return null;
     } else if (filterCards.length === 0) {
       return <p><b>{'Ni podatkov za prikaz grafa. Posodobite iskalni niz.'}</b></p>;
@@ -112,7 +112,7 @@ class LeadTimeGraph extends Component {
         <Box pad='medium' />
 
         <XYPlot
-          className='clustered-stacked-bar-chart-example'
+          className='lead-time-graph'
           xType='ordinal'
           stackBy='y'
           width={this.state.width}
@@ -124,7 +124,7 @@ class LeadTimeGraph extends Component {
           />
           <VerticalGridLines />
           <HorizontalGridLines />
-          <XAxis />
+          <XAxis tickLabelAngle={-10} tickSize={10} tickPadding={0} />
           <YAxis />
 
           {this.prepareData(filterCards).map((bar, i) =>
