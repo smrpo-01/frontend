@@ -17,6 +17,8 @@ class Home extends Component {
     super();
     this.changeAndSetBoard = this.changeAndSetBoard.bind(this);
     this.changeAndSetBoardEdit = this.changeAndSetBoardEdit.bind(this);
+    this.changeAndShowAnalitycs = this.changeAndShowAnalitycs.bind(this);
+
     this.state = {
       boards: [],
       userRoles: [],
@@ -47,6 +49,11 @@ class Home extends Component {
     this.props.history.push('./../board/edit');
   }
 
+  changeAndShowAnalitycs(boardId) {
+    this.props.changeBoard(boardId);
+    this.props.history.push('./../analitycs');
+  }
+
 
   render() {
     const { data: { loading, error, getUserBoards } } = this.props;
@@ -72,6 +79,7 @@ class Home extends Component {
               board={board}
               changeBoard={this.changeAndSetBoard}
               editBoard={this.changeAndSetBoardEdit}
+              showAnalitycs={this.changeAndShowAnalitycs}
               push={this.props.history.push}
               canEdit={this.state.userRoles.includes('km')}
             />)

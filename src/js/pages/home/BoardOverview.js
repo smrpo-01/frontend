@@ -1,12 +1,15 @@
 import React, { Component } from 'react';
-import EditIcon from 'grommet/components/icons/base/Edit';
 import PropTypes from 'prop-types';
+
+import EditIcon from 'grommet/components/icons/base/Edit';
+import AnalyticsIcon from 'grommet/components/icons/base/Analytics';
 
 class BoardOverview extends Component {
   constructor() {
     super();
     this.state = {
-      opacity: 1
+      opacity: 1,
+      opacityAnalisys: 1,
     };
   }
   render() {
@@ -17,8 +20,26 @@ class BoardOverview extends Component {
             {this.props.board.name}
           </h4>
           { this.props.canEdit &&
-            <div style={{ cursor: 'pointer', opacity: this.state.opacity }} onClick={(e) => { e.stopPropagation(); }} onMouseEnter={() => this.setState({ opacity: 0.5 })} onMouseLeave={() => this.setState({ opacity: 1 })} role='button' tabIndex='0'>
-              <EditIcon onClick={() => this.props.editBoard(this.props.board.id)} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', flexDirection: 'row' }}>
+              <div
+                style={{ cursor: 'pointer', opacity: this.state.opacity }}
+                onClick={(e) => { e.stopPropagation(); }}
+                onMouseEnter={() => this.setState({ opacity: 0.5 })}
+                onMouseLeave={() => this.setState({ opacity: 1 })}
+                role='button'
+                tabIndex='0'
+              >
+                <EditIcon onClick={() => this.props.editBoard(this.props.board.id)} />
+              </div>
+              <div
+                style={{ cursor: 'pointer', paddingLeft: 10, opacity: this.state.opacityAnalisys }}
+                onClick={(e) => { e.stopPropagation(); }}
+                onMouseEnter={() => this.setState({ opacityAnalisys: 0.5 })}
+                onMouseLeave={() => this.setState({ opacityAnalisys: 1 })}
+                role='button' tabIndex='0'
+              >
+                <AnalyticsIcon onClick={() => this.props.showAnalitycs(this.props.board.id)} />
+              </div>
             </div>
           }
         </div>
