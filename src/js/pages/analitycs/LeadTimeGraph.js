@@ -78,13 +78,14 @@ class LeadTimeGraph extends Component {
 
   render() {
     const { queryGraphData: { loading, error, filterCards, avgLeadTime } } = this.props;
-    console.log(filterCards);
 
     if (loading) {
       return <Loading />;
     } else if (error) {
       return <p style={{ color: 'red' }}>Error!</p>;
-    } else if (filterCards.length === 0) return null;
+    } else if (filterCards.length === 0) {
+      return <p><b>{'Ni podatkov za prikaz grafa. Posodobite iskalni niz.'}</b></p>;
+    }
 
     return (
       <Box pad='medium' >
@@ -188,7 +189,7 @@ const LeadTimeGraphWithQuery = compose(
     options: props => ({
       variables: {
         projectId: props.filterData.projectId,
-        cardType: [props.filterData.cardTypeId],
+        cardType: props.filterData.cardTypeId,
         creationStart: props.filterData.creationStart,
         creationEnd: props.filterData.creationEnd,
         doneStart: props.filterData.doneStart,

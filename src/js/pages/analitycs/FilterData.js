@@ -33,6 +33,7 @@ class FilterData extends Component {
     this.filterSuggestions = this.filterSuggestions.bind(this);
     this.updateParent = this.updateParent.bind(this);
     this.prepareData = this.prepareData.bind(this);
+    this.validateForm = this.validateForm.bind(this);
 
     this.state = {
       project: '',
@@ -64,15 +65,25 @@ class FilterData extends Component {
       estimateTo: 1,
 
       cardType: null,
-      cardTypeId: null,
       cardTypeOptions: [],
       cardTypeOptionsAll: [],
 
       error: {
         project: '',
+        cardType: '',
+        columnFrom: '',
+        columnTo: '',
+        dateFrom: '',
+        dateTo: '',
+        estimateFrom: '',
+        estimateTo: '',
+        creationStart: '',
+        creationEnd: '',
+        doneStart: '',
+        doneEnd: '',
+        devStart: '',
+        devEnd: '',
         generalError: '',
-        cardCreatedFrom: '',
-        cardCreatedTo: '',
       },
     };
   }
@@ -84,6 +95,7 @@ class FilterData extends Component {
     }
   }
 
+
   componentWillReceiveProps(nextProps) {
     if (nextProps.queryBoardData.allBoards !== undefined) {
       this.prepareData(nextProps.queryBoardData.allBoards[0]);
@@ -91,6 +103,7 @@ class FilterData extends Component {
   }
 
 
+  // prepares data for form population
   prepareData(data) {
     let projectOptions = data.projects.map(project => ({
       value: project,
@@ -144,10 +157,50 @@ class FilterData extends Component {
     }
   }
 
+  // validates form for required fields
+  validateForm() {
+    let valid = true;
+    let error = {
+      project: '',
+      cardType: '',
+      columnFrom: '',
+      columnTo: '',
+      dateFrom: '',
+      dateTo: '',
+      estimateFrom: '',
+      estimateTo: '',
+      creationStart: '',
+      creationEnd: '',
+      doneStart: '',
+      doneEnd: '',
+      devStart: '',
+      devEnd: '',
+      generalError: '',
+    };
+
+    if (this.state.projectId === null) { error.project = ' '; valid = false; }
+    if (this.state.columnFromId === null) { error.columnFrom = ' '; valid = false; }
+    if (this.state.columnToId === null) { error.columnTo = ' '; valid = false; }
+    if (this.props.type === 'kumulativeFlow' && this.state.dateFrom === '') {
+      error.dateFrom = ' ';
+      valid = false;
+    }
+    if (this.props.type === 'kumulativeFlow' && this.state.dateTo === '') {
+      error.dateTo = ' ';
+      valid = false;
+    }
+
+    if (!valid) error.generalError = 'Izpolnite obvezna polja.';
+    this.setState({ error });
+    return valid;
+  }
+
+  // updates parent with filter data. This is used for graph data query
   updateParent() {
+    if (!this.validateForm()) return;
     const filterData = {};
     filterData.projectId = parseInt(this.state.projectId, 10);
-    filterData.cardTypeId = this.state.cardTypeId;
+    filterData.cardTypeId = this.state.cardType.map(type => type.value.id);
     // estimate
     filterData.estimateFrom = parseFloat(this.state.estimateFrom);
     filterData.estimateTo = parseFloat(this.state.estimateTo);
@@ -170,6 +223,7 @@ class FilterData extends Component {
     this.props.setGraphFilter(filterData);
   }
 
+
   render() {
     return (
       <Form compact>
@@ -179,6 +233,11 @@ class FilterData extends Component {
             <Anchor label='Filter podatkov' icon={<FormNextLinkIcon />} reverse primary onClick={this.updateParent} />
           </Heading>
         </Header>
+
+        {(this.state.error.generalError !== undefined) ?
+          <Section className='color-red' pad='none'>{this.state.error.generalError}</Section>
+          : null
+        }
 
         <FormFields>
           <FormLegend label={'Projekt'} />
@@ -200,16 +259,16 @@ class FilterData extends Component {
           </FormField>
 
           <FormLegend label={'Tip kartice'} />
-          <FormField error={this.state.error.project}>
+          <FormField error={this.state.error.cardType}>
             <Select
               id='cardType'
-              value={this.state.cardType}
               placeHolder='Nujna zahteva'
+              multiple={true}
+              value={this.state.cardType}
               options={this.state.cardTypeOptions}
               onChange={event =>
                 this.setState({
-                  cardType: event.option.label,
-                  cardTypeId: event.option.value.id,
+                  cardType: event.value,
                   cardTypeOptions: this.state.cardTypeOptionsAll
                 })
               }
@@ -218,7 +277,7 @@ class FilterData extends Component {
           </FormField>
 
           <FormLegend label={'Mejna stolpca'} />
-          <FormField error={this.state.error.column}>
+          <FormField error={this.state.error.columnFrom}>
             <Select
               id='columnFrom'
               placeHolder='Testiranje'
@@ -233,7 +292,7 @@ class FilterData extends Component {
             />
           </FormField>
 
-          <FormField error={this.state.error.column}>
+          <FormField error={this.state.error.columnTo}>
             <Select
               id='columnTo'
               placeHolder='Integracija'
@@ -275,7 +334,7 @@ class FilterData extends Component {
 
           {/* zahtevnost kartice */}
           <FormLegend label={'Zahtevnost kartice'} />
-          <FormField label='Od' error={this.state.error.cardCreatedFrom}>
+          <FormField label='Od' error={this.state.error.estimateFrom}>
             <NumberInput
               id='estimateFrom'
               min={this.state.estimateMin}
@@ -286,7 +345,7 @@ class FilterData extends Component {
 
           </FormField>
 
-          <FormField label='Do' error={this.state.error.cardCreatedFrom}>
+          <FormField label='Do' error={this.state.error.estimateTo}>
             <NumberInput
               id='estimateTo'
               min={this.state.estimateMin}
@@ -297,9 +356,9 @@ class FilterData extends Component {
           </FormField>
 
           <FormLegend label={'Interval v katerem je bila kartica kreirana'} />
-          <FormField label='Od' error={this.state.error.cardCreatedFrom}>
+          <FormField label='Od' error={this.state.error.creationStart}>
             <DateTime
-              id='cardDateStart'
+              id='creationStart'
               format={dateFormat}
               value={this.state.creationStart}
               onChange={e => this.setState({ creationStart: e })}
@@ -308,7 +367,7 @@ class FilterData extends Component {
 
           <FormField label='Do' error={this.state.error.creationEnd}>
             <DateTime
-              id='cardDateStart'
+              id='creationEnd'
               format={dateFormat}
               value={this.state.creationEnd}
               onChange={e => this.setState({ creationEnd: e })}
@@ -318,18 +377,18 @@ class FilterData extends Component {
 
           {/* Kartica končana */}
           <FormLegend label={'Interval v katerem je bila kartica končana'} />
-          <FormField label='Od' error={this.state.error.cardCreatedFrom}>
+          <FormField label='Od' error={this.state.error.doneStart}>
             <DateTime
-              id='cardDateStart'
+              id='doneStart'
               format={dateFormat}
               value={this.state.doneStart}
               onChange={e => this.setState({ doneStart: e })}
             />
           </FormField>
 
-          <FormField label='Do' error={this.state.error.creationEnd}>
+          <FormField label='Do' error={this.state.error.doneEnd}>
             <DateTime
-              id='cardDateStart'
+              id='doneEnd'
               format={dateFormat}
               value={this.state.doneEnd}
               onChange={e => this.setState({ doneEnd: e })}
@@ -339,18 +398,18 @@ class FilterData extends Component {
 
           {/* Pričel razvoj */}
           <FormLegend label={'Interval v katerem je pričel razvoj'} />
-          <FormField label='Od' error={this.state.error.cardCreatedFrom}>
+          <FormField label='Od' error={this.state.error.devStart}>
             <DateTime
-              id='cardDateStart'
+              id='devStart'
               format={dateFormat}
               value={this.state.devStart}
               onChange={e => this.setState({ devStart: e })}
             />
           </FormField>
 
-          <FormField label='Do' error={this.state.error.creationEnd}>
+          <FormField label='Do' error={this.state.error.devEnd}>
             <DateTime
-              id='cardDateStart'
+              id='devEnd'
               format={dateFormat}
               value={this.state.devEnd}
               onChange={e => this.setState({ devEnd: e })}
@@ -359,11 +418,6 @@ class FilterData extends Component {
 
 
         </FormFields>
-
-        {(this.state.error.generalError !== undefined) ?
-          <Section className='color-red padding-bottom-0'>{this.state.error.generalError}</Section>
-          : null
-        }
 
         <Footer pad={{ vertical: 'medium', between: 'medium' }} />
       </Form>

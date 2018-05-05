@@ -106,7 +106,7 @@ class LeadTimeGraph extends Component {
           />
           <VerticalGridLines />
           <HorizontalGridLines />
-          <XAxis />
+          <XAxis tickLabelAngle={-90} tickSize={0} tickPadding={0} />
           <YAxis />
 
           {this.prepareData(cardsPerDay).map((val, i) =>
@@ -173,7 +173,7 @@ const LeadTimeGraphWithQuery = compose(
     options: props => ({
       variables: {
         projectId: props.filterData.projectId,
-        cardType: [props.filterData.cardTypeId],
+        cardType: props.filterData.cardTypeId,
         creationStart: props.filterData.creationStart,
         creationEnd: props.filterData.creationEnd,
         doneStart: props.filterData.doneStart,
