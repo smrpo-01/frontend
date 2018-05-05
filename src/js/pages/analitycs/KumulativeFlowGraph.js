@@ -79,6 +79,7 @@ class LeadTimeGraph extends Component {
     if (loading) {
       return <Loading />;
     } else if (error) {
+      console.error(error);
       return null;
     }
 
