@@ -27,8 +27,9 @@ const cLen = colorPalette.length;
 class LeadTimeGraph extends Component {
   constructor(props) {
     super(props);
-    this.state = { width: 0, height: 0 };
     this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
+
+    this.state = { width: 0, height: 0 };
   }
 
 

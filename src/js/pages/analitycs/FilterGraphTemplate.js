@@ -7,6 +7,7 @@ import FilterData from './FilterData';
 import LeadTimeGraph from './LeadTimeGraph';
 import KumulativeFlowGraph from './KumulativeFlowGraph';
 import WorkPerDevGraph from './WorkPerDevGraph';
+import WipGraph from './WipGraph';
 
 // Grommet components
 import Section from 'grommet/components/Section';
@@ -58,7 +59,12 @@ class FilterGraphTemplate extends Component {
         />
       );
     } else if (type === 'wip') {
-      return null;
+      return (
+        <WipGraph
+          boardId={this.props.boardId}
+          filterData={this.state.filterData}
+        />
+      );
     }
 
     return null;

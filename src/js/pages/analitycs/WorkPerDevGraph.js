@@ -21,12 +21,13 @@ const cLen = colorPalette.length;
 class WorkPerDevGraph extends Component {
   constructor(props) {
     super(props);
-    this.state = { width: 0, height: 0 };
     this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
 
     this.state = {
       cards: false,
       points: false,
+      width: 0,
+      height: 0,
     };
   }
 

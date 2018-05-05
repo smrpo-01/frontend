@@ -179,8 +179,8 @@ class FilterData extends Component {
     };
 
     if (this.state.projectId === null) { error.project = ' '; valid = false; }
-    if (this.props.type !== 'devWork' && this.state.columnFromId === null) { error.columnFrom = ' '; valid = false; }
-    if (this.props.type !== 'devWork' && this.state.columnToId === null) { error.columnTo = ' '; valid = false; }
+    if (this.props.type !== 'devWork' && this.props.type !== 'wip' && this.state.columnFromId === null) { error.columnFrom = ' '; valid = false; }
+    if (this.props.type !== 'devWork' && this.props.type !== 'wip' && this.state.columnToId === null) { error.columnTo = ' '; valid = false; }
     if (this.props.type === 'kumulativeFlow' && this.state.dateFrom === '') {
       error.dateFrom = ' ';
       valid = false;
@@ -277,7 +277,7 @@ class FilterData extends Component {
             />
           </FormField>
 
-          {(this.props.type !== 'devWork') &&
+          {(this.props.type !== 'devWork' && this.props.type !== 'wip') &&
           <div>
             <FormLegend label={'Mejna stolpca'} />
             <FormField error={this.state.error.columnFrom}>
