@@ -24,7 +24,7 @@ class Analitycs extends Component {
   }
 
   render() {
-    console.log(this.props.boardId);
+    // console.log(this.props.boardId);
     return (
       <PageTemplate
         header={<Title>Analiza Tabla 1</Title>}

@@ -83,7 +83,8 @@ class LeadTimeGraph extends Component {
     if (loading) {
       return <Loading />;
     } else if (error) {
-      return <p style={{ color: 'red' }}>{'Ni podatkov za prikaz grafa. Posodobite iskalni niz. Preverite izbor stolpcev.'}</p>;
+      // return <p style={{ color: 'red' }}>{'Ni podatkov za prikaz grafa. Posodobite iskalni niz. Preverite izbor stolpcev.'}</p>;
+      return null;
     } else if (filterCards.length === 0) {
       return <p><b>{'Ni podatkov za prikaz grafa. Posodobite iskalni niz.'}</b></p>;
     }

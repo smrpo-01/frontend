@@ -30,7 +30,10 @@ class WipGraph extends Component {
     if (loading) {
       return <Loading />;
     } else if (error) {
-      return <p><b>{'Ni podatkov za prikaz grafa. Posodobite iskalni niz.'}</b></p>;
+      // return <p style={{ color: 'red' }}>{'Prišlo je do napake. Posodobite iskalni niz.'}</p>;
+      return null;
+    } else if (wipLogs.length === 0) {
+      return <p><b>{'Ni podatkov za prikaz tabele. Posodobite iskalni niz.'}</b></p>;
     }
 
     return (
