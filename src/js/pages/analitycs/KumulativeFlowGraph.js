@@ -80,7 +80,7 @@ class LeadTimeGraph extends Component {
       return <Loading />;
     } else if (error) {
       console.error(error);
-      return null;
+      return <p><b>{'Prišlo je do napake. Posodobite iskalni niz.'}</b></p>;
     }
 
     return (

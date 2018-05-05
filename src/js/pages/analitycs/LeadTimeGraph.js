@@ -84,7 +84,7 @@ class LeadTimeGraph extends Component {
       return <Loading />;
     } else if (error) {
       console.error(error);
-      return null;
+      return <p><b>{'Prišlo je do napake. Posodobite iskalni niz.'}</b></p>;
     } else if (filterCards.length === 0) {
       return <p><b>{'Ni podatkov za prikaz grafa. Posodobite iskalni niz.'}</b></p>;
     }
