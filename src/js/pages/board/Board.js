@@ -11,6 +11,8 @@ import AddChapterIcon from 'grommet/components/icons/base/AddChapter';
 import Button from 'grommet/components/Button';
 import SidebarCard from './SidebarCard';
 import uuid from 'uuid/v4';
+import ErrorNotificationCard from './ErrorNotificationCard';
+import SideBarCardMore from './SidebarCardMore';
 
 
 const colors = ['#a4b3a2', '#c87d5d', '#008080'];
@@ -25,11 +27,18 @@ class Board extends Component {
     this.renderNames = this.renderNames.bind(this);
     this.renderColumns = this.renderColumns.bind(this);
     this.renderProjects = this.renderProjects.bind(this);
+    this.moveCard = this.moveCard.bind(this);
+    this.showMore = this.showMore.bind(this);
+    this.editCard = this.editCard.bind(this);
 
     this.state = {
       name: '',
       projects: [],
       columns: [],
+      dialogError: false,
+      dialogErrorMessage: '',
+      toggleSidebard: false,
+      showMore: false,
     };
   }
 
@@ -107,13 +116,63 @@ class Board extends Component {
     );
   }
 
+  moveCard(column, card, force = '') {
+    console.log(force)
+    const cards = this.state.cards.map(c => {
+      if (card.id === c.id) {
+        c = {
+          ...card,
+          column: {
+            id: column.id,
+          }
+        };
+      }
+
+      return c;
+    });
+
+    this.setState({
+      cards,
+      dialogError: false,
+      previousCards: this.state.cards,
+    });
+    this.props.moveCardMutation({
+      variables: { 
+        cardId: parseInt(card.id, 10),
+        toColumnId: column.id,
+        force: force,
+      },
+      refetchQueries: [{
+        query: allCardsQuery,
+        variables: {
+          id: parseInt(this.props.board, 10)
+        }
+      }]
+    }).then(res => {
+    }).catch(err => {
+      this.setState({
+        dialogError: true,
+        dialogErrorMessage: err.message.split(':')[1],
+        moveCard: card,
+        moveColumn: column,
+      });
+    })
+  }
+
+  showMore(card) {
+    this.setState({
+      showMore: true,
+      showMoreCard: card,
+    });
+  }
+
   renderColumns(column, project) {
     const cards = this.state.cards.filter(card =>
       card.project.id === project.id && column.id === card.column.id
     );
 
     if (column.columns.length === 0) {
-      return (<Column data={column} project={project} key={`${column.id}${project.id}`} cards={cards} />);
+      return (<Column data={column} project={project} key={`${column.id}${project.id}`} cards={cards} moveCard={this.moveCard} showMore={this.showMore} />);
     }
     return (
       <div style={{ display: 'flex', borderRightWidth: 2, borderLeftWidth: 2, borderTopWidth: 2, borderBottomWidth: 0, borderStyle: 'solid', borderColor: 'white', }} key={uuid()}>
@@ -122,12 +181,18 @@ class Board extends Component {
     );
   }
 
+  editCard(card) {
+    this.setState({
+      showMore: false,
+      toggleSidebard: true,
+      modeEdit: true,
+      editCard: card,
+    });
+  }
+
   render() {
-    if (this.props.data && this.props.data.allCards) console.log(this.props.data.allCards.length);
     const user = sessionStorage.getItem('user');
-
     const roles = JSON.parse(user).roles;
-
     return (
       <div>
         <div style={{ display: 'inline-block', minWidth: '100%', }}>
@@ -174,10 +239,22 @@ class Board extends Component {
             closer={() => this.setState({ toggleSidebard: false })}
             columns={this.state.columns}
             boardId={parseInt(this.props.board, 10)}
+            modeEdit={this.state.modeEdit}
             data={{
               projects: this.state.projects,
-
+              card: this.state.editCard,
             }}/>
+        }
+        { this.state.showMore &&
+          <SideBarCardMore
+            closer={() => this.setState({ showMore: false })}
+            editCard={this.editCard}
+            data={{
+              card: this.state.showMoreCard,
+            }}/>
+        }
+        { this.state.dialogError &&
+          <ErrorNotificationCard error={this.state.dialogErrorMessage} closer={() => this.setState({ dialogError: false, cards: this.state.previousCards })} continue={(force) => this.moveCard(this.state.moveColumn, this.state.moveCard, force)} />
         }
       </div>
     );
@@ -231,6 +308,13 @@ export const allCardsQuery = gql`query allCards($id: Int!) {
     estimate
     project {
       id
+      name
+      team {
+        id
+        members {
+          id
+        }
+      }
     }
     expiration
     owner {
@@ -244,10 +328,24 @@ export const allCardsQuery = gql`query allCards($id: Int!) {
       id
       description
       done
+      assignee {
+        id
+        member {
+          id
+          firstName
+          lastName
+        }
+      }
     }
   }
 }`;
 
+
+const moveCardMutation = gql`mutation moveCard($cardId: Int!, $toColumnId: String!, $force: String!) {
+  moveCard(cardId: $cardId, toColumnId: $toColumnId, force: $force) {
+    ok
+  }
+}`;
 
 const boardGraphql = compose(
   graphql(getBoardQuery, {
@@ -257,6 +355,9 @@ const boardGraphql = compose(
   graphql(allCardsQuery, {
     name: 'allCardsQuery',
     options: props => ({ variables: { id: parseInt(props.board, 10) } })
+  }),
+  graphql(moveCardMutation, {
+    name: 'moveCardMutation'
   })
 )(Board);
 

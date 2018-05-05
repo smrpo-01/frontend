@@ -45,7 +45,7 @@ const transitionStylesTransform = {
 };
 
 
-class SidebarColumn extends Component {
+class SidebarCard extends Component {
   constructor() {
     super();
     this.onSubmit = this.onSubmit.bind(this);
@@ -55,10 +55,11 @@ class SidebarColumn extends Component {
     this.formatDate = this.formatDate.bind(this);
     this.findFirstColumn = this.findFirstColumn.bind(this);
     this.findPriorityColumn = this.findPriorityColumn.bind(this);
+    this.onDelete = this.onDelete.bind(this);
+    this.canDeleteBorderCheck = this.canDeleteBorderCheck.bind(this);
 
     this.state = {
       in: false,
-      id: uuid(),
       name: '',
       tasks: [],
       type: 0,
@@ -84,13 +85,40 @@ class SidebarColumn extends Component {
       return false;
     });
 
-    this.setState({
-      km,
-      po,
-      type: km ? 1 : 0,
-      projects,
-      userId,
-    });
+    if (this.props.modeEdit) {
+      const { data } = this.props;
+      const { card } = data;
+      this.setState({
+        id: card.id,
+        name: card.name,
+        description: card.description,
+        estimate: card.estimate,
+        selectedProject: {
+          value: card.project.name,
+          id: card.project.id
+        },
+        columnId: card.column.id,
+        type: card.type.id === 'A_1' ? 1 : 0,
+        expiration: this.formatDate(card.expiration, 'django'),
+        owner: {
+          value: `${card.owner.member.firstName} ${card.owner.member.lastName}`,
+          id: card.owner.member.id,
+        },
+        km,
+        po,
+        type: km ? 1 : 0,
+        projects,
+        userId,
+      });
+    } else {
+      this.setState({
+        km,
+        po,
+        type: km ? 1 : 0,
+        projects,
+        userId,
+      });
+    }
   }
 
   onSubmit() {
@@ -125,6 +153,7 @@ class SidebarColumn extends Component {
         filteredTasks = filteredTasks.map(task => ({ description: task.description, assigneeUserteamId: task.owner && parseInt(task.owner.id, 10) }));
 
         const cardData = {
+          id: this.state.id,
           name: this.state.name,
           description: this.state.description,
           typeId: parseInt(this.state.type, 10),
@@ -133,25 +162,43 @@ class SidebarColumn extends Component {
           estimate: parseFloat(this.state.estimate),
           ownerUserteamId: parseInt(this.state.owner.id, 10),
           tasks: filteredTasks,
-          columnId: column.id,
+          columnId: this.props.modeEdit && this.state.columnId || column.id,
         };
 
-        this.props.addCardMutation({
-          variables: {
-            cardData,
-            boardId: this.props.boardId,
-          },
-          refetchQueries: [{
-            query: allCardsQuery,
-            variables: { id: this.props.boardId }
-          }],
-        }).then(res => this.props.closer())
-          .catch(err => {
-            this.setState({
-              in: true,
-              notificationError: err.message.split(':')[1],
+        if (this.props.modeEdit) {
+          this.props.editCardMutation({
+            variables: {
+              cardData,
+            },
+            refetchQueries: [{
+              query: allCardsQuery,
+              variables: { id: this.props.boardId },
+            }]
+          }).then(res => this.props.closer())
+            .catch(err => {
+              this.setState({
+                in: true,
+                notificationError: err.message.split(':')[1],
+              });
             });
-          });
+        } else {
+          this.props.addCardMutation({
+            variables: {
+              cardData,
+              boardId: this.props.boardId,
+            },
+            refetchQueries: [{
+              query: allCardsQuery,
+              variables: { id: this.props.boardId }
+            }],
+          }).then(res => this.props.closer())
+            .catch(err => {
+              this.setState({
+                in: true,
+                notificationError: err.message.split(':')[1],
+              });
+            });
+        }
       }
     });
   }
@@ -232,6 +279,41 @@ class SidebarColumn extends Component {
     if (this.state.type !== value) {
       this.changeProject({ id: null, value: null });
       this.setState({ type: value });
+    }
+  }
+
+  canDeleteBorderCheck(columns) {
+    for (let c = 0; c < columns.length; c++) {
+      if (columns[c].id === this.state.columnId) return true;      
+      if (columns[c].priority) return false;
+
+      const returnedColumn = this.canDeleteBorderCheck(columns[c].columns);
+      if (returnedColumn === null) {
+        console.log(returnedColumn)
+      }
+    }
+
+    return null;
+  }
+
+  onDelete() {
+    let user = sessionStorage.getItem('user');
+    user = JSON.parse(user);
+    console.log(user)
+    const project = this.props.data.projects.filter(pr => pr.id === this.state.selectedProject.id)[0];
+
+    //const memberOfProject = project.team.members.map(m => m.id).includes(String(user.id));
+
+    //if( !memberOfProject ) {
+    //  console.log('Niste member projekta');
+    //}
+
+    const isPo = project.team.productOwner.idUser === user.id;
+    const isKM = project.team.kanbanMaster.idUser === user.id;
+    if (isPo && !this.canDeleteBorderCheck(this.props.columns)) {
+      console.log('Ste po ampak nemorate brisati')
+    } else if (isKM) {
+      
     }
   }
 
@@ -323,7 +405,6 @@ class SidebarColumn extends Component {
               <FormField label='Zahtevnost kartice'>
                 <NumberInput
                   min={0}
-                  defaultValue={0}
                   value={this.state.estimate}
                   step={0.1}
                   onChange={event => this.setState({ estimate: event.target.value })}
@@ -353,13 +434,13 @@ class SidebarColumn extends Component {
             <Footer pad={{ vertical: 'medium', between: 'medium' }}>
               {this.props.modeEdit && <Button
                 icon={<TrashIcon />}
-                onClick={() => this.props.completeAddEditColumn(null)}
+                onClick={() => this.onDelete()}
               />}
               <Button label='Prekliči'
                 secondary={true}
                 onClick={() => this.props.closer()}
               />
-              {this.props.modeEdit && <Button label='Uredi'
+              {this.props.modeEdit && <Button label='Shrani'
                 primary={true}
                 onClick={() => this.onSubmit()}
               />}
@@ -370,7 +451,7 @@ class SidebarColumn extends Component {
             </Footer>
           </Form>
           <Transition in={this.state.in} timeout={duration}>
-            {status => (<Notification message={this.state.notificationError}
+            {status => (<Notification message={this.state.notificationError || ''}
               size='small'
               status='critical'
               style={{
@@ -386,12 +467,12 @@ class SidebarColumn extends Component {
   }
 }
 
-SidebarColumn.propTypes = {
+SidebarCard.propTypes = {
   modeEdit: PropTypes.bool,
   closer: PropTypes.func.isRequired,
 };
 
-SidebarColumn.defaultProps = {
+SidebarCard.defaultProps = {
   modeEdit: false,
   columnData: null,
 };
@@ -402,6 +483,40 @@ const addCardMutation = gql`mutation addCard($cardData: CardInput!, $boardId: In
   }
 }`;
 
-export default graphql(addCardMutation, {
-  name: 'addCardMutation',
-})(SidebarColumn);
+const editCardMutation = gql`mutation editCard($cardData: CardInput!){
+  editCard(cardData: $cardData) {
+    ok
+  }
+}`;
+
+const whoCanEditQuery = gql`query whoCanEdit($userTeamId: Int!, $cardId: Int!){
+  whoCanEdit(userTeamId:$userTeamId, cardId: $cardId) {
+    cardName
+    cardDescription
+    projectName
+    owner
+    date
+    estimate
+    tasks
+  }
+}`
+
+export default compose(
+  graphql(addCardMutation, {
+    name: 'addCardMutation',
+  }),
+  graphql(editCardMutation, {
+    name: 'editCardMutation',
+  }),
+  //graphql(whoCanEditQuery, {
+    //name: 'whoCanEditQuery',
+    //options: props => {
+      //const user = sessionStorage.getItem('user');
+      //console.log(user)
+      //return ({ variables: {
+      //  userTeamId: 4,
+        //cardId: props.data.card.id,
+      //  cardId: 123
+      //}});
+    //}
+  )(SidebarCard);
