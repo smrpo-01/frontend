@@ -153,13 +153,23 @@ class Board extends Component {
         }
       }]
     }).then(res => {
+
     }).catch(err => {
-      this.setState({
-        dialogError: true,
-        dialogErrorMessage: err.message.split(':')[1],
-        moveCard: card,
-        moveColumn: column,
-      });
+      console.log(err.message.split(':')[1])
+      if (err.message.split(':')[1] !== ' Ne moreš premikati za več kot ena v levo/desno.') {
+        this.setState({
+          dialogError: true,
+          dialogErrorMessage: err.message.split(':')[1],
+          moveCard: card,
+          moveColumn: column,
+        });
+      } else {
+        this.setState({
+          cards: this.state.previousCards,
+          dialogError: true,
+          dialogErrorMessage: err.message.split(':')[1],
+        });
+      }
     });
   }
 

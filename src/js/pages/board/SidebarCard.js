@@ -104,6 +104,7 @@ class SidebarCard extends Component {
           value: `${card.owner.member.firstName} ${card.owner.member.lastName}`,
           id: card.owner.member.id,
         },
+        tasks: card.tasks,
         km,
         po,
         type: km ? 1 : 0,
@@ -151,7 +152,6 @@ class SidebarCard extends Component {
 
         let filteredTasks = this.state.tasks.filter(task => task.description !== '');
         filteredTasks = filteredTasks.map(task => ({ description: task.description, assigneeUserteamId: task.owner && parseInt(task.owner.id, 10) }));
-
         const cardData = {
           id: this.state.id,
           name: this.state.name,
@@ -303,7 +303,6 @@ class SidebarCard extends Component {
   onDelete() {
     let user = sessionStorage.getItem('user');
     user = JSON.parse(user);
-    console.log(user)
     const project = this.props.data.projects.filter(pr => pr.id === this.state.selectedProject.id)[0];
 
     //const memberOfProject = project.team.members.map(m => m.id).includes(String(user.id));
@@ -340,6 +339,23 @@ class SidebarCard extends Component {
         );
         memberOptions = members.map(member => ({ value: `${member.firstName} ${member.lastName}`, id: member.id }));
       }
+    };
+
+    let whoCanEdit = {
+      cardDescription: true,
+      cardName: true,
+      date: true,
+      estimate: true,
+      owner: true,
+      projectName: true,
+      tasks: true,
+      type: true,
+    };
+    if (this.props.whoCanEditQuery.whoCanEdit) {
+      whoCanEdit = {
+        ...this.props.whoCanEditQuery.whoCanEdit,
+        type: false,
+      };
     }
 
     return (
@@ -356,63 +372,96 @@ class SidebarCard extends Component {
             </Header>
 
             <FormFields>
-              <FormField>
-                <div style={{ display: 'flex', justifyContent: 'space-around', margin: 20 }}>
+              <FormField style={{ backgroundColor: whoCanEdit.type ? 'white' : '#f0f0f0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-around', margin: 20, }}>
                   <CheckBox label='Navadna kartica'
                     toggle={false}
-                    disabled={!this.state.po}
+                    disabled={!whoCanEdit.type && !this.state.po}
                     checked={this.state.type === 0 && this.state.po}
                     onChange={() => this.changeType(0)} />
                   <CheckBox label='Silver bullet'
                     toggle={false}
-                    disabled={!this.state.km}
+                    disabled={!whoCanEdit.type && !this.state.km}
                     checked={this.state.type === 1 && this.state.km}
                     onChange={() => this.changeType(1)} />
                 </div>
               </FormField>
-              <FormField label='Ime kartice' error={this.state.errors.name}>
+              <FormField label='Ime kartice' error={this.state.errors.name} style={{ backgroundColor: whoCanEdit.cardName ? 'white' : '#f0f0f0' }}>
                 <TextInput
                   id='name'
                   value={this.state.name}
                   onDOMChange={event => this.setState({ name: event.target.value })}
+                  disabled={!whoCanEdit.cardName}
                 />
               </FormField>
-              <FormField label='Opis kartice' error={this.state.errors.description}>
+              <FormField label='Opis kartice' error={this.state.errors.description} style={{ backgroundColor: whoCanEdit.cardDescription ? 'white' : '#f0f0f0' }}>
                 <TextInput
                   id='description'
                   value={this.state.description}
                   onDOMChange={event => this.setState({ description: event.target.value })}
+                  disabled={!whoCanEdit.cardDescription}
                 />
               </FormField>
-              <FormField label='Ime projekta' error={this.state.errors.selectedProject}>
-                <Select placeHolder='/'
-                  options={projectOptions}
-                  multiple={false}
-                  onChange={change => this.changeProject(change.value)}
-                  value={this.state.selectedProject} />
+              <FormField label='Ime projekta' error={this.state.errors.selectedProject} style={{ backgroundColor: whoCanEdit.projectName ? 'white' : '#f0f0f0' }}>
+                { (!whoCanEdit.projectName &&
+                  (<TextInput
+                    id='project'
+                    value={this.state.selectedProject.value}
+                    disabled={true}
+                  />)) ||
+                    <Select placeHolder='/'
+                      options={projectOptions}
+                      multiple={false}
+                      onChange={change => this.changeProject(change.value)}
+                      value={this.state.selectedProject} />
+                }
+                
               </FormField>
-              <FormField label='Izberite uporabnika' error={this.state.errors.owner}>
-                <Select placeHolder='/'
-                  options={memberOptions}
-                  multiple={false}
-                  onChange={change => this.setState({ owner: change.value })}
-                  value={this.state.owner} />
+              <FormField label='Izberite uporabnika' error={this.state.errors.owner} style={{ backgroundColor: whoCanEdit.owner ? 'white' : '#f0f0f0' }}>
+                { (!whoCanEdit.owner &&
+                    (<TextInput
+                      id='owner'
+                      value={this.state.owner.value}
+                      disabled={true}
+                    />)) ||
+                    <Select placeHolder='/'
+                      options={memberOptions}
+                      multiple={false}
+                      onChange={change => this.setState({ owner: change.value })}
+                      value={this.state.owner} />
+                }
               </FormField>
-              <FormField label='Datum zaključka kartice' error={this.state.errors.expiration}>
-                <DateTime
-                  id='expiration'
-                  format={dateFormat}
-                  value={this.state.expiration}
-                  onChange={e => this.setState({ expiration: e })}
-                />
+              <FormField label='Datum zaključka kartice' error={this.state.errors.expiration} style={{ backgroundColor: whoCanEdit.date ? 'white' : '#f0f0f0' }}>
+                { (!whoCanEdit.date &&
+                  (<TextInput
+                    id='date'
+                    value={this.state.expiration}
+                    disabled={true}
+                  />)) ||
+                  <DateTime
+                    id='expiration'
+                    format={dateFormat}
+                    value={this.state.expiration}
+                    onChange={e => this.setState({ expiration: e })}
+                  />
+                }
               </FormField>
-              <FormField label='Zahtevnost kartice'>
-                <NumberInput
-                  min={0}
-                  value={this.state.estimate}
-                  step={0.1}
-                  onChange={event => this.setState({ estimate: event.target.value })}
-                />
+              <FormField label='Zahtevnost kartice' style={{ backgroundColor: whoCanEdit.estimate ? 'white' : '#f0f0f0' }}>
+                 { (!whoCanEdit.date &&
+                  (<TextInput
+                    id='date'
+                    value={this.state.estimate}
+                    disabled={true}
+                  />)) ||
+                  <NumberInput
+                    min={0}
+                    value={this.state.estimate}
+                    step={0.1}
+                    onChange={event => this.setState({ estimate: event.target.value })}
+                    disabled={whoCanEdit.estimate}
+                  />
+                  
+                }
               </FormField>
               <FormField label='Naloge' strong={true} style={{ backgroundColor: '#fdfdfd' }}>
                 { this.state.tasks.map((task, i) => (
@@ -493,8 +542,8 @@ const editCardMutation = gql`mutation editCard($cardData: CardInput!){
   }
 }`;
 
-const whoCanEditQuery = gql`query whoCanEdit($userTeamId: Int!, $cardId: Int!){
-  whoCanEdit(userTeamId:$userTeamId, cardId: $cardId) {
+export const whoCanEditQuery = gql`query whoCanEdit($userId: Int!, $cardId: Int){
+  whoCanEdit(userId:$userId, cardId: $cardId) {
     cardName
     cardDescription
     projectName
@@ -502,8 +551,9 @@ const whoCanEditQuery = gql`query whoCanEdit($userTeamId: Int!, $cardId: Int!){
     date
     estimate
     tasks
+    error
   }
-}`
+}`;
 
 export default compose(
   graphql(addCardMutation, {
@@ -512,15 +562,14 @@ export default compose(
   graphql(editCardMutation, {
     name: 'editCardMutation',
   }),
-  //graphql(whoCanEditQuery, {
-    //name: 'whoCanEditQuery',
-    //options: props => {
-      //const user = sessionStorage.getItem('user');
-      //console.log(user)
-      //return ({ variables: {
-      //  userTeamId: 4,
-        //cardId: props.data.card.id,
-      //  cardId: 123
-      //}});
-    //}
+  graphql(whoCanEditQuery, {
+    name: 'whoCanEditQuery',
+    options: (props) => {
+      const user = sessionStorage.getItem('user');
+      const userId = JSON.parse(user).id;
+      return ({ variables: {
+        userId,
+        cardId: (props.data.card && props.data.card.id) || null,
+      }});
+    }})
   )(SidebarCard);

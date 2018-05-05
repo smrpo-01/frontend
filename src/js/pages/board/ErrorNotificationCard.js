@@ -14,8 +14,22 @@ import TextInput from 'grommet/components/TextInput';
 class ErrorNotificationCard extends Component {
   constructor() {
     super();
+
+    this.onSubmit = this.onSubmit.bind(this);
+
     this.state = {
       force: '',
+      error: '',
+    };
+  }
+
+  onSubmit() {
+    if (this.state.force !== '') {
+      this.props.continue(this.state.force);
+    } else {
+      this.setState({
+        error: 'Razlog ne sme biti prazen',
+      });
     }
   }
 
@@ -29,24 +43,38 @@ class ErrorNotificationCard extends Component {
               {this.props.error}
             </h>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <h style={{ color: 'red' }}>
-              Razlog za nadaljevanje:
-            </h>
-          </div>
-          <TextInput
-            value={this.state.force}
-            onDOMChange={event => this.setState({ force: event.target.value })}
-          />
+          { this.props.error !== ' Ne moreš premikati za več kot ena v levo/desno.' &&
+            <div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <h style={{ color: 'red' }}>
+                  Razlog za nadaljevanje:
+                </h>
+              </div>
+              <TextInput
+                value={this.state.force}
+                onDOMChange={event => this.setState({ force: event.target.value })}
+              />
+            </div>
+          }
+          {
+            this.state.error !== '' &&
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <h style={{ color: 'red' }}>
+                Razlog ne sme biti prazen
+              </h>
+            </div>
+          }
           <Footer pad={{ vertical: 'medium', between: 'medium' }} justify='center'>
             <Button label='Prekliči'
               primary={false}
               onClick={() => this.props.closer()}
             />
+            { this.props.error !== ' Ne moreš premikati za več kot ena v levo/desno.' &&
             <Button label='Nadaljuj'
               primary={true}
-              onClick={() => this.props.continue(this.state.force)}
+              onClick={() => this.onSubmit()}
             />
+            }
           </Footer>
         </Article>
       </Layer>

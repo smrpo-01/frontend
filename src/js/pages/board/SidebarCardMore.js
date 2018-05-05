@@ -22,6 +22,9 @@ import NumberInput from 'grommet/components/NumberInput';
 import CheckBox from 'grommet/components/CheckBox';
 import Tabs from 'grommet/components/Tabs';
 import Tab from 'grommet/components/Tab';
+import TableHeader from 'grommet/components/TableHeader';
+
+
 import Label from 'grommet/components/Label';
 import Paragraph from 'grommet/components/Paragraph';
 
@@ -36,12 +39,13 @@ import EditIcon from 'grommet/components/icons/base/Edit';
 
 import Notification from 'grommet/components/Notification';
 
-import { allCardsQuery } from './Board';
+import { whoCanEditQuery } from './SidebarCard';
 
 const dateFormat = 'D/M/YYYY';
 const duration = 100;
 
-const borderColor = '#dbdbdb'
+const borderColor = '#dbdbdb';
+
 
 const transitionStyles = {
   entering: 0,
@@ -93,83 +97,91 @@ class SideBarCardMore extends Component {
   }
 
   getDate(timestamp) {
-    const date = new Date(timestamp)
-    return `${date.getDate()}.${date.getMonth()}.${1900 + date.getYear()}`
+    const date = new Date(timestamp);
+    return `${date.getDate()}.${date.getMonth()}.${1900 + date.getYear()}`;
   }
 
   render() {
     const { data: { card } } = this.props;
     const { getCardLogsQuery: { allCardLogs } } = this.props;
+    console.log(this.props.whoCanEditQuery)
     return (
       <Layer
         closer
         align='right'
       >
-        <Article pad='small' size='large'>
-          <Form>
-            <Header pad={{ vertical: 'medium' }}>
-              <Heading>
-                Podrobnosti kartice
-              </Heading>
-            </Header>
+        <Article pad='small' style={{width: 800}}>
+          <Header pad={{ vertical: 'medium' }}>
+            <Heading>
+              Podrobnosti kartice
+            </Heading>
+          </Header>
 
-            <Tabs justify='start'>
-              <Tab title='Podatki o kartici'>
-                <div>
-                  <div style={{ borderColor: borderColor, borderStyle: 'solid', borderWidth: 1, padding: 10,}}>
-                    <Label style={{width: 150}}>
-                      Ime kartice:
-                    </Label>
-                    <Label size='medium' style={{marginLeft: 30}}>
-                      {card.name}
-                    </Label>
-                  </div>
-                  <div style={{ borderColor: borderColor, borderStyle: 'solid', borderWidth: 1, padding: 10,}}>
+          <Tabs justify='start'>
+            <Tab title='Podatki o kartici'>
+              <div>
+                <div style={{ borderColor: borderColor, borderStyle: 'solid', borderWidth: 1, padding: 10 }}>
                   <Label style={{width: 150}}>
-                      Opis kartice:
+                    Tip kartice:
+                  </Label>
+                  <Label size='medium' style={{marginLeft: 30, fontWeight: 600}}>
+                    {card.type.id === 'A_0' ? 'Navadna kartica' : 'Silver bullet'}
+                  </Label>
+                </div>
+                <div style={{ borderColor: borderColor, borderStyle: 'solid', borderWidth: 1, padding: 10 }}>
+                  <Label style={{width: 150}}>
+                    Ime kartice:
+                  </Label>
+                  <Label size='medium' style={{marginLeft: 30, fontWeight: 600}}>
+                    {card.name}
+                  </Label>
+                </div>
+                <div style={{ borderColor: borderColor, borderStyle: 'solid', borderWidth: 1, padding: 10,}}>
+                <Label style={{width: 150}}>
+                    Opis kartice:
+                  </Label>
+                  <Paragraph size='medium' style={{marginLeft: 30, fontWeight: 600}}>
+                    {card.description}
+                  </Paragraph>
+                </div>
+                <div style={{ borderColor: borderColor, borderStyle: 'solid', borderWidth: 1, padding: 10,}}>
+                  <Label style={{width: 150}}>
+                    Ime projekta:
+                  </Label>
+                  <Label size='medium' style={{marginLeft: 30, fontWeight: 600}}>
+                    {card.project.name}
+                  </Label>
+                </div>
+                <div style={{ borderColor: borderColor, borderStyle: 'solid', borderWidth: 1, padding: 10,}}>
+                  <Label style={{width: 150}}>
+                    Ime uporabnika:
+                  </Label>
+                  <Label size='medium' style={{marginLeft: 30, fontWeight: 600}}>
+                    {card.owner.member.firstName} {card.owner.member.lastName}
+                  </Label>
+                </div>
+                <div style={{ borderColor: borderColor, borderStyle: 'solid', borderWidth: 1, padding: 10,}}>
+                  <Label style={{width: 150}}>
+                    Datum zaključka:
+                  </Label>
+                  <Label size='medium' style={{marginLeft: 30, fontWeight: 600}}>
+                    {this.formatDate(card.expiration)}
+                  </Label>
+                </div>
+                <div style={{ borderColor: borderColor, borderStyle: 'solid', borderWidth: 1, padding: 10,}}>
+                  <Label>
+                    Zahtevnost kartice:
+                  </Label>
+                  <Label size='medium' style={{marginLeft: 30, fontWeight: 600}}>
+                    {card.estimate}
+                  </Label>
+                </div>
+                { card.tasks.length > 0 &&
+                  <div style={{ display: 'flex', flexDirection: 'column', borderColor: borderColor, borderStyle: 'solid', borderWidth: 1,}}>
+                    <Label size='medium' style={{marginLeft: 30, fontWeight: 600}}>
+                      Naloge
                     </Label>
-                    <Paragraph size='medium' style={{marginLeft: 30}}>
-                      {card.description}
-                    </Paragraph>
-                  </div>
-                  <div style={{ borderColor: borderColor, borderStyle: 'solid', borderWidth: 1, padding: 10,}}>
-                    <Label style={{width: 150}}>
-                      Ime projekta:
-                    </Label>
-                    <Label size='medium' style={{marginLeft: 30}}>
-                      {card.project.name}
-                    </Label>
-                  </div>
-                  <div style={{ borderColor: borderColor, borderStyle: 'solid', borderWidth: 1, padding: 10,}}>
-                    <Label style={{width: 150}}>
-                      Ime uporabnika:
-                    </Label>
-                    <Label size='medium' style={{marginLeft: 30}}>
-                      {card.owner.member.firstName} {card.owner.member.lastName}
-                    </Label>
-                  </div>
-                  <div style={{ borderColor: borderColor, borderStyle: 'solid', borderWidth: 1, padding: 10,}}>
-                    <Label style={{width: 150}}>
-                      Datum zaključka:
-                    </Label>
-                    <Label size='medium' style={{marginLeft: 30}}>
-                      {this.formatDate(card.expiration)}
-                    </Label>
-                  </div>
-                  <div style={{ borderColor: borderColor, borderStyle: 'solid', borderWidth: 1, padding: 10,}}>
-                    <Label>
-                      Zahtevnost kartice:
-                    </Label>
-                    <Label size='medium' style={{marginLeft: 30}}>
-                      {card.estimate}
-                    </Label>
-                  </div>
-                  { card.tasks.length > 0 &&
-                    <div style={{ display: 'flex', flexDirection: 'column', borderColor: borderColor, borderStyle: 'solid', borderWidth: 1,}}>
-                      <Label size='medium' style={{marginLeft: 30}}>
-                        Naloge
-                      </Label>
-                      <div style={{ display: 'flex', flexDirection: 'column', padding: 5, paddingLeft: 20, paddingRight: 20}}>
+                    <div style={{ display: 'flex', flexDirection: 'column', padding: 5, paddingLeft: 20, paddingRight: 20}}>
                       {card.tasks.map(task => (
                         <div style={{height: 40, display: 'flex', justifyContent: 'space-between', alignItems: 'center',}}>
                           <CheckBox label={task.description} defaultChecked={task.done} key={task.id} disabled={true}/>
@@ -178,63 +190,57 @@ class SideBarCardMore extends Component {
                             {!task.assignee && '/'}
                           </p>
                         </div>
-                        ))}
-                      </div>
+                      ))}
                     </div>
-                  }
-                </div>
-              </Tab>
-              <Tab title='Akcije kartice'>
-                <Table>
-                  <thead>
-                    <tr>
-                      <th>
-                        Čas
-                      </th>
-                      <th>
-                        Iz stolpca
-                      </th>
-                      <th>
-                        Na stolpec
-                      </th>
-                      <th>
-                        Akcija
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    { allCardLogs && allCardLogs.map(log => (
-                      <TableRow key={log.id}>
-                        <td style={{ opacity: 0.8 }}>
-                          {this.getDate(log.timestamp)}
-                        </td>
-                        <td style={{ opacity: log.fromColumn ? 1 : 0.3 }}>
-                          {log.fromColumn ? log.fromColumn.name : '/'}
-                        </td>
-                        <td style={{ opacity: log.toColumn ? 1 : 0.3 }}>
-                          {log.toColumn ? log.toColumn.name : '/'}
-                        </td>
-                        <td style={{ opacity: log.action ? 1 : 0.3, color: log.action && 'red' }}>
-                          {log.action ? log.action : 'Premik'}
-                        </td>
-                      </TableRow>
-                    ))}
-                  </tbody>
-                </Table>
-              </Tab>
-            </Tabs>
-            <Footer pad={{ vertical: 'medium', between: 'medium' }}>
-              <Button label='Prekliči'
-                secondary={true}
-                onClick={() => this.props.closer()}
-              />
-              <Button label='Uredi'
-                primary={true}
-                icon={<EditIcon />}
-                onClick={() => this.props.editCard(card)}
-              />
-            </Footer>
-          </Form>
+                  </div>
+                }
+              </div>
+            </Tab>
+            <Tab title='Akcije kartice'>
+              <Table>
+                <TableHeader
+                  labels={['Čas', 'Uporabnik', 'Iz stolpca', 'Na stolpec', 'Razlog']}
+                />
+                <tbody>
+                  { allCardLogs && allCardLogs.map(log => (
+                    <TableRow key={log.id}>
+                      <td style={{ opacity: 0.8 }}>
+                        {this.getDate(log.timestamp)}
+                      </td>
+                      <td style={{ opacity: 0.8 }}>
+                        {log.userTeam.member.firstName} {log.userTeam.member.lastName}
+                      </td>
+                      <td style={{ opacity: log.fromColumn ? 1 : 0.3 }}>
+                        {log.fromColumn ? log.fromColumn.name : '/'}
+                      </td>
+                      <td style={{ opacity: log.toColumn ? 1 : 0.3 }}>
+                        {log.toColumn ? log.toColumn.name : '/'}
+                      </td>
+                      <td style={{ opacity: log.action ? 1 : 0.3, color: log.action && 'red' }}>
+                        {log.action ? log.action : 'Premik'}
+                      </td>
+                    </TableRow>
+                  ))}
+                </tbody>
+              </Table>
+            </Tab>
+          </Tabs>
+          <Footer pad={{ vertical: 'medium', between: 'medium' }}>
+            <Button label='Prekliči'
+              secondary={true}
+              onClick={() => this.props.closer()}
+            />
+            <Button label='Uredi'
+              primary={true}
+              icon={<EditIcon />}
+              onClick={this.props.whoCanEditQuery && this.props.whoCanEditQuery.whoCanEdit && this.props.whoCanEditQuery.whoCanEdit.error !== null ? null : (() => this.props.editCard(card))}
+            />
+            { this.props.whoCanEditQuery && this.props.whoCanEditQuery.whoCanEdit && this.props.whoCanEditQuery.whoCanEdit.error !== null &&
+            <h style={{ color: 'red' }}>
+              {this.props.whoCanEditQuery.whoCanEdit.error}
+            </h>
+            }
+          </Footer>
         </Article>
       </Layer>
     );
@@ -248,8 +254,8 @@ SideBarCardMore.propTypes = {
 SideBarCardMore.defaultProps = {
 };
 
-const getCardLogsQuery = gql`query allCardLogs {
-  allCardLogs {
+const getCardLogsQuery = gql`query allCardLogs($cardId: Int!) {
+  allCardLogs(cardId: $cardId) {
     id
     card {
       id
@@ -264,9 +270,30 @@ const getCardLogsQuery = gql`query allCardLogs {
     }
     action
     timestamp
+    userTeam {
+      member {
+        id
+        firstName
+        lastName
+      }
+    }
   }
 }`;
 
-export default graphql(getCardLogsQuery, {
-  name: 'getCardLogsQuery',
-})(SideBarCardMore);
+export default compose(
+  graphql(getCardLogsQuery, {
+    name: 'getCardLogsQuery',
+    options: props => {
+      return ({ variables: { cardId: parseInt(props.data.card.id, 10) } })
+    }
+  }),
+  graphql(whoCanEditQuery, {
+    name: 'whoCanEditQuery',
+    options: (props) => {
+      const user = sessionStorage.getItem('user');
+      const userId = JSON.parse(user).id;
+      return ({ variables: {
+        userId,
+        cardId: (props.data.card && props.data.card.id) || null,
+    }});
+  }}))(SideBarCardMore);
