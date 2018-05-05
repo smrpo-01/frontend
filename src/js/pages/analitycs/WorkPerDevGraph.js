@@ -8,11 +8,15 @@ import Heading from 'grommet/components/Heading';
 import Table from 'grommet/components/Table';
 import TableRow from 'grommet/components/TableRow';
 import TableHeader from 'grommet/components/TableHeader';
+import Title from 'grommet/components/Title';
 
 import { RadialChart } from 'react-vis';
 
 // Custom
 import Loading from '../../components/Loading';
+
+const colorPalette = ['#9e0142', '#d53e4f', '#f46d43', '#fdae61', '#fee08b', '#ffffbf', '#e6f598', '#abdda4', '#66c2a5', '#3288bd', '#5e4fa2'];
+const cLen = colorPalette.length;
 
 class WorkPerDevGraph extends Component {
   constructor(props) {
@@ -48,7 +52,7 @@ class WorkPerDevGraph extends Component {
 
   prepareData(data) {
     return data.map((dev, i) => (
-      { id: i, angle: dev.value, label: dev.name }
+      { id: i, angle: dev.value, label: dev.name, color: colorPalette[i % cLen] }
     ));
   }
 
@@ -90,27 +94,41 @@ class WorkPerDevGraph extends Component {
         </Table>
 
         <Box direction='row' pad={{ vertical: 'medium' }}>
-          <RadialChart
-            showLabels
-            data={this.prepareData(cardsPerDev)}
-            // onValueMouseOver={v => this.setState({ cards: v })}
-            // onSeriesMouseOut={() => this.setState({ cards: false })}
-            width={this.state.width / 2}
-            height={this.state.height / 2}
-          >
-            {/* cards && <Hint value={cards} /> */}
-          </RadialChart>
+          <Box>
+            <Title>{'Število zgodb'}</Title>
+            <RadialChart
+              showLabels
+              labelsRadiusMultiplier={0.9}
+              labelsStyle={{ fontSize: 16, fill: '#ffffff' }}
+              data={this.prepareData(cardsPerDev)}
+              colorType='category'
+              colorRange={colorPalette}
+              // onValueMouseOver={v => this.setState({ cards: v })}
+              // onSeriesMouseOut={() => this.setState({ cards: false })}
+              width={this.state.width / 2}
+              height={this.state.height / 2}
+            >
+              {/* cards && <Hint value={cards} /> */}
+            </RadialChart>
+          </Box>
 
-          <RadialChart
-            showLabels
-            data={this.prepareData(estimatePerDev)}
-            // onValueMouseOver={v => this.setState({ points: v })}
-            // onSeriesMouseOut={() => this.setState({ points: false })}
-            width={this.state.width / 2}
-            height={this.state.height / 2}
-          >
-            {/* points && <Hint value={points} /> */}
-          </RadialChart>
+          <Box>
+            <Title>{'Število točk'}</Title>
+            <RadialChart
+              showLabels
+              labelsRadiusMultiplier={0.9}
+              labelsStyle={{ fontSize: 16, fill: '#ffffff' }}
+              data={this.prepareData(estimatePerDev)}
+              colorType='category'
+              colorRange={colorPalette}
+              // onValueMouseOver={v => this.setState({ points: v })}
+              // onSeriesMouseOut={() => this.setState({ points: false })}
+              width={this.state.width / 2}
+              height={this.state.height / 2}
+            >
+              {/* points && <Hint value={points} /> */}
+            </RadialChart>
+          </Box>
         </Box>
       </Box>
     );
