@@ -173,7 +173,7 @@ const LeadTimeGraphWithQuery = compose(
     options: props => ({
       variables: {
         projectId: props.filterData.projectId,
-        cardType: [props.filterData.cardTypeId],
+        cardType: props.filterData.cardTypeId,
         creationStart: props.filterData.creationStart,
         creationEnd: props.filterData.creationEnd,
         doneStart: props.filterData.doneStart,

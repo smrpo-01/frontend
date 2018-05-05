@@ -64,7 +64,6 @@ class FilterData extends Component {
       estimateTo: 1,
 
       cardType: null,
-      cardTypeId: null,
       cardTypeOptions: [],
       cardTypeOptionsAll: [],
 
@@ -147,7 +146,7 @@ class FilterData extends Component {
   updateParent() {
     const filterData = {};
     filterData.projectId = parseInt(this.state.projectId, 10);
-    filterData.cardTypeId = this.state.cardTypeId;
+    filterData.cardTypeId = this.state.cardType.map(type => type.value.id);
     // estimate
     filterData.estimateFrom = parseFloat(this.state.estimateFrom);
     filterData.estimateTo = parseFloat(this.state.estimateTo);
@@ -203,15 +202,17 @@ class FilterData extends Component {
           <FormField error={this.state.error.project}>
             <Select
               id='cardType'
-              value={this.state.cardType}
               placeHolder='Nujna zahteva'
+              multiple={true}
+              value={this.state.cardType}
               options={this.state.cardTypeOptions}
-              onChange={event =>
+              onChange={(event) => {
+                console.log(event.value);
                 this.setState({
-                  cardType: event.option.label,
-                  cardTypeId: event.option.value.id,
+                  cardType: event.value,
                   cardTypeOptions: this.state.cardTypeOptionsAll
-                })
+                });
+              }
               }
               onSearch={event => this.filterSuggestions(event.target.value, 'cardType')}
             />
