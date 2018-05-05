@@ -10,7 +10,7 @@ import Tab from 'grommet/components/Tab';
 import Title from 'grommet/components/Title';
 
 // Components
-import LeadTime from './LeadTime';
+import FilterGraphTemplate from './FilterGraphTemplate';
 
 class Analitycs extends Component {
   // Redirect if necessary
@@ -31,14 +31,20 @@ class Analitycs extends Component {
       >
         <Tabs justify='start'>
           <Tab title='Povprečni čas izdelave'>
-            <LeadTime boardId={this.props.boardId} />
+            <FilterGraphTemplate boardId={this.props.boardId} type={'leadTime'} />
           </Tab>
 
-          {/*
-            <Tab title='Pregled dela' />
-            <Tab title='Kumulativni diagram poteka' />
-            <Tab title='Krštitve WIP' />
-          */}
+          <Tab title='Kumulativni diagram poteka'>
+            <FilterGraphTemplate boardId={this.props.boardId} type={'kumulativeFlow'} />
+          </Tab>
+
+          <Tab title='Pregled dela'>
+            <FilterGraphTemplate boardId={this.props.boardId} type={'kumulativeFlow'} />
+          </Tab>
+
+          <Tab title='Kršitve WIP'>
+            <FilterGraphTemplate boardId={this.props.boardId} type={'kumulativeFlow'} />
+          </Tab>
         </Tabs>
       </PageTemplate>
     );

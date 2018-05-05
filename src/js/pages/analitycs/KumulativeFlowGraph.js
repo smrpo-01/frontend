@@ -4,8 +4,6 @@ import { graphql, compose } from 'react-apollo';
 import gql from 'graphql-tag';
 
 import Box from 'grommet/components/Box';
-import List from 'grommet/components/List';
-import ListItem from 'grommet/components/ListItem';
 import Heading from 'grommet/components/Heading';
 
 import {
@@ -14,13 +12,14 @@ import {
   YAxis,
   VerticalGridLines,
   HorizontalGridLines,
-  VerticalBarSeries,
+  AreaSeries,
   DiscreteColorLegend
 } from 'react-vis';
 
 // Custom
 import Loading from '../../components/Loading';
 
+// const colorPalette = ['9e0142', 'd53e4f', 'f46d43', 'fdae61', 'fee08b', 'e6f598', 'abdda4', '66c2a5', '3288bd', '5e4fa2'];
 const colorPalette = ['9e0142', 'd53e4f', 'f46d43', 'fdae61', 'fee08b', 'ffffbf', 'e6f598', 'abdda4', '66c2a5', '3288bd', '5e4fa2'];
 const cLen = colorPalette.length;
 
@@ -52,64 +51,48 @@ class LeadTimeGraph extends Component {
 
 
   /**
-   * [Prepare data to visualize]
-   * @param  {[Object]} data [description]
-   * @return {[Array]}      [description]
+   * [Map data so react vis can visalize it]
+   * @param  {[Object]} data [input data]
+   * @return {[Array]}      [data to show in graph]
    */
   prepareData(data) {
     let tmp = [];
-    for (let i = 0; i < data.length; i++) {
-      let cardId = data[i].id;
-      let cardTime = data[i].cardPerColumnTime;
-      // we need to init 2d array
-
-      Object.keys(cardTime).forEach((time, j) => {
-        let newEl = { x: cardId, y: cardTime[time] };
+    Object.keys(data).forEach((key, i) => {
+      let day = data[key];
+      Object.keys(day).forEach((column, j) => {
+        let newEl = { x: key, y: day[column] };
         if (i === 0) {
           tmp.push([newEl]);
         } else {
           tmp[j].push(newEl);
         }
       });
-    }
+    });
     return tmp;
   }
 
 
   render() {
-    const { queryGraphData: { loading, error, filterCards, avgLeadTime } } = this.props;
-    console.log(filterCards);
+    const { queryGraphData: { loading, error, cardsPerDay } } = this.props;
 
     if (loading) {
       return <Loading />;
     } else if (error) {
-      return <p style={{ color: 'red' }}>Error!</p>;
-    } else if (filterCards.length === 0) return null;
+      return null;
+    }
 
     return (
       <Box pad='medium' >
         <Heading margin='medium' style={{ marginTop: '0px' }} tag='h3' strong>
-          <span>{'Povprečni čas izdelave'}</span>
+          <span>{'Kumulativni diagram poteka'}</span>
         </Heading>
-        <List>
-          <ListItem justify='start' pad={{ between: 'small', vertical: 'small' }}>
-            <b>{'Povprečni čas izdelave:'}</b>
-            <b>{avgLeadTime}</b>
-            <span>{'h'}</span>
-          </ListItem>
-          {filterCards.map(card => (
-            <ListItem key={card.id} justify='start' pad={{ between: 'small', vertical: 'small' }}>
-              <span>{card.name + ':'}</span>
-              <b>{card.travelTime}</b>
-              <span>{'h'}</span>
-            </ListItem>
-          ))}
-        </List>
 
         <Box pad='medium' />
 
         <XYPlot
-          className='clustered-stacked-bar-chart-example'
+          className='kumulative-flow'
+          colorType='category'
+          colorRange={colorPalette}
           xType='ordinal'
           stackBy='y'
           width={this.state.width}
@@ -117,18 +100,20 @@ class LeadTimeGraph extends Component {
           <DiscreteColorLegend
             style={{ position: 'absolute', left: '40px', top: '0px' }}
             orientation='horizontal'
-            items={Object.keys(filterCards[0].cardPerColumnTime).map((key, i) => ({ title: key, color: '#' + colorPalette[i % cLen] }))}
+            colorType='category'
+            colorRange={colorPalette}
+            items={Object.keys(cardsPerDay[Object.keys(cardsPerDay)[0]]).map((key, i) => ({ title: key, color: '#' + colorPalette[i % cLen] }))}
           />
           <VerticalGridLines />
           <HorizontalGridLines />
           <XAxis />
           <YAxis />
 
-          {this.prepareData(filterCards).map((bar, i) =>
+          {this.prepareData(cardsPerDay).map((val, i) =>
             (
-              <VerticalBarSeries
+              <AreaSeries
                 key={Math.random()}
-                data={bar}
+                data={val}
                 color={'#' + colorPalette[i % cLen]}
               />
             )
@@ -147,7 +132,7 @@ LeadTimeGraph.propTypes = {
 
 
 export const getGraphDataQuery = gql`
-  query getBoardData(
+  query getGraphData(
     $projectId: Int!,
     $creationStart: String!,
     $creationEnd: String!,
@@ -160,11 +145,15 @@ export const getGraphDataQuery = gql`
     $columnFrom: String!,
     $columnTo: String!,
     $cardType: [String]!,
+    $dateFrom: String!,
+    $dateTo: String!,
   ) {
-    filterCards(
+    cardsPerDay(
       projectId: $projectId,
       creationStart: $creationStart,
       creationEnd: $creationEnd,
+      columnTo: $columnTo,
+      columnFrom: $columnFrom,
       doneStart: $doneStart,
       doneEnd: $doneEnd,
       devStart: $devStart,
@@ -172,13 +161,9 @@ export const getGraphDataQuery = gql`
       estimateFrom: $estimateFrom,
       estimateTo: $estimateTo,
       cardType: $cardType,
-    ) {
-      id
-      name
-      cardPerColumnTime(minimal: true)
-      travelTime(columnFrom: $columnFrom, columnTo: $columnTo)
-    }
-    avgLeadTime(projectId: $projectId)
+      dateFrom: $dateFrom,
+      dateTo: $dateTo,
+    )
   }
 `;
 
@@ -199,6 +184,8 @@ const LeadTimeGraphWithQuery = compose(
         estimateTo: props.filterData.estimateTo,
         columnFrom: props.filterData.columnFrom,
         columnTo: props.filterData.columnTo,
+        dateFrom: props.filterData.dateFrom,
+        dateTo: props.filterData.dateTo,
       }
     })
   })

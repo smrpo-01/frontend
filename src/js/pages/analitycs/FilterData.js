@@ -49,6 +49,9 @@ class FilterData extends Component {
       devStart: '',
       devEnd: '',
 
+      dateFrom: '',
+      dateTo: '',
+
       columnFrom: null,
       columnFromId: null,
       columnTo: null,
@@ -114,6 +117,7 @@ class FilterData extends Component {
       cardTypeOptionsAll: cardTypeOptions,
       estimateMin,
       estimateMax,
+      estimateTo: estimateMax,
       columnsOptions: columns,
     });
   }
@@ -159,6 +163,9 @@ class FilterData extends Component {
     // columns
     filterData.columnFrom = this.state.columnFromId;
     filterData.columnTo = this.state.columnToId;
+    // time interval
+    filterData.dateFrom = this.state.dateFrom;
+    filterData.dateTo = this.state.dateTo;
 
     this.props.setGraphFilter(filterData);
   }
@@ -241,6 +248,30 @@ class FilterData extends Component {
             />
           </FormField>
 
+
+          {/* Časovni interval */}
+          {(this.props.type === 'kumulativeFlow') &&
+          <div>
+            <FormLegend label={'Časovni interval'} />
+            <FormField label='Od' error={this.state.error.dateFrom}>
+              <DateTime
+                id='dateFrom'
+                format={dateFormat}
+                value={this.state.dateFrom}
+                onChange={e => this.setState({ dateFrom: e })}
+              />
+            </FormField>
+
+            <FormField label='Do' error={this.state.error.dateTo}>
+              <DateTime
+                id='dateTo'
+                format={dateFormat}
+                value={this.state.dateTo}
+                onChange={e => this.setState({ dateTo: e })}
+              />
+            </FormField>
+          </div>
+          }
 
           {/* zahtevnost kartice */}
           <FormLegend label={'Zahtevnost kartice'} />
@@ -344,6 +375,7 @@ FilterData.defaultProps = {};
 FilterData.propTypes = {
   setGraphFilter: PropTypes.func.isRequired,
   queryBoardData: PropTypes.object.isRequired,
+  type: PropTypes.string.isRequired,
 };
 
 
