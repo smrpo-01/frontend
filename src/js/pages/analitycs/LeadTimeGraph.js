@@ -79,6 +79,8 @@ class LeadTimeGraph extends Component {
 
   render() {
     const { queryGraphData: { loading, error, filterCards, avgLeadTime } } = this.props;
+    console.log(filterCards);
+    console.log(avgLeadTime);
 
     if (loading) {
       return <Loading />;
@@ -95,16 +97,16 @@ class LeadTimeGraph extends Component {
           <span>{'Povprečni čas izdelave'}</span>
         </Heading>
         <List>
-          <ListItem justify='start' pad={{ between: 'small', vertical: 'small' }}>
+          <ListItem justify='between' pad={{ between: 'small', vertical: 'small' }} size='xxlarge'>
             <b>{'Povprečni čas izdelave:'}</b>
-            <b>{avgLeadTime}</b>
-            <span>{'h'}</span>
+            <b>{avgLeadTime + ' h'}</b>
           </ListItem>
           {filterCards.map(card => (
-            <ListItem key={card.id} justify='start' pad={{ between: 'small', vertical: 'small' }}>
-              <span>{card.name + ':'}</span>
-              <b>{card.travelTime}</b>
-              <span>{'h'}</span>
+            <ListItem key={card.id} justify='between' pad={{ between: 'small', vertical: 'small' }} size='xxlarge'>
+              <span>
+                {'#' + card.cardNumber + ' ' + card.name + ':'}
+              </span>
+              <b>{card.travelTime + ' h'}</b>
             </ListItem>
           ))}
         </List>
@@ -150,7 +152,7 @@ LeadTimeGraph.propTypes = {
 
 
 export const getGraphDataQuery = gql`
-  query getBoardData(
+query getBoardData(
     $projectId: Int!,
     $creationStart: String!,
     $creationEnd: String!,
@@ -177,11 +179,25 @@ export const getGraphDataQuery = gql`
       cardType: $cardType,
     ) {
       id
+      cardNumber
       name
-      cardPerColumnTime(minimal: true)
+      cardPerColumnTime(columnFrom: $columnFrom, columnTo: $columnTo)
       travelTime(columnFrom: $columnFrom, columnTo: $columnTo)
     }
-    avgLeadTime(projectId: $projectId)
+    avgLeadTime(
+      projectId: $projectId,
+      creationStart: $creationStart,
+      creationEnd: $creationEnd,
+      doneStart: $doneStart,
+      doneEnd: $doneEnd,
+      devStart: $devStart,
+      devEnd: $devEnd,
+      estimateFrom: $estimateFrom,
+      estimateTo: $estimateTo,
+      cardType: $cardType,
+      columnFrom: $columnFrom,
+      columnTo: $columnTo
+    )
   }
 `;
 
