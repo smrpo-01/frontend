@@ -32,7 +32,7 @@ class Analitycs extends Component {
   render() {
     return (
       <PageTemplate
-        header={<Title>Analiza Tabla 1</Title>}
+        header={<Title>{'Analiza ' + this.props.boardName}</Title>}
       >
         {this.canView() ?
           <Tabs
@@ -71,6 +71,7 @@ Analitycs.defaultProps = {
 
 Analitycs.propTypes = {
   boardId: PropTypes.string.isRequired,
+  boardName: PropTypes.string.isRequired,
 };
 
 export default Analitycs;

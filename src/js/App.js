@@ -36,6 +36,7 @@ class MainApp extends Component {
         token: '',
         userData: null,
         defaultBoard: '1',
+        boardName: '',
       },
     };
   }
@@ -90,11 +91,12 @@ class MainApp extends Component {
     sessionStorage.clear();
   }
 
-  changeBoard(boardId) {
+  changeBoard(boardId, boardName = '') {
     this.setState({
       appState: {
         ...this.state.appState,
-        defaultBoard: boardId
+        defaultBoard: boardId,
+        boardName,
       }
     });
   }
@@ -140,7 +142,9 @@ class MainApp extends Component {
                 (<BoardEdit {...props} boardId={this.state.appState.defaultBoard} />)
               } />
               <Route path='/administration' render={props => (<Administration {...props} />)} />
-              <Route path='/analitycs' render={props => (<Analitycs {...props} boardId={this.state.appState.defaultBoard} />)} />
+              <Route path='/analitycs' render={props => (
+                <Analitycs {...props} boardId={this.state.appState.defaultBoard} boardName={this.state.appState.boardName} />
+              )} />
               <Redirect to='/home' />
             </Switch>
 
