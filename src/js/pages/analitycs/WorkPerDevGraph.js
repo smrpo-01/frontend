@@ -83,7 +83,7 @@ class WorkPerDevGraph extends Component {
         {/* table */}
         <Table>
           <TableHeader
-            labels={['#', 'Ime', 'E-mail', 'Št. kartic', 'Št. točk']}
+            labels={['#', 'Ime', 'E-mail', 'Št. zgodb', 'Št. točk']}
           />
           <tbody>
             {cardsPerDev.map((rowData, i) => (
