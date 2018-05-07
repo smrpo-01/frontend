@@ -49,8 +49,8 @@ class Home extends Component {
     this.props.history.push('./../board/edit');
   }
 
-  changeAndShowAnalitycs(boardId) {
-    this.props.changeBoard(boardId);
+  changeAndShowAnalitycs(boardId, name) {
+    this.props.changeBoard(boardId, name);
     this.props.history.push('./../analitycs');
   }
 

@@ -90,14 +90,14 @@ class FilterData extends Component {
 
 
   componentDidMount() {
-    if (this.props.queryBoardData.allBoards !== undefined) {
+    if (this.props.queryBoardData.allBoards) {
       this.prepareData(this.props.queryBoardData.allBoards[0]);
     }
   }
 
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.queryBoardData.allBoards !== undefined) {
+    if (nextProps.queryBoardData.allBoards) {
       this.prepareData(nextProps.queryBoardData.allBoards[0]);
     }
   }

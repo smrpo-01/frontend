@@ -19,6 +19,8 @@ class Analitycs extends Component {
   }
   // Redirect if necessary
   componentWillMount() {
+    // hack - could be fixed
+    if (this.props.boardName === '') this.props.history.push('/');
     // eslint-disable-next-line no-undef
     const user = sessionStorage.getItem('user');
     const userRoles = JSON.parse(user).roles;
@@ -32,7 +34,7 @@ class Analitycs extends Component {
   render() {
     return (
       <PageTemplate
-        header={<Title>Analiza Tabla 1</Title>}
+        header={<Title>{'Analiza ' + this.props.boardName}</Title>}
       >
         {this.canView() ?
           <Tabs
@@ -71,6 +73,8 @@ Analitycs.defaultProps = {
 
 Analitycs.propTypes = {
   boardId: PropTypes.string.isRequired,
+  boardName: PropTypes.string.isRequired,
+  history: PropTypes.object.isRequired,
 };
 
 export default Analitycs;

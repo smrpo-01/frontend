@@ -39,7 +39,7 @@ class BoardOverview extends Component {
                 onMouseLeave={() => this.setState({ opacityAnalisys: 1 })}
                 role='button' tabIndex='0'
               >
-                <AnalyticsIcon onClick={() => this.props.showAnalitycs(this.props.board.id)} />
+                <AnalyticsIcon onClick={() => this.props.showAnalitycs(this.props.board.id, this.props.board.name)} />
               </div>
             </div>
         </div>
@@ -54,15 +54,11 @@ class BoardOverview extends Component {
 }
 
 BoardOverview.defaultProps = {
-  board: {
-    name: '',
-    projects: []
-  },
   canEdit: false,
 };
 
 BoardOverview.propTypes = {
-  board: PropTypes.object,
+  board: PropTypes.object.isRequired,
   editBoard: PropTypes.func.isRequired,
   canEdit: PropTypes.bool,
   changeBoard: PropTypes.func.isRequired,
