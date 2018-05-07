@@ -15,6 +15,7 @@ import ErrorNotificationCard from './ErrorNotificationCard';
 import SideBarCardMore from './SidebarCardMore';
 
 import { getCardLogsQuery } from './SidebarCardMore';
+import { whoCanEditQuery } from './SidebarCard';
 
 
 const colors = ['#a4b3a2', '#c87d5d', '#008080'];
@@ -156,6 +157,12 @@ class Board extends Component {
         query: getCardLogsQuery,
         variables: {
           cardId: parseInt(card.id, 10),
+        }
+      }, {
+        query: whoCanEditQuery,
+        variables: {
+          userId,
+          cardId: card.id,
         }
       }]
     }).then(res => {

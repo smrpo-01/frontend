@@ -84,7 +84,6 @@ class SideBarCardMore extends Component {
     const userId = JSON.parse(user).id;
     let km = false;
     let po = false;
-    this.props.whoCanEditQuery.refetch();
     this.setState({
       km,
       po,
