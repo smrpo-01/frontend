@@ -129,6 +129,7 @@ class SideBarCardMore extends Component {
   componentWillMount() {
     this.props.getCardLogsQuery.refetch();
     this.props.whoCanEditQuery.refetch();
+    this.props.getCardQuery.refetch();
   }
 
   componentWillReceiveProps(nextProps) {
