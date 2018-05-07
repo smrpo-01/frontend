@@ -153,18 +153,22 @@ class Board extends Component {
         variables: {
           id: parseInt(this.props.board, 10)
         }
-      }, {
+      },
+      /*, {
         query: getCardLogsQuery,
         variables: {
           cardId: parseInt(card.id, 10),
         }
-      }, {
+      },
+      */ {
         query: whoCanEditQuery,
         variables: {
           userId,
           cardId: card.id,
         }
-      }]
+      }
+      
+      ]
     }).then(res => {
 
     }).catch(err => {

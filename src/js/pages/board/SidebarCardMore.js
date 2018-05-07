@@ -79,26 +79,14 @@ class SideBarCardMore extends Component {
     };
   }
 
-  componentWillMount() {
-    const user = sessionStorage.getItem('user');
-    const userId = JSON.parse(user).id;
-    let km = false;
-    let po = false;
-    this.setState({
-      km,
-      po,
-      type: km ? 1 : 0,
-    });
-  }
-
   toggleTask(taskId, done) {
-    let tasks = this.state.tasks.map(task => task.id ==taskId && {
+    let tasks = this.state.tasks.map(task => task.id === taskId && {
       ...task,
       done: !task.done,
     } || task);
     this.setState({
       tasks
-    })
+    });
     this.props.setDoneTaskMutation({
       variables: {
         taskId: parseInt(taskId, 10),
@@ -113,10 +101,22 @@ class SideBarCardMore extends Component {
       }]
       
     }).then(res => console.log(res))
-    .catch(err => console.log(err));
+      .catch(err => console.log(err));
   }
 
   componentWillMount() {
+    const user = sessionStorage.getItem('user');
+    const userId = JSON.parse(user).id;
+    let km = false;
+    let po = false;
+    this.props.getCardLogsQuery.refetch();
+
+    this.setState({
+      km,
+      po,
+      type: km ? 1 : 0,
+    });
+    console.log('jaja')
     if (this.props.data && this.props.data.card && this.props.data.card.tasks) {
       this.setState({
         tasks: this.props.data.card.tasks,
