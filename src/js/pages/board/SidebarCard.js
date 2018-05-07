@@ -84,13 +84,12 @@ class SidebarCard extends Component {
 
       if (km || po) return true;
 
-      return false;
+      return true;
     });
 
     if (this.props.modeEdit) {
       const { data } = this.props;
       const { card } = data;
-      console.log(card.tasks)
       this.setState({
         id: card.id,
         name: card.name,
@@ -114,6 +113,7 @@ class SidebarCard extends Component {
             value: `${task.assignee.member.firstName} ${task.assignee.member.lastName}`,
             id: parseInt(task.assignee.id, 10),
           },
+          done: task.done,
         })),
         km,
         po,
@@ -161,7 +161,7 @@ class SidebarCard extends Component {
         }
 
         let filteredTasks = this.state.tasks.filter(task => task.description !== '');
-        filteredTasks = filteredTasks.map(task => ({ description: task.description, assigneeUserteamId: task.owner && parseInt(task.owner.id, 10) }));
+        filteredTasks = filteredTasks.map(task => ({ description: task.description, assigneeUserteamId: task.owner && parseInt(task.owner.id, 10), done: task.done }));
         
         const cardData = {
           id: this.state.id,
@@ -340,6 +340,7 @@ class SidebarCard extends Component {
   render() {
     let projectOptions = [];
     let memberOptions = [];
+    console.log(this.state.projects)
     if (this.state.projects) {
       if (this.state.type === 1) {
         projectOptions = this.state.projects.filter(pr => pr.team.kanbanMaster.idUser === this.state.userId);
