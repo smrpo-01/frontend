@@ -30,7 +30,7 @@ class Analitycs extends Component {
         header={<Title>Analiza Tabla 1</Title>}
       >
         <Tabs justify='start'>
-          <Tab title='Povprečni čas izdelave'>
+          <Tab title='Čas izdelave'>
             <FilterGraphTemplate boardId={this.props.boardId} type={'leadTime'} />
           </Tab>
 
@@ -38,11 +38,11 @@ class Analitycs extends Component {
             <FilterGraphTemplate boardId={this.props.boardId} type={'kumulativeFlow'} />
           </Tab>
 
-          <Tab title='Pregled dela'>
+          <Tab title='Pregled dela po posameznih razvijalcih'>
             <FilterGraphTemplate boardId={this.props.boardId} type={'devWork'} />
           </Tab>
 
-          <Tab title='Kršitve WIP'>
+          <Tab title='Kršitve omejitev WIP'>
             <FilterGraphTemplate boardId={this.props.boardId} type={'wip'} />
           </Tab>
         </Tabs>
