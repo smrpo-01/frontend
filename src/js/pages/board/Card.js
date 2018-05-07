@@ -10,7 +10,7 @@ import { findDOMNode } from 'react-dom';
 
 import Meter from 'grommet/components/Meter';
 
-import { allCardsQuery } from './Board';
+import { getCardQuery } from './SidebarCardMore';
 
 /**
  * Implements the drag source contract.
@@ -79,16 +79,15 @@ class Card extends Component {
         userId
       },
       refetchQueries: [{
-        query: allCardsQuery,
+        query: getCardQuery,
         variables: {
-          id: this.props.boardId,
+          cardId: parseInt(this.props.data.id, 10)
         }
-      }]
+      }
+      ]
     }).then(res => {})
       .catch(err => {
-        if (err.message.split(':')[1] === ' None') {
-          console.log('no err')
-        } else {
+        if (err.message.split(':')[1] !== ' None') {
           this.props.showError(err.message.split(':')[1]);
         }
       });

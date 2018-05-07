@@ -75,9 +75,12 @@ class SidebarCard extends Component {
     const userId = JSON.parse(user).id;
     let km = false;
     let po = false;
+
     const projects = this.props.data.projects.filter(project => {
       const { kanbanMaster } = project.team;
       const { productOwner } = project.team;
+      console.log(kanbanMaster.idUser, userId)
+      console.log(productOwner.idUser, userId)
       if (kanbanMaster.idUser === userId) km = true;
 
       if (productOwner.idUser === userId) po = true;
@@ -86,10 +89,11 @@ class SidebarCard extends Component {
 
       return true;
     });
-
+    console.log(km, po)
     if (this.props.modeEdit) {
-      const { data } = this.props;
-      const { card } = data;
+      const { getCardQuery } = this.props;
+      const card = getCardQuery.allCards[0];
+
       this.setState({
         id: card.id,
         name: card.name,
@@ -125,7 +129,7 @@ class SidebarCard extends Component {
       this.setState({
         km,
         po,
-        type: km ? 1 : 0,
+        type: km ? 0 : 1,
         projects,
         userId,
       });
@@ -182,8 +186,8 @@ class SidebarCard extends Component {
               cardData,
             },
             refetchQueries: [{
-              query: allCardsQuery,
-              variables: { id: this.props.boardId },
+              query: getCardQuery,
+              variables: { cardId: this.state.id },
             }]
           }).then(res => this.props.closer())
             .catch(err => {
@@ -348,6 +352,8 @@ class SidebarCard extends Component {
         projectOptions = this.state.projects.filter(pr => pr.team.productOwner.idUser === this.state.userId);
       }
 
+      console.log(projectOptions)
+
       projectOptions = projectOptions.map(pr => ({ value: pr.name, id: pr.id }));
 
       const currentProject = this.state.projects.filter(pr => this.state.selectedProject && pr.id === this.state.selectedProject.id);
@@ -390,8 +396,6 @@ class SidebarCard extends Component {
         type: false,
       };
     }
-
-    console.log(this.state)
 
     return (
       <Layer
@@ -597,6 +601,69 @@ const deleteCardMutation = gql`mutation deleteCardMutation($causeOfDeletion: Str
   }
 }`;
 
+const getCardQuery = gql`query allCards($cardId: Int!) {
+  allCards(cardId: $cardId) {
+    id
+    cardNumber
+    colorRejected
+    column {
+      id
+    }
+    type {
+      id
+    }
+    description
+    name
+    estimate
+    project {
+      id
+      name
+      team {
+        id
+        members {
+          id
+          firstName
+          lastName
+        }
+        developers {
+          idUser
+          isActive
+        }
+        kanbanMaster {
+          idUser
+          isActive
+        }
+        productOwner {
+          idUser
+          isActive
+        }
+      }
+    }
+    expiration
+    owner {
+      id
+      member {
+        id
+        firstName
+        lastName
+      }
+    }
+    tasks {
+      id
+      description
+      done
+      assignee {
+        id
+        member {
+          id
+          firstName
+          lastName
+        }
+      }
+    }
+  }
+}`;
+
 
 export default compose(
   graphql(addCardMutation, {
@@ -607,6 +674,16 @@ export default compose(
   }),
   graphql(deleteCardMutation, {
     name: 'deleteCardMutation',
+  }),
+  graphql(getCardQuery, {
+    name: 'getCardQuery',
+    options: (props) => {
+      return ({
+        variables: {
+          cardId: parseInt(props.cardId, 10) || -1,
+        }
+      });
+    },
   }),
   graphql(whoCanEditQuery, {
     name: 'whoCanEditQuery',
@@ -619,4 +696,4 @@ export default compose(
         skip: false,
       }});
     }})
-  )(SidebarCard);
+)(SidebarCard);

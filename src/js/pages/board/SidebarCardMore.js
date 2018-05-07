@@ -32,15 +32,10 @@ import Table from 'grommet/components/Table';
 import TableRow from 'grommet/components/TableRow';
 
 
-import TrashIcon from 'grommet/components/icons/base/Trash';
-import AddIcon from 'grommet/components/icons/base/Add';
 import EditIcon from 'grommet/components/icons/base/Edit';
 
 
-import Notification from 'grommet/components/Notification';
-
 import { whoCanEditQuery } from './SidebarCard';
-import { allCardsQuery } from './Board';
 
 const dateFormat = 'D/M/YYYY';
 const duration = 100;
@@ -70,12 +65,27 @@ class SideBarCardMore extends Component {
 
     this.state = {
       in: false,
-      id: uuid(),
+      id: 0,
+      km: false,
+      po: false,
       name: '',
       tasks: [],
-      type: 0,
+      type: {
+        id: ''
+      },
       errors: {},
       estimate: 0,
+      description: '',
+      project: {
+        name: '',
+      },
+      owner: {
+        member: {
+          firstName: '',
+          lastName: ''
+        }
+      },
+      expiration: '',
     };
   }
 
@@ -100,9 +110,9 @@ class SideBarCardMore extends Component {
         userId
       },
       refetchQueries: [{
-        query: allCardsQuery,
+        query: getCardQuery,
         variables: {
-          id: this.props.boardId,
+          cardId: this.state.id,
         }
       }]
     }).then(res => {})
@@ -112,30 +122,31 @@ class SideBarCardMore extends Component {
         }
         this.setState({
           tasks: prevTasks,
-        })
+        });
       });
   }
 
   componentWillMount() {
-    const user = sessionStorage.getItem('user');
-    const userId = JSON.parse(user).id;
-    let km = false;
-    let po = false;
     this.props.getCardLogsQuery.refetch();
     this.props.whoCanEditQuery.refetch();
-    this.setState({
-      km,
-      po,
-      type: km ? 1 : 0,
-    });
+  }
 
-    if (this.props.data && this.props.data.card && this.props.data.card.tasks) {
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.getCardQuery.allCards) {
+      const card = nextProps.getCardQuery.allCards[0];
       this.setState({
-        tasks: this.props.data.card.tasks,
+        id: card.id,
+        name: card.name,
+        tasks: card.tasks,
+        type: card.type,
+        description: card.description,
+        project: card.project,
+        owner: card.owner,
+        estimate: card.estimate,
+        expiration: card.expiration
       });
     }
   }
-
 
   formatDate(dateToFormat) {
     let d = dateToFormat.split('-'); // YYYY-MM-DD
@@ -148,8 +159,12 @@ class SideBarCardMore extends Component {
   }
 
   render() {
-    const { data: { card } } = this.props;
     const { getCardLogsQuery: { allCardLogs } } = this.props;
+    let card = {};
+    if (this.props.getCardQuery.allCards && this.props.getCardQuery.allCards.length > 0) {
+      card = this.props.getCardQuery.allCards[0];
+    }
+
     return (
       <Layer
         closer
@@ -170,7 +185,8 @@ class SideBarCardMore extends Component {
                     Tip kartice:
                   </Label>
                   <Label size='medium' style={{marginLeft: 30, fontWeight: 600}}>
-                    {card.type.id === 'A_0' ? 'Navadna kartica' : 'Silver bullet'}
+                    {this.state.type && this.state.type.id === 'A_0' && 'Navadna kartica'}
+                    {this.state.type && this.state.type.id === 'A_1' && 'Silver bullet'}
                   </Label>
                 </div>
                 <div style={{ borderColor: borderColor, borderStyle: 'solid', borderWidth: 1, padding: 10 }}>
@@ -178,7 +194,7 @@ class SideBarCardMore extends Component {
                     Ime kartice:
                   </Label>
                   <Label size='medium' style={{marginLeft: 30, fontWeight: 600}}>
-                    {card.name}
+                    {this.state.name}
                   </Label>
                 </div>
                 <div style={{ borderColor: borderColor, borderStyle: 'solid', borderWidth: 1, padding: 10,}}>
@@ -186,7 +202,7 @@ class SideBarCardMore extends Component {
                     Opis kartice:
                   </Label>
                   <Paragraph size='medium' style={{marginLeft: 30, fontWeight: 600}}>
-                    {card.description}
+                    {this.state.description}
                   </Paragraph>
                 </div>
                 <div style={{ borderColor: borderColor, borderStyle: 'solid', borderWidth: 1, padding: 10,}}>
@@ -194,7 +210,7 @@ class SideBarCardMore extends Component {
                     Ime projekta:
                   </Label>
                   <Label size='medium' style={{marginLeft: 30, fontWeight: 600}}>
-                    {card.project.name}
+                    {this.state.project && this.state.project.name}
                   </Label>
                 </div>
                 <div style={{ borderColor: borderColor, borderStyle: 'solid', borderWidth: 1, padding: 10,}}>
@@ -202,7 +218,7 @@ class SideBarCardMore extends Component {
                     Ime uporabnika:
                   </Label>
                   <Label size='medium' style={{marginLeft: 30, fontWeight: 600}}>
-                    {card.owner.member.firstName} {card.owner.member.lastName}
+                    {this.state.owner && this.state.owner.member.firstName} {this.state.owner && this.state.owner.member.lastName}
                   </Label>
                 </div>
                 <div style={{ borderColor: borderColor, borderStyle: 'solid', borderWidth: 1, padding: 10,}}>
@@ -210,7 +226,7 @@ class SideBarCardMore extends Component {
                     Datum zaključka:
                   </Label>
                   <Label size='medium' style={{marginLeft: 30, fontWeight: 600}}>
-                    {this.formatDate(card.expiration)}
+                    {this.state.expiration && this.formatDate(this.state.expiration)}
                   </Label>
                 </div>
                 <div style={{ borderColor: borderColor, borderStyle: 'solid', borderWidth: 1, padding: 10,}}>
@@ -218,10 +234,10 @@ class SideBarCardMore extends Component {
                     Zahtevnost kartice:
                   </Label>
                   <Label size='medium' style={{marginLeft: 30, fontWeight: 600}}>
-                    {card.estimate}
+                    {this.state.estimate}
                   </Label>
                 </div>
-                { card.tasks.length > 0 &&
+                { this.state.tasks.length > 0 &&
                   <div style={{ display: 'flex', flexDirection: 'column', borderColor: borderColor, borderStyle: 'solid', borderWidth: 1,}}>
                     <Label size='medium' style={{marginLeft: 30, fontWeight: 600}}>
                       Naloge
@@ -325,6 +341,69 @@ export const getCardLogsQuery = gql`query allCardLogs($cardId: Int!) {
   }
 }`;
 
+export const getCardQuery = gql`query allCards($cardId: Int!) {
+  allCards(cardId: $cardId) {
+    id
+    cardNumber
+    colorRejected
+    column {
+      id
+    }
+    type {
+      id
+    }
+    description
+    name
+    estimate
+    project {
+      id
+      name
+      team {
+        id
+        members {
+          id
+          firstName
+          lastName
+        }
+        developers {
+          idUser
+          isActive
+        }
+        kanbanMaster {
+          idUser
+          isActive
+        }
+        productOwner {
+          idUser
+          isActive
+        }
+      }
+    }
+    expiration
+    owner {
+      id
+      member {
+        id
+        firstName
+        lastName
+      }
+    }
+    tasks {
+      id
+      description
+      done
+      assignee {
+        id
+        member {
+          id
+          firstName
+          lastName
+        }
+      }
+    }
+  }
+}`;
+
 const setDoneTaskMutation = gql`mutation setDoneTaskMutation($taskId: Int!, $done: Boolean!, $userId: Int!) {
   setDoneTask(taskId: $taskId, done: $done, userId: $userId) {
     ok
@@ -338,8 +417,12 @@ export default compose(
   graphql(getCardLogsQuery, {
     name: 'getCardLogsQuery',
     options: props => {
-      return ({ variables: { cardId: parseInt(props.data.card.id, 10) } })
+      return ({ variables: { cardId: parseInt(props.cardId, 10) } })
     }
+  }),
+  graphql(getCardQuery, {
+    name: 'getCardQuery',
+    options: props => ({ variables: { cardId: parseInt(props.cardId, 10) } })
   }),
   graphql(whoCanEditQuery, {
     name: 'whoCanEditQuery',
@@ -348,7 +431,7 @@ export default compose(
       const userId = JSON.parse(user).id;
       return ({ variables: {
         userId,
-        cardId: (props.data.card && props.data.card.id) || null,
+        cardId: props.cardId,
         skip: false,
     }});
   }}))(SideBarCardMore);

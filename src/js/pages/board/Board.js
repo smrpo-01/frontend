@@ -15,7 +15,8 @@ import ErrorNotificationCard from './ErrorNotificationCard';
 import SideBarCardMore from './SidebarCardMore';
 import ErrorNotificationToggle from './ErrorNotificationToggle';
 
-import { getCardLogsQuery } from './SidebarCardMore';
+import { getCardLogsQuery, getCardQuery } from './SidebarCardMore';
+console.log(getCardQuery)
 import { whoCanEditQuery } from './SidebarCard';
 
 
@@ -144,18 +145,18 @@ class Board extends Component {
       previousCards: this.state.cards,
     });
     this.props.moveCardMutation({
-      variables: { 
+      variables: {
         cardId: parseInt(card.id, 10),
         toColumnId: column.id,
-        force: force,
+        force,
         userId,
       },
       refetchQueries: [{
-        query: allCardsQuery,
+        query: getCardQuery,
         variables: {
-          id: parseInt(this.props.board, 10)
+          cardId: parseInt(card.id, 10)
         }
-      },
+      }
       ]
     }).then(res => {
 
@@ -187,7 +188,7 @@ class Board extends Component {
   showMore(card) {
     this.setState({
       showMore: true,
-      showMoreCard: card,
+      showMoreCard: card.id,
     });
   }
 
@@ -265,9 +266,9 @@ class Board extends Component {
             columns={this.state.columns}
             boardId={parseInt(this.props.board, 10)}
             modeEdit={this.state.modeEdit}
+            cardId={(this.state.editCard && this.state.editCard.id) || null}
             data={{
               projects: this.state.projects,
-              card: this.state.editCard,
             }}/>
         }
         { this.state.showMore &&
@@ -276,9 +277,7 @@ class Board extends Component {
             editCard={this.editCard}
             boardId={parseInt(this.props.board, 10)}
             showError={this.showError}
-            data={{
-              card: this.state.showMoreCard,
-            }}/>
+            cardId={this.state.showMoreCard} />
         }
         { this.state.dialogError &&
           <ErrorNotificationCard error={this.state.dialogErrorMessage} closer={() => this.setState({ dialogError: false, cards: this.state.previousCards })} continue={(force) => this.moveCard(this.state.moveColumn, this.state.moveCard, force)} />
