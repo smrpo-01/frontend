@@ -81,6 +81,8 @@ class LeadTimeGraph extends Component {
     } else if (error) {
       console.error(error);
       return <p><b>{'Prišlo je do napake. Posodobite iskalni niz.'}</b></p>;
+    } else if (cardsPerDay.length === 0) {
+      return <p><b>{'Ni podatkov za prikaz grafa. Posodobite iskalni niz.'}</b></p>;
     }
 
     return (

@@ -85,6 +85,8 @@ export const getGraphDataQuery = gql`
     $estimateFrom: Float!,
     $estimateTo: Float!,
     $cardType: [String]!,
+    $dateFrom: String!,
+    $dateTo: String!,
   ) {
     wipLogs(
       projectId: $projectId,
@@ -97,6 +99,8 @@ export const getGraphDataQuery = gql`
       estimateFrom: $estimateFrom,
       estimateTo: $estimateTo,
       cardType: $cardType,
+      dateFrom: $dateFrom,
+      dateTo: $dateTo,
     ) {
       id
       card {
