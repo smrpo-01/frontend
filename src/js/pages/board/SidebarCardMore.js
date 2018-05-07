@@ -95,7 +95,7 @@ class SideBarCardMore extends Component {
     let tasks = this.state.tasks.map(task => task.id ==taskId && {
       ...task,
       done: !task.done,
-    });
+    } || task);
     this.setState({
       tasks
     })
@@ -138,7 +138,6 @@ class SideBarCardMore extends Component {
   render() {
     const { data: { card } } = this.props;
     const { getCardLogsQuery: { allCardLogs } } = this.props;
-    console.log(this.props.whoCanEditQuery)
     return (
       <Layer
         closer

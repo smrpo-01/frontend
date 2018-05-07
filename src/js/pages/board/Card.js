@@ -55,10 +55,11 @@ class Card extends Component {
     let tasks = this.state.tasks.map(task => task.id ==taskId && {
       ...task,
       done: !task.done,
-    });
+    } || task);
     this.setState({
       tasks
-    })
+    });
+
     this.props.setDoneTaskMutation({
       variables: {
         taskId: parseInt(taskId, 10),
@@ -70,8 +71,8 @@ class Card extends Component {
           id: this.props.boardId,
         }
       }]
-    }).then(res => console.log(res))
-    .catch(err => console.log(err));
+    }).then(res => {})
+      .catch(err => console.log(err));
   }
 
   componentWillMount() {
