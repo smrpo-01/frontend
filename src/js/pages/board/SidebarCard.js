@@ -21,6 +21,8 @@ import TextInput from 'grommet/components/TextInput';
 import NumberInput from 'grommet/components/NumberInput';
 import CheckBox from 'grommet/components/CheckBox';
 
+import DeleteNotification from './DeleteNotification';
+
 import TrashIcon from 'grommet/components/icons/base/Trash';
 import AddIcon from 'grommet/components/icons/base/Add';
 
@@ -45,7 +47,7 @@ const transitionStylesTransform = {
 };
 
 
-class SidebarColumn extends Component {
+class SidebarCard extends Component {
   constructor() {
     super();
     this.onSubmit = this.onSubmit.bind(this);
@@ -55,10 +57,11 @@ class SidebarColumn extends Component {
     this.formatDate = this.formatDate.bind(this);
     this.findFirstColumn = this.findFirstColumn.bind(this);
     this.findPriorityColumn = this.findPriorityColumn.bind(this);
+    this.onDelete = this.onDelete.bind(this);
+    this.canDeleteBorderCheck = this.canDeleteBorderCheck.bind(this);
 
     this.state = {
       in: false,
-      id: uuid(),
       name: '',
       tasks: [],
       type: 0,
@@ -72,25 +75,65 @@ class SidebarColumn extends Component {
     const userId = JSON.parse(user).id;
     let km = false;
     let po = false;
+
     const projects = this.props.data.projects.filter(project => {
       const { kanbanMaster } = project.team;
       const { productOwner } = project.team;
+      console.log(kanbanMaster.idUser, userId)
+      console.log(productOwner.idUser, userId)
       if (kanbanMaster.idUser === userId) km = true;
 
       if (productOwner.idUser === userId) po = true;
 
       if (km || po) return true;
 
-      return false;
+      return true;
     });
+    console.log(km, po)
+    if (this.props.modeEdit) {
+      const { getCardQuery } = this.props;
+      const card = getCardQuery.allCards[0];
 
-    this.setState({
-      km,
-      po,
-      type: km ? 1 : 0,
-      projects,
-      userId,
-    });
+      this.setState({
+        id: card.id,
+        name: card.name,
+        description: card.description,
+        estimate: card.estimate,
+        selectedProject: {
+          value: card.project.name,
+          id: card.project.id
+        },
+        columnId: card.column.id,
+        type: card.type.id === 'A_1' ? 1 : 0,
+        expiration: this.formatDate(card.expiration, 'django'),
+        owner: {
+          value: `${card.owner.member.firstName} ${card.owner.member.lastName}`,
+          id: parseInt(card.owner.id, 10),
+        },
+        tasks: card.tasks.map(task => ({
+          description: task.description,
+          id: task.id,
+          owner: task.assignee && {
+            value: `${task.assignee.member.firstName} ${task.assignee.member.lastName}`,
+            id: parseInt(task.assignee.id, 10),
+          },
+          done: task.done,
+        })),
+        km,
+        po,
+        type: km ? 1 : 0,
+        projects,
+        userId,
+      });
+    } else {
+      this.setState({
+        km,
+        po,
+        type: km ? 0 : 1,
+        projects,
+        userId,
+      });
+    }
   }
 
   onSubmit() {
@@ -122,9 +165,10 @@ class SidebarColumn extends Component {
         }
 
         let filteredTasks = this.state.tasks.filter(task => task.description !== '');
-        filteredTasks = filteredTasks.map(task => ({ description: task.description, assigneeUserteamId: task.owner && parseInt(task.owner.id, 10) }));
-
+        filteredTasks = filteredTasks.map(task => ({ description: task.description, assigneeUserteamId: task.owner && parseInt(task.owner.id, 10), done: task.done }));
+        
         const cardData = {
+          id: this.state.id,
           name: this.state.name,
           description: this.state.description,
           typeId: parseInt(this.state.type, 10),
@@ -133,25 +177,47 @@ class SidebarColumn extends Component {
           estimate: parseFloat(this.state.estimate),
           ownerUserteamId: parseInt(this.state.owner.id, 10),
           tasks: filteredTasks,
-          columnId: column.id,
+          columnId: this.props.modeEdit && this.state.columnId || column.id,
         };
 
-        this.props.addCardMutation({
-          variables: {
-            cardData,
-            boardId: this.props.boardId,
-          },
-          refetchQueries: [{
-            query: allCardsQuery,
-            variables: { id: this.props.boardId }
-          }],
-        }).then(res => this.props.closer())
-          .catch(err => {
-            this.setState({
-              in: true,
-              notificationError: err.message.split(':')[1],
+        if (this.props.modeEdit) {
+          this.props.editCardMutation({
+            variables: {
+              cardData,
+            },
+            refetchQueries: [{
+              query: getCardQuery,
+              variables: { cardId: this.state.id },
+            }]
+          }).then(res => this.props.closer())
+            .catch(err => {
+              this.setState({
+                in: true,
+                notificationError: err.message.split(':')[1],
+              });
             });
-          });
+        } else {
+          const user = sessionStorage.getItem('user');
+          const userId = JSON.parse(user).id;
+
+          this.props.addCardMutation({
+            variables: {
+              cardData,
+              boardId: this.props.boardId,
+              userId,
+            },
+            refetchQueries: [{
+              query: allCardsQuery,
+              variables: { id: this.props.boardId }
+            }],
+          }).then(res => this.props.closer())
+            .catch(err => {
+              this.setState({
+                in: true,
+                notificationError: err.message.split(':')[1],
+              });
+            });
+        }
       }
     });
   }
@@ -215,6 +281,7 @@ class SidebarColumn extends Component {
   changeTaskOwner(value, taskId) {
     const tasks = this.state.tasks.map((task) => {
       if (task.id === taskId) {
+        console.log(value)
         return {
           ...task,
           owner: value
@@ -235,9 +302,49 @@ class SidebarColumn extends Component {
     }
   }
 
+  canDeleteBorderCheck(columns) {
+    for (let c = 0; c < columns.length; c++) {
+      if (columns[c].id === this.state.columnId) return true;
+      if (columns[c].priority) return false;
+
+      const returnedColumn = this.canDeleteBorderCheck(columns[c].columns);
+      if (returnedColumn !== null) {
+        return returnedColumn;
+      }
+    }
+
+    return null;
+  }
+
+  onDelete(causeOfDeletion) {
+    const { data } = this.props;
+    const { card } = data;
+    const cardId = card.id;
+    
+    this.props.deleteCardMutation({
+      variables: {
+        causeOfDeletion,
+        cardId
+      }, refetchQueries: [{
+        query: allCardsQuery,
+        variables: {
+          id: this.props.boardId,
+        }
+      }]
+    }).then(res => {
+      this.setState({
+        dialogDelete: false,
+      });
+      this.props.closer();
+    }).catch(err => {
+      console.log(err);
+    });
+  }
+
   render() {
     let projectOptions = [];
     let memberOptions = [];
+    console.log(this.state.projects)
     if (this.state.projects) {
       if (this.state.type === 1) {
         projectOptions = this.state.projects.filter(pr => pr.team.kanbanMaster.idUser === this.state.userId);
@@ -245,15 +352,49 @@ class SidebarColumn extends Component {
         projectOptions = this.state.projects.filter(pr => pr.team.productOwner.idUser === this.state.userId);
       }
 
+      console.log(projectOptions)
+
       projectOptions = projectOptions.map(pr => ({ value: pr.name, id: pr.id }));
 
       const currentProject = this.state.projects.filter(pr => this.state.selectedProject && pr.id === this.state.selectedProject.id);
+
       if (currentProject.length > 0) {
-        const members = currentProject[0].team.members.filter((obj, pos, arr) =>
-          arr.map(mapObj => mapObj.id).indexOf(obj.id) === pos
-        );
-        memberOptions = members.map(member => ({ value: `${member.firstName} ${member.lastName}`, id: member.id }));
+        const members = currentProject[0].team.developers;
+        memberOptions = members.map(member => ({ value: `${member.firstName} ${member.lastName}`, id: parseInt(member.idUserTeam, 10) }));
       }
+    }
+
+    let canDelete = false;
+
+    if (this.state.selectedProject) {
+      let user = sessionStorage.getItem('user');
+      user = JSON.parse(user);
+      const project = this.props.data.projects.filter(pr => this.state.selectedProject && pr.id === this.state.selectedProject.id)[0];
+
+      const isPo = project && project.team.productOwner.idUser === user.id;
+      const isKM = project && project.team.kanbanMaster.idUser === user.id;
+      if (isPo && this.canDeleteBorderCheck(this.props.columns)) {
+        canDelete = true;
+      } else if (isKM) {
+        canDelete = true;
+      }
+    }
+
+    let whoCanEdit = {
+      cardDescription: true,
+      cardName: true,
+      date: true,
+      estimate: true,
+      owner: true,
+      projectName: true,
+      tasks: true,
+      type: true,
+    };
+    if (this.props.whoCanEditQuery.whoCanEdit && this.props.modeEdit) {
+      whoCanEdit = {
+        ...this.props.whoCanEditQuery.whoCanEdit,
+        type: false,
+      };
     }
 
     return (
@@ -270,68 +411,98 @@ class SidebarColumn extends Component {
             </Header>
 
             <FormFields>
-              <FormField>
-                <div style={{ display: 'flex', justifyContent: 'space-around', margin: 20 }}>
+              <FormField style={{ backgroundColor: whoCanEdit.type ? 'white' : '#f0f0f0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-around', margin: 20, }}>
                   <CheckBox label='Navadna kartica'
                     toggle={false}
-                    disabled={!this.state.po}
+                    disabled={!whoCanEdit.type || !this.state.po}
                     checked={this.state.type === 0 && this.state.po}
                     onChange={() => this.changeType(0)} />
                   <CheckBox label='Silver bullet'
                     toggle={false}
-                    disabled={!this.state.km}
+                    disabled={!whoCanEdit.type || !this.state.km}
                     checked={this.state.type === 1 && this.state.km}
                     onChange={() => this.changeType(1)} />
                 </div>
               </FormField>
-              <FormField label='Ime kartice' error={this.state.errors.name}>
+              <FormField label='Ime kartice' error={this.state.errors.name} style={{ backgroundColor: whoCanEdit.cardName ? 'white' : '#f0f0f0' }}>
                 <TextInput
                   id='name'
                   value={this.state.name}
                   onDOMChange={event => this.setState({ name: event.target.value })}
+                  disabled={!whoCanEdit.cardName}
                 />
               </FormField>
-              <FormField label='Opis kartice' error={this.state.errors.description}>
+              <FormField label='Opis kartice' error={this.state.errors.description} style={{ backgroundColor: whoCanEdit.cardDescription ? 'white' : '#f0f0f0' }}>
                 <TextInput
                   id='description'
                   value={this.state.description}
                   onDOMChange={event => this.setState({ description: event.target.value })}
+                  disabled={!whoCanEdit.cardDescription}
                 />
               </FormField>
-              <FormField label='Ime projekta' error={this.state.errors.selectedProject}>
-                <Select placeHolder='/'
-                  options={projectOptions}
-                  multiple={false}
-                  onChange={change => this.changeProject(change.value)}
-                  value={this.state.selectedProject} />
+              <FormField label='Ime projekta' error={this.state.errors.selectedProject} style={{ backgroundColor: whoCanEdit.projectName ? 'white' : '#f0f0f0' }}>
+                { (!whoCanEdit.projectName &&
+                  (<TextInput
+                    id='project'
+                    value={this.state.selectedProject && this.state.selectedProject.value || ''}
+                    disabled={true}
+                  />)) ||
+                    <Select placeHolder='/'
+                      options={projectOptions}
+                      multiple={false}
+                      onChange={change => this.changeProject(change.value)}
+                      value={this.state.selectedProject} />
+                }
+                
               </FormField>
-              <FormField label='Izberite uporabnika' error={this.state.errors.owner}>
-                <Select placeHolder='/'
-                  options={memberOptions}
-                  multiple={false}
-                  onChange={change => this.setState({ owner: change.value })}
-                  value={this.state.owner} />
+              <FormField label='Izberite uporabnika' error={this.state.errors.owner} style={{ backgroundColor: whoCanEdit.owner ? 'white' : '#f0f0f0' }}>
+                { (!whoCanEdit.owner &&
+                    (<TextInput
+                      id='owner'
+                      value={this.state.owner && this.state.owner.value}
+                      disabled={true}
+                    />)) ||
+                    <Select placeHolder='/'
+                      options={memberOptions}
+                      multiple={false}
+                      onChange={change => this.setState({ owner: change.value })}
+                      value={this.state.owner} />
+                }
               </FormField>
-              <FormField label='Datum zaključka kartice' error={this.state.errors.expiration}>
-                <DateTime
-                  id='expiration'
-                  format={dateFormat}
-                  value={this.state.expiration}
-                  onChange={e => this.setState({ expiration: e })}
-                />
+              <FormField label='Datum zaključka kartice' error={this.state.errors.expiration} style={{ backgroundColor: whoCanEdit.date ? 'white' : '#f0f0f0' }}>
+                { (!whoCanEdit.date &&
+                  (<TextInput
+                    id='date'
+                    value={this.state.expiration}
+                    disabled={true}
+                  />)) ||
+                  <DateTime
+                    id='expiration'
+                    format={dateFormat}
+                    value={this.state.expiration}
+                    onChange={e => this.setState({ expiration: e })}
+                  />
+                }
               </FormField>
-              <FormField label='Zahtevnost kartice'>
+              <FormField label='Zahtevnost kartice' style={{ backgroundColor: whoCanEdit.estimate ? 'white' : '#f0f0f0' }}>
+              { (!whoCanEdit.date &&
+                (<TextInput
+                  id='date'
+                  value={this.state.estimate}
+                  disabled={true}
+                />)) ||
                 <NumberInput
                   min={0}
-                  defaultValue={0}
                   value={this.state.estimate}
                   step={0.1}
                   onChange={event => this.setState({ estimate: event.target.value })}
                 />
+              }
               </FormField>
               <FormField label='Naloge' strong={true} style={{ backgroundColor: '#fdfdfd' }}>
                 { this.state.tasks.map((task, i) => (
-                  <FormField label={`#${i + 1}`} style={{ backgroundColor: '#fdfdfd' }}>
+                  <FormField label={`#${i + 1}`} style={{ backgroundColor: '#fdfdfd' }} key={task.id}>
                     <TextInput
                       value={task.description}
                       onDOMChange={event => this.changeTaskDescription(event.target.value, task.id)}
@@ -351,15 +522,15 @@ class SidebarColumn extends Component {
 
             </FormFields>
             <Footer pad={{ vertical: 'medium', between: 'medium' }}>
-              {this.props.modeEdit && <Button
+              {this.props.modeEdit && canDelete && <Button
                 icon={<TrashIcon />}
-                onClick={() => this.props.completeAddEditColumn(null)}
+                onClick={() => this.setState({dialogDelete: true})}
               />}
               <Button label='Prekliči'
                 secondary={true}
                 onClick={() => this.props.closer()}
               />
-              {this.props.modeEdit && <Button label='Uredi'
+              {this.props.modeEdit && <Button label='Shrani'
                 primary={true}
                 onClick={() => this.onSubmit()}
               />}
@@ -369,8 +540,11 @@ class SidebarColumn extends Component {
               />}
             </Footer>
           </Form>
+          { this.state.dialogDelete &&
+            <DeleteNotification closer={() => this.setState({ dialogDelete: false })} delete={(causeOfDeletion) => this.onDelete(causeOfDeletion)} />
+          }
           <Transition in={this.state.in} timeout={duration}>
-            {status => (<Notification message={this.state.notificationError}
+            {status => (<Notification message={this.state.notificationError || ''}
               size='small'
               status='critical'
               style={{
@@ -386,22 +560,140 @@ class SidebarColumn extends Component {
   }
 }
 
-SidebarColumn.propTypes = {
+SidebarCard.propTypes = {
   modeEdit: PropTypes.bool,
   closer: PropTypes.func.isRequired,
 };
 
-SidebarColumn.defaultProps = {
+SidebarCard.defaultProps = {
   modeEdit: false,
   columnData: null,
 };
 
-const addCardMutation = gql`mutation addCard($cardData: CardInput!, $boardId: Int!){
-  addCard(cardData: $cardData, boardId: $boardId) {
+const addCardMutation = gql`mutation addCard($cardData: CardInput!, $boardId: Int!, $userId: Int!){
+  addCard(cardData: $cardData, boardId: $boardId, userId: $userId) {
     ok
   }
 }`;
 
-export default graphql(addCardMutation, {
-  name: 'addCardMutation',
-})(SidebarColumn);
+const editCardMutation = gql`mutation editCard($cardData: CardInput!){
+  editCard(cardData: $cardData) {
+    ok
+  }
+}`;
+
+export const whoCanEditQuery = gql`query whoCanEdit($userId: Int!, $cardId: Int, $skip: Boolean!){
+  whoCanEdit(userId:$userId, cardId: $cardId) @skip (if: $skip){
+    cardName
+    cardDescription
+    projectName
+    owner
+    date
+    estimate
+    tasks
+    error
+  }
+}`;
+
+const deleteCardMutation = gql`mutation deleteCardMutation($causeOfDeletion: String!, $cardId: Int!) {
+  deleteCard(causeOfDeletion: $causeOfDeletion, cardId: $cardId) {
+    ok
+  }
+}`;
+
+const getCardQuery = gql`query allCards($cardId: Int!) {
+  allCards(cardId: $cardId) {
+    id
+    cardNumber
+    colorRejected
+    column {
+      id
+    }
+    type {
+      id
+    }
+    description
+    name
+    estimate
+    project {
+      id
+      name
+      team {
+        id
+        members {
+          id
+          firstName
+          lastName
+        }
+        developers {
+          idUser
+          isActive
+        }
+        kanbanMaster {
+          idUser
+          isActive
+        }
+        productOwner {
+          idUser
+          isActive
+        }
+      }
+    }
+    expiration
+    owner {
+      id
+      member {
+        id
+        firstName
+        lastName
+      }
+    }
+    tasks {
+      id
+      description
+      done
+      assignee {
+        id
+        member {
+          id
+          firstName
+          lastName
+        }
+      }
+    }
+  }
+}`;
+
+
+export default compose(
+  graphql(addCardMutation, {
+    name: 'addCardMutation',
+  }),
+  graphql(editCardMutation, {
+    name: 'editCardMutation',
+  }),
+  graphql(deleteCardMutation, {
+    name: 'deleteCardMutation',
+  }),
+  graphql(getCardQuery, {
+    name: 'getCardQuery',
+    options: (props) => {
+      return ({
+        variables: {
+          cardId: parseInt(props.cardId, 10) || -1,
+        }
+      });
+    },
+  }),
+  graphql(whoCanEditQuery, {
+    name: 'whoCanEditQuery',
+    options: (props) => {
+      const user = sessionStorage.getItem('user');
+      const userId = JSON.parse(user).id;
+      return ({ variables: {
+        userId,
+        cardId: (props.data.card && parseInt(props.data.card.id, 10)) || null,
+        skip: false,
+      }});
+    }})
+)(SidebarCard);
