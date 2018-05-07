@@ -107,12 +107,12 @@ class Card extends Component {
     const percent = (data.estimate / 6);
     const w = true ? Math.max(5, 100 * Math.min(percent, 1)) : 0;
     return connectDragSource(
-      <div style={{ backgroundColor: data.colorRejected ? '#f4f4f4' : 'white', width: '95%', maxWidth: 250, borderStyle: 'solid', borderColor: '#dbd9d9', borderWidth: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 5, opacity: isDragging ? 0.3 : 1, cursor: 'move', borderRadius: 10, marginTop: 5, }}>
+      <div style={{ backgroundColor: data.colorRejected ? '#ff84841A' : 'white', width: '95%', maxWidth: 250, borderStyle: 'solid', borderColor: '#dbd9d9', borderWidth: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 5, opacity: isDragging ? 0.3 : 1, cursor: 'move', borderRadius: 10, marginTop: 5, borderColor: data.colorRejected ? '#d62a2a' : 'white' }}>
         <div style={{ display: 'flex', width: '90%', justifyContent: 'space-between', marginBottom: 8, marginTop: 5 }}>
           <h style={{ opacity: 0.5 }}>
             {data.id}
           </h>
-          <svg width='100' height='5' style={{marginTop: 10, borderRadius: 20}}>
+          <svg width='100' height='5' style={{ marginTop: 10, borderRadius: 20 }}>
             <rect width='100' height='5' fill='#ccc' rx='0' ry='0'></rect>
             <rect width={w} height='5' fill='#426381' rx='0' ry='0'></rect>
           </svg>
@@ -134,8 +134,11 @@ class Card extends Component {
         </div>
         <div style={{ borderColor: 'black', borderWidth: 0, borderBottomWidth: 1, width: '100%', borderStyle: 'solid', marginBottom: 10, opacity: 0.2 }} />
         <div style={{ display: 'flex', width: '95%', marginBottom: 10, flexDirection: 'column' }}>
-          {this.state.tasks.map(task => (<CheckBox
-            label={task.description} key={task.id} checked={task.done} onClick={() => this.toggleTask(task.id, task.done)} />))}
+          {this.state.tasks.map(task => (
+            <div style={{ marginBottom: 5 }}>
+              <CheckBox
+                label={task.description} key={task.id} checked={task.done} onClick={() => this.toggleTask(task.id, task.done)}/>
+            </div>))}
         </div>
       </div>
     );
