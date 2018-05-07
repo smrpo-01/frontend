@@ -79,7 +79,7 @@ class AppHeader extends Component {
       case '/management':
         return this.arrIntersection(roles, rolesForManagement);
       case '/analitycs':
-        return ((roles.find(el => el === 'km')) !== undefined);
+        return true;
       default:
         return false;
     }

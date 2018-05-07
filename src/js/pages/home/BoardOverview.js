@@ -19,8 +19,8 @@ class BoardOverview extends Component {
           <h4>
             {this.props.board.name}
           </h4>
-          { this.props.canEdit &&
             <div style={{ display: 'flex', justifyContent: 'space-between', flexDirection: 'row' }}>
+              { this.props.canEdit &&
               <div
                 style={{ cursor: 'pointer', opacity: this.state.opacity }}
                 onClick={(e) => { e.stopPropagation(); }}
@@ -31,6 +31,7 @@ class BoardOverview extends Component {
               >
                 <EditIcon onClick={() => this.props.editBoard(this.props.board.id)} />
               </div>
+              }
               <div
                 style={{ cursor: 'pointer', paddingLeft: 10, opacity: this.state.opacityAnalisys }}
                 onClick={(e) => { e.stopPropagation(); }}
@@ -41,7 +42,6 @@ class BoardOverview extends Component {
                 <AnalyticsIcon onClick={() => this.props.showAnalitycs(this.props.board.id)} />
               </div>
             </div>
-          }
         </div>
         <div>
           <ul>
