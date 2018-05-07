@@ -50,8 +50,8 @@ class FilterData extends Component {
       devStart: '',
       devEnd: '',
 
-      dateFrom: '',
-      dateTo: '',
+      dateFrom: '1.4.2018',
+      dateTo: '1.5.2018',
 
       columnFrom: null,
       columnFromId: null,
