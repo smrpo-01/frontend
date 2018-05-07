@@ -13,6 +13,7 @@ import SidebarCard from './SidebarCard';
 import uuid from 'uuid/v4';
 import ErrorNotificationCard from './ErrorNotificationCard';
 import SideBarCardMore from './SidebarCardMore';
+import ErrorNotificationToggle from './ErrorNotificationToggle';
 
 import { getCardLogsQuery } from './SidebarCardMore';
 import { whoCanEditQuery } from './SidebarCard';
@@ -33,6 +34,7 @@ class Board extends Component {
     this.moveCard = this.moveCard.bind(this);
     this.showMore = this.showMore.bind(this);
     this.editCard = this.editCard.bind(this);
+    this.showError = this.showError.bind(this);
 
     this.state = {
       name: '',
@@ -154,20 +156,6 @@ class Board extends Component {
           id: parseInt(this.props.board, 10)
         }
       },
-      /*, {
-        query: getCardLogsQuery,
-        variables: {
-          cardId: parseInt(card.id, 10),
-        }
-      },
-      */ {
-        query: whoCanEditQuery,
-        variables: {
-          userId,
-          cardId: card.id,
-        }
-      }
-      
       ]
     }).then(res => {
 
@@ -189,6 +177,13 @@ class Board extends Component {
     });
   }
 
+  showError(err) {
+    this.setState({
+      dialogErrorToggle: true,
+      dialogErrorMessage: err,
+    });
+  }
+
   showMore(card) {
     this.setState({
       showMore: true,
@@ -202,7 +197,7 @@ class Board extends Component {
     );
 
     if (column.columns.length === 0) {
-      return (<Column data={column} project={project} key={`${column.id}${project.id}`} cards={cards} moveCard={this.moveCard} showMore={this.showMore} boardId={parseInt(this.props.board, 10)}/>);
+      return (<Column data={column} project={project} key={`${column.id}${project.id}`} cards={cards} showError={this.showError} moveCard={this.moveCard} showMore={this.showMore} boardId={parseInt(this.props.board, 10)}/>);
     }
     return (
       <div style={{ display: 'flex', borderRightWidth: 2, borderLeftWidth: 2, borderTopWidth: 2, borderBottomWidth: 0, borderStyle: 'solid', borderColor: 'white', }} key={uuid()}>
@@ -287,6 +282,9 @@ class Board extends Component {
         { this.state.dialogError &&
           <ErrorNotificationCard error={this.state.dialogErrorMessage} closer={() => this.setState({ dialogError: false, cards: this.state.previousCards })} continue={(force) => this.moveCard(this.state.moveColumn, this.state.moveCard, force)} />
         }
+        { this.state.dialogErrorToggle &&
+          <ErrorNotificationToggle error={this.state.dialogErrorMessage} closer={() => this.setState({ dialogErrorToggle: false })}  />
+        }
       </div>
     );
   }
@@ -329,6 +327,7 @@ export const allCardsQuery = gql`query allCards($id: Int!) {
   allCards(boardId: $id) {
     id
     cardNumber
+    colorRejected
     column {
       id
     }
@@ -364,6 +363,7 @@ export const allCardsQuery = gql`query allCards($id: Int!) {
     }
     expiration
     owner {
+      id
       member {
         id
         firstName

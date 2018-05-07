@@ -100,7 +100,7 @@ class SideBarCardMore extends Component {
         }
       }]
       
-    }).then(res => console.log(res))
+    }).then(res => {})
       .catch(err => console.log(err));
   }
 
@@ -110,13 +110,13 @@ class SideBarCardMore extends Component {
     let km = false;
     let po = false;
     this.props.getCardLogsQuery.refetch();
-
+    this.props.whoCanEditQuery.refetch();
     this.setState({
       km,
       po,
       type: km ? 1 : 0,
     });
-    console.log('jaja')
+
     if (this.props.data && this.props.data.card && this.props.data.card.tasks) {
       this.setState({
         tasks: this.props.data.card.tasks,
@@ -313,8 +313,8 @@ export const getCardLogsQuery = gql`query allCardLogs($cardId: Int!) {
   }
 }`;
 
-const setDoneTaskMutation = gql`mutation setDoneTaskMutation($taskId: Int!, $done: Boolean!) {
-  setDoneTask(taskId: $taskId, done: $done) {
+const setDoneTaskMutation = gql`mutation setDoneTaskMutation($taskId: Int!, $done: Boolean!, $userId: Int!) {
+  setDoneTask(taskId: $taskId, done: $done, userId: $userId) {
     ok
   }
 }`;
@@ -337,5 +337,6 @@ export default compose(
       return ({ variables: {
         userId,
         cardId: (props.data.card && props.data.card.id) || null,
+        skip: false,
     }});
   }}))(SideBarCardMore);

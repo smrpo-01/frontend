@@ -34,6 +34,7 @@ class ErrorNotificationCard extends Component {
   }
 
   render() {
+    console.log(this.props.error)
     return (
       <Layer>
         <Article pad='small'>
@@ -43,7 +44,7 @@ class ErrorNotificationCard extends Component {
               {this.props.error}
             </h>
           </div>
-          { this.props.error !== ' Ne moreš premikati za več kot ena v levo/desno.' &&
+          { this.props.error === ' Presežena omejitev wip. Nadaljujem?' &&
             <div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column' }}>
               <div style={{ display: 'flex', justifyContent: 'center' }}>
                 <h style={{ color: 'red' }}>
@@ -69,7 +70,7 @@ class ErrorNotificationCard extends Component {
               primary={false}
               onClick={() => this.props.closer()}
             />
-            { this.props.error !== ' Ne moreš premikati za več kot ena v levo/desno.' &&
+            { this.props.error === ' Presežena omejitev wip. Nadaljujem?' &&
             <Button label='Nadaljuj'
               primary={true}
               onClick={() => this.onSubmit()}

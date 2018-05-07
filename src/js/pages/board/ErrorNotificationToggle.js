@@ -15,7 +15,7 @@ class ErrorNotification extends Component {
     return (
       <Layer>
         <Article pad='small'>
-          <Header justify='center'><Heading tag='h3'>Napaka pri shranjevanju</Heading></Header>
+          <Header justify='center'><Heading tag='h3'>Napaka pri urejanju kartice</Heading></Header>
           <div style={{ display: 'flex', justifyContent: 'center' }}>
             <p2 style={{ color: 'red' }}>
               {this.props.error}

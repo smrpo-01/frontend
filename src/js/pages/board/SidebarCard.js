@@ -87,8 +87,6 @@ class SidebarCard extends Component {
       return false;
     });
 
-    console.log(po, km)
-
     if (this.props.modeEdit) {
       const { data } = this.props;
       const { card } = data;
@@ -107,14 +105,14 @@ class SidebarCard extends Component {
         expiration: this.formatDate(card.expiration, 'django'),
         owner: {
           value: `${card.owner.member.firstName} ${card.owner.member.lastName}`,
-          id: card.owner.member.id,
+          id: parseInt(card.owner.id, 10),
         },
         tasks: card.tasks.map(task => ({
           description: task.description,
           id: task.id,
           owner: task.assignee && {
             value: `${task.assignee.member.firstName} ${task.assignee.member.lastName}`,
-            id: task.assignee.member.id,
+            id: parseInt(task.assignee.id, 10),
           },
         })),
         km,
@@ -164,7 +162,7 @@ class SidebarCard extends Component {
 
         let filteredTasks = this.state.tasks.filter(task => task.description !== '');
         filteredTasks = filteredTasks.map(task => ({ description: task.description, assigneeUserteamId: task.owner && parseInt(task.owner.id, 10) }));
-        console.log(filteredTasks)
+        
         const cardData = {
           id: this.state.id,
           name: this.state.name,
@@ -279,6 +277,7 @@ class SidebarCard extends Component {
   changeTaskOwner(value, taskId) {
     const tasks = this.state.tasks.map((task) => {
       if (task.id === taskId) {
+        console.log(value)
         return {
           ...task,
           owner: value
@@ -301,7 +300,7 @@ class SidebarCard extends Component {
 
   canDeleteBorderCheck(columns) {
     for (let c = 0; c < columns.length; c++) {
-      if (columns[c].id === this.state.columnId) return true; 
+      if (columns[c].id === this.state.columnId) return true;
       if (columns[c].priority) return false;
 
       const returnedColumn = this.canDeleteBorderCheck(columns[c].columns);
@@ -354,7 +353,7 @@ class SidebarCard extends Component {
 
       if (currentProject.length > 0) {
         const members = currentProject[0].team.developers;
-        memberOptions = members.map(member => ({ value: `${member.firstName} ${member.lastName}`, id: member.idUserTeam }));
+        memberOptions = members.map(member => ({ value: `${member.firstName} ${member.lastName}`, id: parseInt(member.idUserTeam, 10) }));
       }
     }
 
@@ -390,6 +389,8 @@ class SidebarCard extends Component {
         type: false,
       };
     }
+
+    console.log(this.state)
 
     return (
       <Layer
@@ -576,8 +577,8 @@ const editCardMutation = gql`mutation editCard($cardData: CardInput!){
   }
 }`;
 
-export const whoCanEditQuery = gql`query whoCanEdit($userId: Int!, $cardId: Int){
-  whoCanEdit(userId:$userId, cardId: $cardId) {
+export const whoCanEditQuery = gql`query whoCanEdit($userId: Int!, $cardId: Int, $skip: Boolean!){
+  whoCanEdit(userId:$userId, cardId: $cardId) @skip (if: $skip){
     cardName
     cardDescription
     projectName
@@ -593,7 +594,7 @@ const deleteCardMutation = gql`mutation deleteCardMutation($causeOfDeletion: Str
   deleteCard(causeOfDeletion: $causeOfDeletion, cardId: $cardId) {
     ok
   }
-}`
+}`;
 
 
 export default compose(
@@ -613,7 +614,8 @@ export default compose(
       const userId = JSON.parse(user).id;
       return ({ variables: {
         userId,
-        cardId: (props.data.card && props.data.card.id) || null,
+        cardId: (props.data.card && parseInt(props.data.card.id, 10)) || null,
+        skip: false,
       }});
     }})
   )(SidebarCard);

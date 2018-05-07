@@ -55,7 +55,7 @@ class Card extends Component {
     this.toggleTask = this.toggleTask.bind(this);
     this.state = {
       tasks: [],
-    }
+    };
   }
 
   toggleTask(taskId, done) {
@@ -63,6 +63,11 @@ class Card extends Component {
       ...task,
       done: !task.done,
     } || task);
+
+    const user = sessionStorage.getItem('user');
+    const userId = JSON.parse(user).id;
+
+
     this.setState({
       tasks
     });
@@ -71,6 +76,7 @@ class Card extends Component {
       variables: {
         taskId: parseInt(taskId, 10),
         done: !done,
+        userId
       },
       refetchQueries: [{
         query: allCardsQuery,
@@ -79,7 +85,13 @@ class Card extends Component {
         }
       }]
     }).then(res => {})
-      .catch(err => console.log(err));
+      .catch(err => {
+        if (err.message.split(':')[1] === ' None') {
+          console.log('no err')
+        } else {
+          this.props.showError(err.message.split(':')[1]);
+        }
+      });
   }
 
   componentWillMount() {
@@ -96,7 +108,7 @@ class Card extends Component {
     const percent = (data.estimate / 6);
     const w = true ? Math.max(5, 100 * Math.min(percent, 1)) : 0;
     return connectDragSource(
-      <div style={{ backgroundColor: 'white', width: '95%', maxWidth: 250, borderStyle: 'solid', borderColor: '#dbd9d9', borderWidth: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 5, opacity: isDragging ? 0.3 : 1, cursor: 'move', borderRadius: 10, marginTop: 5, }}>
+      <div style={{ backgroundColor: data.colorRejected ? '#f4f4f4' : 'white', width: '95%', maxWidth: 250, borderStyle: 'solid', borderColor: '#dbd9d9', borderWidth: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 5, opacity: isDragging ? 0.3 : 1, cursor: 'move', borderRadius: 10, marginTop: 5, }}>
         <div style={{ display: 'flex', width: '90%', justifyContent: 'space-between', marginBottom: 8, marginTop: 5 }}>
           <h style={{ opacity: 0.5 }}>
             {data.id}
@@ -142,8 +154,8 @@ Card.propTypes = {
   connectDragSource: PropTypes.func.isRequired
 };
 
-const setDoneTaskMutation = gql`mutation setDoneTaskMutation($taskId: Int!, $done: Boolean!) {
-  setDoneTask(taskId: $taskId, done: $done) {
+const setDoneTaskMutation = gql`mutation setDoneTaskMutation($taskId: Int!, $done: Boolean!, $userId: Int!) {
+  setDoneTask(taskId: $taskId, done: $done, userId: $userId) {
     ok
   }
 }`;
