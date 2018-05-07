@@ -31,7 +31,7 @@ import Notification from 'grommet/components/Notification';
 
 import { allCardsQuery } from './Board';
 
-const dateFormat = 'D/M/YYYY';
+const dateFormat = 'D.M.YYYY';
 const duration = 100;
 
 const transitionStyles = {
@@ -278,7 +278,6 @@ class SidebarCard extends Component {
   changeTaskOwner(value, taskId) {
     const tasks = this.state.tasks.map((task) => {
       if (task.id === taskId) {
-        console.log(value)
         return {
           ...task,
           owner: value
@@ -314,14 +313,10 @@ class SidebarCard extends Component {
   }
 
   onDelete(causeOfDeletion) {
-    const { data } = this.props;
-    const { card } = data;
-    const cardId = card.id;
-    
     this.props.deleteCardMutation({
       variables: {
         causeOfDeletion,
-        cardId
+        cardId: this.state.id,
       }, refetchQueries: [{
         query: allCardsQuery,
         variables: {
@@ -475,6 +470,7 @@ class SidebarCard extends Component {
                     id='expiration'
                     format={dateFormat}
                     value={this.state.expiration}
+                    format={dateFormat}
                     onChange={e => this.setState({ expiration: e })}
                   />
                 }

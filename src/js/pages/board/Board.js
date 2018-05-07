@@ -16,7 +16,6 @@ import SideBarCardMore from './SidebarCardMore';
 import ErrorNotificationToggle from './ErrorNotificationToggle';
 
 import { getCardLogsQuery, getCardQuery } from './SidebarCardMore';
-console.log(getCardQuery)
 import { whoCanEditQuery } from './SidebarCard';
 
 
