@@ -87,6 +87,8 @@ class SidebarCard extends Component {
       return false;
     });
 
+    console.log(po, km)
+
     if (this.props.modeEdit) {
       const { data } = this.props;
       const { card } = data;
@@ -363,8 +365,8 @@ class SidebarCard extends Component {
       user = JSON.parse(user);
       const project = this.props.data.projects.filter(pr => this.state.selectedProject && pr.id === this.state.selectedProject.id)[0];
 
-      const isPo = project.team.productOwner.idUser === user.id;
-      const isKM = project.team.kanbanMaster.idUser === user.id;
+      const isPo = project && project.team.productOwner.idUser === user.id;
+      const isKM = project && project.team.kanbanMaster.idUser === user.id;
       if (isPo && this.canDeleteBorderCheck(this.props.columns)) {
         canDelete = true;
       } else if (isKM) {
@@ -383,10 +385,9 @@ class SidebarCard extends Component {
       type: true,
     };
     if (this.props.whoCanEditQuery.whoCanEdit && this.props.modeEdit) {
-      console.log(this.props.whoCanEditQuery.whoCanEdit)
       whoCanEdit = {
         ...this.props.whoCanEditQuery.whoCanEdit,
-        type: !this.props.modeEdit,
+        type: false,
       };
     }
 
@@ -408,12 +409,12 @@ class SidebarCard extends Component {
                 <div style={{ display: 'flex', justifyContent: 'space-around', margin: 20, }}>
                   <CheckBox label='Navadna kartica'
                     toggle={false}
-                    disabled={!whoCanEdit.type && !this.state.po}
+                    disabled={!whoCanEdit.type || !this.state.po}
                     checked={this.state.type === 0 && this.state.po}
                     onChange={() => this.changeType(0)} />
                   <CheckBox label='Silver bullet'
                     toggle={false}
-                    disabled={!whoCanEdit.type && !this.state.km}
+                    disabled={!whoCanEdit.type || !this.state.km}
                     checked={this.state.type === 1 && this.state.km}
                     onChange={() => this.changeType(1)} />
                 </div>
