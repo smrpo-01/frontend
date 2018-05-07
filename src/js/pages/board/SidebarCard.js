@@ -21,6 +21,8 @@ import TextInput from 'grommet/components/TextInput';
 import NumberInput from 'grommet/components/NumberInput';
 import CheckBox from 'grommet/components/CheckBox';
 
+import DeleteNotification from './DeleteNotification';
+
 import TrashIcon from 'grommet/components/icons/base/Trash';
 import AddIcon from 'grommet/components/icons/base/Add';
 
@@ -88,6 +90,7 @@ class SidebarCard extends Component {
     if (this.props.modeEdit) {
       const { data } = this.props;
       const { card } = data;
+      console.log(card.tasks)
       this.setState({
         id: card.id,
         name: card.name,
@@ -104,7 +107,14 @@ class SidebarCard extends Component {
           value: `${card.owner.member.firstName} ${card.owner.member.lastName}`,
           id: card.owner.member.id,
         },
-        tasks: card.tasks,
+        tasks: card.tasks.map(task => ({
+          description: task.description,
+          id: task.id,
+          owner: task.assignee && {
+            value: `${task.assignee.member.firstName} ${task.assignee.member.lastName}`,
+            id: task.assignee.member.id,
+          },
+        })),
         km,
         po,
         type: km ? 1 : 0,
@@ -152,6 +162,7 @@ class SidebarCard extends Component {
 
         let filteredTasks = this.state.tasks.filter(task => task.description !== '');
         filteredTasks = filteredTasks.map(task => ({ description: task.description, assigneeUserteamId: task.owner && parseInt(task.owner.id, 10) }));
+        console.log(filteredTasks)
         const cardData = {
           id: this.state.id,
           name: this.state.name,
@@ -288,36 +299,42 @@ class SidebarCard extends Component {
 
   canDeleteBorderCheck(columns) {
     for (let c = 0; c < columns.length; c++) {
-      if (columns[c].id === this.state.columnId) return true;      
+      if (columns[c].id === this.state.columnId) return true; 
       if (columns[c].priority) return false;
 
       const returnedColumn = this.canDeleteBorderCheck(columns[c].columns);
-      if (returnedColumn === null) {
-        console.log(returnedColumn)
+      if (returnedColumn !== null) {
+        return returnedColumn;
       }
     }
 
     return null;
   }
 
-  onDelete() {
-    let user = sessionStorage.getItem('user');
-    user = JSON.parse(user);
-    const project = this.props.data.projects.filter(pr => pr.id === this.state.selectedProject.id)[0];
+  onDelete(causeOfDeletion) {
+    const { data } = this.props;
+    const { card } = data;
+    const cardId = card.id;
+    
+    this.props.deleteCardMutation({
+      variables: {
+        causeOfDeletion,
+        cardId
+      }, refetchQueries: [{
+        query: allCardsQuery,
+        variables: {
+          id: this.props.boardId,
+        }
+      }]
+    }).then(res => {
+      this.setState({
+        dialogDelete: false,
+      });
+      this.props.closer();
+    }).catch(err => {
+      console.log(err);
+    });
 
-    //const memberOfProject = project.team.members.map(m => m.id).includes(String(user.id));
-
-    //if( !memberOfProject ) {
-    //  console.log('Niste member projekta');
-    //}
-
-    const isPo = project.team.productOwner.idUser === user.id;
-    const isKM = project.team.kanbanMaster.idUser === user.id;
-    if (isPo && !this.canDeleteBorderCheck(this.props.columns)) {
-      console.log('Ste po ampak nemorate brisati')
-    } else if (isKM) {
-      
-    }
   }
 
   render() {
@@ -333,13 +350,25 @@ class SidebarCard extends Component {
       projectOptions = projectOptions.map(pr => ({ value: pr.name, id: pr.id }));
 
       const currentProject = this.state.projects.filter(pr => this.state.selectedProject && pr.id === this.state.selectedProject.id);
+
       if (currentProject.length > 0) {
-        const members = currentProject[0].team.members.filter((obj, pos, arr) =>
-          arr.map(mapObj => mapObj.id).indexOf(obj.id) === pos
-        );
-        memberOptions = members.map(member => ({ value: `${member.firstName} ${member.lastName}`, id: member.id }));
+        const members = currentProject[0].team.developers;
+        memberOptions = members.map(member => ({ value: `${member.firstName} ${member.lastName}`, id: member.idUserTeam }));
       }
-    };
+    }
+
+    let user = sessionStorage.getItem('user');
+    user = JSON.parse(user);
+    const project = this.props.data.projects.filter(pr => pr.id === this.state.selectedProject.id)[0];
+
+    const isPo = project.team.productOwner.idUser === user.id;
+    const isKM = project.team.kanbanMaster.idUser === user.id;
+    let canDelete = false;
+    if (isPo && this.canDeleteBorderCheck(this.props.columns)) {
+      canDelete = true;
+    } else if (isKM) {
+      canDelete = true;
+    }
 
     let whoCanEdit = {
       cardDescription: true,
@@ -351,10 +380,11 @@ class SidebarCard extends Component {
       tasks: true,
       type: true,
     };
-    if (this.props.whoCanEditQuery.whoCanEdit) {
+    if (this.props.whoCanEditQuery.whoCanEdit && this.props.modeEdit) {
+      console.log(this.props.whoCanEditQuery.whoCanEdit)
       whoCanEdit = {
         ...this.props.whoCanEditQuery.whoCanEdit,
-        type: false,
+        type: !this.props.modeEdit,
       };
     }
 
@@ -406,7 +436,7 @@ class SidebarCard extends Component {
                 { (!whoCanEdit.projectName &&
                   (<TextInput
                     id='project'
-                    value={this.state.selectedProject.value}
+                    value={this.state.selectedProject && this.state.selectedProject.value || ''}
                     disabled={true}
                   />)) ||
                     <Select placeHolder='/'
@@ -421,7 +451,7 @@ class SidebarCard extends Component {
                 { (!whoCanEdit.owner &&
                     (<TextInput
                       id='owner'
-                      value={this.state.owner.value}
+                      value={this.state.owner && this.state.owner.value}
                       disabled={true}
                     />)) ||
                     <Select placeHolder='/'
@@ -447,25 +477,23 @@ class SidebarCard extends Component {
                 }
               </FormField>
               <FormField label='Zahtevnost kartice' style={{ backgroundColor: whoCanEdit.estimate ? 'white' : '#f0f0f0' }}>
-                 { (!whoCanEdit.date &&
-                  (<TextInput
-                    id='date'
-                    value={this.state.estimate}
-                    disabled={true}
-                  />)) ||
-                  <NumberInput
-                    min={0}
-                    value={this.state.estimate}
-                    step={0.1}
-                    onChange={event => this.setState({ estimate: event.target.value })}
-                    disabled={whoCanEdit.estimate}
-                  />
-                  
-                }
+              { (!whoCanEdit.date &&
+                (<TextInput
+                  id='date'
+                  value={this.state.estimate}
+                  disabled={true}
+                />)) ||
+                <NumberInput
+                  min={0}
+                  value={this.state.estimate}
+                  step={0.1}
+                  onChange={event => this.setState({ estimate: event.target.value })}
+                />
+              }
               </FormField>
               <FormField label='Naloge' strong={true} style={{ backgroundColor: '#fdfdfd' }}>
                 { this.state.tasks.map((task, i) => (
-                  <FormField label={`#${i + 1}`} style={{ backgroundColor: '#fdfdfd' }}>
+                  <FormField label={`#${i + 1}`} style={{ backgroundColor: '#fdfdfd' }} key={task.id}>
                     <TextInput
                       value={task.description}
                       onDOMChange={event => this.changeTaskDescription(event.target.value, task.id)}
@@ -485,9 +513,9 @@ class SidebarCard extends Component {
 
             </FormFields>
             <Footer pad={{ vertical: 'medium', between: 'medium' }}>
-              {this.props.modeEdit && <Button
+              {this.props.modeEdit && canDelete && <Button
                 icon={<TrashIcon />}
-                onClick={() => this.onDelete()}
+                onClick={() => this.setState({dialogDelete: true})}
               />}
               <Button label='Prekliči'
                 secondary={true}
@@ -503,6 +531,9 @@ class SidebarCard extends Component {
               />}
             </Footer>
           </Form>
+          { this.state.dialogDelete &&
+            <DeleteNotification closer={() => this.setState({ dialogDelete: false })} delete={(causeOfDeletion) => this.onDelete(causeOfDeletion)} />
+          }
           <Transition in={this.state.in} timeout={duration}>
             {status => (<Notification message={this.state.notificationError || ''}
               size='small'
@@ -555,12 +586,22 @@ export const whoCanEditQuery = gql`query whoCanEdit($userId: Int!, $cardId: Int)
   }
 }`;
 
+const deleteCardMutation = gql`mutation deleteCardMutation($causeOfDeletion: String!, $cardId: Int!) {
+  deleteCard(causeOfDeletion: $causeOfDeletion, cardId: $cardId) {
+    ok
+  }
+}`
+
+
 export default compose(
   graphql(addCardMutation, {
     name: 'addCardMutation',
   }),
   graphql(editCardMutation, {
     name: 'editCardMutation',
+  }),
+  graphql(deleteCardMutation, {
+    name: 'deleteCardMutation',
   }),
   graphql(whoCanEditQuery, {
     name: 'whoCanEditQuery',

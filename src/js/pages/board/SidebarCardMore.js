@@ -82,7 +82,7 @@ class SideBarCardMore extends Component {
     const userId = JSON.parse(user).id;
     let km = false;
     let po = false;
-
+    this.props.whoCanEditQuery.refetch();
     this.setState({
       km,
       po,
@@ -254,7 +254,7 @@ SideBarCardMore.propTypes = {
 SideBarCardMore.defaultProps = {
 };
 
-const getCardLogsQuery = gql`query allCardLogs($cardId: Int!) {
+export const getCardLogsQuery = gql`query allCardLogs($cardId: Int!) {
   allCardLogs(cardId: $cardId) {
     id
     card {

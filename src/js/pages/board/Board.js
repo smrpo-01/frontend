@@ -14,6 +14,8 @@ import uuid from 'uuid/v4';
 import ErrorNotificationCard from './ErrorNotificationCard';
 import SideBarCardMore from './SidebarCardMore';
 
+import { getCardLogsQuery } from './SidebarCardMore';
+
 
 const colors = ['#a4b3a2', '#c87d5d', '#008080'];
 
@@ -119,7 +121,6 @@ class Board extends Component {
   moveCard(column, card, force = '') {
     const user = sessionStorage.getItem('user');
     const userId = JSON.parse(user).id;
-    console.log(userId);
 
     const cards = this.state.cards.map(c => {
       if (card.id === c.id) {
@@ -151,11 +152,15 @@ class Board extends Component {
         variables: {
           id: parseInt(this.props.board, 10)
         }
+      }, {
+        query: getCardLogsQuery,
+        variables: {
+          cardId: parseInt(card.id, 10),
+        }
       }]
     }).then(res => {
 
     }).catch(err => {
-      console.log(err.message.split(':')[1])
       if (err.message.split(':')[1] !== ' Ne moreš premikati za več kot ena v levo/desno.') {
         this.setState({
           dialogError: true,
@@ -291,8 +296,9 @@ export const getBoardQuery = gql`query allBoards($id: Int!) {
       name
       team {
         id
-        members {
-          id
+        developers {
+          idUser
+          idUserTeam
           firstName
           lastName
         }
