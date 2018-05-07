@@ -218,7 +218,15 @@ class Board extends Component {
 
   render() {
     const user = sessionStorage.getItem('user');
-    const roles = JSON.parse(user).roles;
+    const userId = JSON.parse(user).id;
+
+    let canCreateCard = false;
+    this.state.projects.forEach(pr => {
+      if (pr.team.kanbanMaster.idUser === userId) canCreateCard = true;
+
+      if (pr.team.productOwner.idUser === userId) canCreateCard = true;
+    });
+
     return (
       <div>
         <div style={{ display: 'inline-block', minWidth: '100%', }}>
@@ -237,7 +245,7 @@ class Board extends Component {
               )
               )}
             </div>
-            { (roles.includes('km') || roles.includes('po')) &&
+            { canCreateCard &&
               <div style={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end' }}>
                 <Button icon={<AddChapterIcon />}
                   style={{ marginRight: 30 }}

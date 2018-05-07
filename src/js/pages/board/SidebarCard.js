@@ -79,8 +79,6 @@ class SidebarCard extends Component {
     const projects = this.props.data.projects.filter(project => {
       const { kanbanMaster } = project.team;
       const { productOwner } = project.team;
-      console.log(kanbanMaster.idUser, userId)
-      console.log(productOwner.idUser, userId)
       if (kanbanMaster.idUser === userId) km = true;
 
       if (productOwner.idUser === userId) po = true;
@@ -89,7 +87,6 @@ class SidebarCard extends Component {
 
       return true;
     });
-    console.log(km, po)
     if (this.props.modeEdit) {
       const { getCardQuery } = this.props;
       const card = getCardQuery.allCards[0];
@@ -129,7 +126,7 @@ class SidebarCard extends Component {
       this.setState({
         km,
         po,
-        type: km ? 0 : 1,
+        type: km ? 1 : 0,
         projects,
         userId,
       });
@@ -344,15 +341,12 @@ class SidebarCard extends Component {
   render() {
     let projectOptions = [];
     let memberOptions = [];
-    console.log(this.state.projects)
     if (this.state.projects) {
       if (this.state.type === 1) {
         projectOptions = this.state.projects.filter(pr => pr.team.kanbanMaster.idUser === this.state.userId);
       } else {
         projectOptions = this.state.projects.filter(pr => pr.team.productOwner.idUser === this.state.userId);
       }
-
-      console.log(projectOptions)
 
       projectOptions = projectOptions.map(pr => ({ value: pr.name, id: pr.id }));
 
