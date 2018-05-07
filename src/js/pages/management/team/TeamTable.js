@@ -32,12 +32,13 @@ class TeamTable extends Component {
     return (
       <Table>
         <TableHeader
-          labels={['Ime', 'Kanban Master', 'Product owner', 'Projekti', 'Akcije']}
+          labels={['#', 'Ime', 'Kanban Master', 'Product owner', 'Projekti', 'Akcije']}
         />
 
         <tbody>
-          {allTeams.map(rowData => (
+          {allTeams.map((rowData, i) => (
             <TableRow key={rowData.id}>
+              <td>{i + 1}</td>
               <td>{rowData.name}</td>
               <td>{(rowData.kanbanMaster !== null) && rowData.kanbanMaster.firstName + ' ' + rowData.kanbanMaster.lastName}</td>
               <td>{(rowData.productOwner !== null) && rowData.productOwner.firstName + ' ' + rowData.productOwner.lastName}</td>

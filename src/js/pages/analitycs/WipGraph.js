@@ -45,11 +45,12 @@ class WipGraph extends Component {
         <Box pad='small' />
         <Table>
           <TableHeader
-            labels={['Številka kartice', 'Ime', 'Datum', 'Stolpec kršitve', 'Uporabnik', 'E-mail', 'Vzrok']}
+            labels={['#', 'Številka kartice', 'Ime', 'Datum', 'Stolpec kršitve', 'Uporabnik', 'E-mail', 'Vzrok']}
           />
           <tbody>
-            {wipLogs.map(rowData => (
+            {wipLogs.map((rowData, i) => (
               <TableRow key={rowData.id} >
+                <td>{i + 1}</td>
                 <td>{rowData.card.cardNumber}</td>
                 <td>{rowData.card.name}</td>
                 <td>{rowData.siTimestamp}</td>

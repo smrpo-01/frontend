@@ -54,12 +54,13 @@ class TeamTable extends Component {
     return (
       <Table>
         <TableHeader
-          labels={['Šifra', 'Naziv', 'Naročnik', 'Datum začetka', 'Datum zaključka', 'Razvojna skupina', 'Akcije']}
+          labels={['#', 'Šifra', 'Naziv', 'Naročnik', 'Datum začetka', 'Datum zaključka', 'Razvojna skupina', 'Akcije']}
         />
 
         <tbody>
-          {allProjects.map(rowData => (
+          {allProjects.map((rowData, i) => (
             <TableRow key={rowData.id} className={(rowData.isActive) ? '' : 'table-row-grey'}>
+              <td>{i + 1}</td>
               <td>{rowData.projectCode}</td>
               <td>{rowData.name}</td>
               <td>{rowData.customer}</td>
