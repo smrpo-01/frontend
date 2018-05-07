@@ -50,8 +50,8 @@ class FilterData extends Component {
       devStart: '',
       devEnd: '',
 
-      dateFrom: '1.4.2018',
-      dateTo: '1.5.2018',
+      dateFrom: '1.' + new Date().getMonth() + '.' + new Date().getFullYear(),
+      dateTo: '1.' + (new Date().getMonth() + 1) + '.' + new Date().getFullYear(),
 
       columnFrom: null,
       columnFromId: null,
@@ -191,6 +191,26 @@ class FilterData extends Component {
     }
 
     if (!valid) error.generalError = 'Izpolnite obvezna polja.';
+
+    // date validation
+    let dateFrom = this.state.dateFrom.split('.');
+    let dateTo = this.state.dateTo.split('.');
+    let start = new Date(dateFrom[1] + '.' + dateFrom[0] + '.' + dateFrom[2]);
+    let end = new Date(dateTo[1] + '.' + dateTo[0] + '.' + dateTo[2]);
+    let now = new Date();
+
+    if (start > end) {
+      error.dateTo = ' ';
+      valid = false;
+      error.generalError = 'Neveljaven datum.';
+    }
+
+    if (start > now) {
+      error.dateFrom = ' ';
+      valid = false;
+      error.generalError = 'Izberi datum do današnjega dne.';
+    }
+
     this.setState({ error });
     return valid;
   }
@@ -313,7 +333,7 @@ class FilterData extends Component {
           }
 
           {/* Časovni interval */}
-          {(this.props.type === 'kumulativeFlow') &&
+          {(this.props.type === 'kumulativeFlow' || this.props.type === 'wip') &&
           <div>
             <FormLegend label={'Časovni interval'} />
             <FormField label='Od' error={this.state.error.dateFrom}>

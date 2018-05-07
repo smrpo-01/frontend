@@ -79,8 +79,6 @@ class LeadTimeGraph extends Component {
 
   render() {
     const { queryGraphData: { loading, error, filterCards, avgLeadTime } } = this.props;
-    console.log(filterCards);
-    console.log(avgLeadTime);
 
     if (loading) {
       return <Loading />;
