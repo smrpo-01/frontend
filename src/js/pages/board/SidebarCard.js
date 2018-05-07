@@ -334,7 +334,6 @@ class SidebarCard extends Component {
     }).catch(err => {
       console.log(err);
     });
-
   }
 
   render() {
@@ -357,17 +356,20 @@ class SidebarCard extends Component {
       }
     }
 
-    let user = sessionStorage.getItem('user');
-    user = JSON.parse(user);
-    const project = this.props.data.projects.filter(pr => pr.id === this.state.selectedProject.id)[0];
-
-    const isPo = project.team.productOwner.idUser === user.id;
-    const isKM = project.team.kanbanMaster.idUser === user.id;
     let canDelete = false;
-    if (isPo && this.canDeleteBorderCheck(this.props.columns)) {
-      canDelete = true;
-    } else if (isKM) {
-      canDelete = true;
+
+    if (this.state.selectedProject) {
+      let user = sessionStorage.getItem('user');
+      user = JSON.parse(user);
+      const project = this.props.data.projects.filter(pr => this.state.selectedProject && pr.id === this.state.selectedProject.id)[0];
+
+      const isPo = project.team.productOwner.idUser === user.id;
+      const isKM = project.team.kanbanMaster.idUser === user.id;
+      if (isPo && this.canDeleteBorderCheck(this.props.columns)) {
+        canDelete = true;
+      } else if (isKM) {
+        canDelete = true;
+      }
     }
 
     let whoCanEdit = {
