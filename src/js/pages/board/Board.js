@@ -341,6 +341,20 @@ export const allCardsQuery = gql`query allCards($id: Int!) {
         id
         members {
           id
+          firstName
+          lastName
+        }
+        developers {
+          idUser
+          isActive
+        }
+        kanbanMaster {
+          idUser
+          isActive
+        }
+        productOwner {
+          idUser
+          isActive
         }
       }
     }
@@ -378,7 +392,9 @@ const moveCardMutation = gql`mutation moveCard($cardId: Int!, $toColumnId: Strin
 const boardGraphql = compose(
   graphql(getBoardQuery, {
     name: 'allBoardsQuery',
-    options: props => ({ variables: { id: parseInt(props.board, 10) } })
+    options: props => {
+      return ({ variables: { id: parseInt(props.board, 10) } });
+    }
   }),
   graphql(allCardsQuery, {
     name: 'allCardsQuery',

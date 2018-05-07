@@ -18,7 +18,14 @@ import { allCardsQuery } from './Board';
 const cardSource = {
   canDrag(props) {
     const user = sessionStorage.getItem('user');
-    return props.data.project.team.members.map(m => m.id).includes(String(JSON.parse(user).id));
+    const userId = (JSON.parse(user).id);
+
+    const filteredDevelopers = props.data.project.team.developers.filter(dev => dev.isActive);
+    if (filteredDevelopers.map(m => m.idUser).includes(userId)) return true;
+    if (props.data.project.team.kanbanMaster.idUser === userId && props.data.project.team.kanbanMaster.isActive) return true;
+    if (props.data.project.team.productOwner.idUser === userId && props.data.project.team.productOwner.isActive) return true;
+    console.log(props.data.project.team);
+    return false;
   },
 
   beginDrag(props, monitor, component) {
@@ -94,9 +101,9 @@ class Card extends Component {
           <h style={{ opacity: 0.5 }}>
             {data.id}
           </h>
-          <svg width="100" height="5" style={{marginTop: 10, borderRadius: 20}}>
-            <rect width="100" height="5" fill="#ccc" rx="0" ry="0"></rect>
-            <rect width={w} height="5" fill="#426381" rx="0" ry="0"></rect>
+          <svg width='100' height='5' style={{marginTop: 10, borderRadius: 20}}>
+            <rect width='100' height='5' fill='#ccc' rx='0' ry='0'></rect>
+            <rect width={w} height='5' fill='#426381' rx='0' ry='0'></rect>
           </svg>
           <div style={{height: 20, cursor: 'pointer'}} onClick={() => this.props.showMore(data)}>
             <MoreIcon />
