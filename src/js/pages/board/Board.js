@@ -275,6 +275,7 @@ class Board extends Component {
             closer={() => this.setState({ showMore: false })}
             editCard={this.editCard}
             boardId={parseInt(this.props.board, 10)}
+            showError={this.showError}
             data={{
               card: this.state.showMoreCard,
             }}/>

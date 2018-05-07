@@ -84,24 +84,36 @@ class SideBarCardMore extends Component {
       ...task,
       done: !task.done,
     } || task);
+
+    const user = sessionStorage.getItem('user');
+    const userId = JSON.parse(user).id;
+    const prevTasks = this.state.tasks;
+
     this.setState({
       tasks
     });
+
     this.props.setDoneTaskMutation({
       variables: {
         taskId: parseInt(taskId, 10),
         done: !done,
+        userId
       },
-      
       refetchQueries: [{
         query: allCardsQuery,
         variables: {
           id: this.props.boardId,
         }
       }]
-      
     }).then(res => {})
-      .catch(err => console.log(err));
+      .catch(err => {
+        if (err.message.split(':')[1] !== ' None') {
+          this.props.showError(err.message.split(':')[1]);
+        }
+        this.setState({
+          tasks: prevTasks,
+        })
+      });
   }
 
   componentWillMount() {
