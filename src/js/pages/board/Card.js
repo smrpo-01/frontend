@@ -3,10 +3,14 @@ import MoreIcon from 'grommet/components/icons/base/More';
 import CheckBox from 'grommet/components/CheckBox';
 import PropTypes from 'prop-types';
 import { DragSource } from 'react-dnd';
+import { graphql, compose } from 'react-apollo';
+import gql from 'graphql-tag';
 
 import { findDOMNode } from 'react-dom';
 
 import Meter from 'grommet/components/Meter';
+
+import { allCardsQuery } from './Board';
 
 /**
  * Implements the drag source contract.
@@ -38,6 +42,46 @@ const collect = (connect, monitor) => ({
 
 
 class Card extends Component {
+  constructor() {
+    super();
+
+    this.toggleTask = this.toggleTask.bind(this);
+    this.state = {
+      tasks: [],
+    }
+  }
+
+  toggleTask(taskId, done) {
+    let tasks = this.state.tasks.map(task => task.id ==taskId && {
+      ...task,
+      done: !task.done,
+    });
+    this.setState({
+      tasks
+    })
+    this.props.setDoneTaskMutation({
+      variables: {
+        taskId: parseInt(taskId, 10),
+        done: !done,
+      },
+      refetchQueries: [{
+        query: allCardsQuery,
+        variables: {
+          id: this.props.boardId,
+        }
+      }]
+    }).then(res => console.log(res))
+    .catch(err => console.log(err));
+  }
+
+  componentWillMount() {
+    if (this.props.data && this.props.data.tasks) {
+      this.setState({
+        tasks: this.props.data.tasks,
+      });
+    }
+  }
+
   render() {
     const { isDragging, connectDragSource } = this.props;
     const data = this.props.data;
@@ -71,8 +115,8 @@ class Card extends Component {
         </div>
         <div style={{ borderColor: 'black', borderWidth: 0, borderBottomWidth: 1, width: '100%', borderStyle: 'solid', marginBottom: 10, opacity: 0.2 }} />
         <div style={{ display: 'flex', width: '95%', marginBottom: 10, flexDirection: 'column' }}>
-          {data.tasks.map(task => (<CheckBox
-            label={task.description} defaultChecked={task.done} key={task.id} />))}
+          {this.state.tasks.map(task => (<CheckBox
+            label={task.description} key={task.id} checked={task.done} onClick={() => this.toggleTask(task.id, task.done)} />))}
         </div>
       </div>
     );
@@ -90,4 +134,15 @@ Card.propTypes = {
   connectDragSource: PropTypes.func.isRequired
 };
 
-export default DragSource('1', cardSource, collect)(Card);
+const setDoneTaskMutation = gql`mutation setDoneTaskMutation($taskId: Int!, $done: Boolean!) {
+  setDoneTask(taskId: $taskId, done: $done) {
+    ok
+  }
+}`;
+
+
+const cardGraphql = graphql(setDoneTaskMutation, {
+  name: 'setDoneTaskMutation',
+})(Card);
+
+export default DragSource('1', cardSource, collect)(cardGraphql);

@@ -191,7 +191,7 @@ class Board extends Component {
     );
 
     if (column.columns.length === 0) {
-      return (<Column data={column} project={project} key={`${column.id}${project.id}`} cards={cards} moveCard={this.moveCard} showMore={this.showMore} />);
+      return (<Column data={column} project={project} key={`${column.id}${project.id}`} cards={cards} moveCard={this.moveCard} showMore={this.showMore} boardId={parseInt(this.props.board, 10)}/>);
     }
     return (
       <div style={{ display: 'flex', borderRightWidth: 2, borderLeftWidth: 2, borderTopWidth: 2, borderBottomWidth: 0, borderStyle: 'solid', borderColor: 'white', }} key={uuid()}>
@@ -268,6 +268,7 @@ class Board extends Component {
           <SideBarCardMore
             closer={() => this.setState({ showMore: false })}
             editCard={this.editCard}
+            boardId={parseInt(this.props.board, 10)}
             data={{
               card: this.state.showMoreCard,
             }}/>

@@ -40,6 +40,7 @@ import EditIcon from 'grommet/components/icons/base/Edit';
 import Notification from 'grommet/components/Notification';
 
 import { whoCanEditQuery } from './SidebarCard';
+import { allCardsQuery } from './Board';
 
 const dateFormat = 'D/M/YYYY';
 const duration = 100;
@@ -65,6 +66,7 @@ class SideBarCardMore extends Component {
     super();
     this.formatDate = this.formatDate.bind(this);
     this.getDate = this.getDate.bind(this);
+    this.toggleTask = this.toggleTask.bind(this);
 
     this.state = {
       in: false,
@@ -88,6 +90,39 @@ class SideBarCardMore extends Component {
       po,
       type: km ? 1 : 0,
     });
+  }
+
+  toggleTask(taskId, done) {
+    let tasks = this.state.tasks.map(task => task.id ==taskId && {
+      ...task,
+      done: !task.done,
+    });
+    this.setState({
+      tasks
+    })
+    this.props.setDoneTaskMutation({
+      variables: {
+        taskId: parseInt(taskId, 10),
+        done: !done,
+      },
+      
+      refetchQueries: [{
+        query: allCardsQuery,
+        variables: {
+          id: this.props.boardId,
+        }
+      }]
+      
+    }).then(res => console.log(res))
+    .catch(err => console.log(err));
+  }
+
+  componentWillMount() {
+    if (this.props.data && this.props.data.card && this.props.data.card.tasks) {
+      this.setState({
+        tasks: this.props.data.card.tasks,
+      });
+    }
   }
 
 
@@ -182,9 +217,9 @@ class SideBarCardMore extends Component {
                       Naloge
                     </Label>
                     <div style={{ display: 'flex', flexDirection: 'column', padding: 5, paddingLeft: 20, paddingRight: 20}}>
-                      {card.tasks.map(task => (
-                        <div style={{height: 40, display: 'flex', justifyContent: 'space-between', alignItems: 'center',}}>
-                          <CheckBox label={task.description} defaultChecked={task.done} key={task.id} disabled={true}/>
+                      {this.state.tasks.map(task => (
+                        <div style={{height: 40, display: 'flex', justifyContent: 'space-between', alignItems: 'center',}} key={task.id}>
+                          <CheckBox label={task.description} checked={task.done} key={task.id} onClick={() => this.toggleTask(task.id, task.done)} />
                           <p>
                             {task.assignee && task.assignee.member.firstName} {task.assignee && task.assignee.member.lastName}
                             {!task.assignee && '/'}
@@ -280,7 +315,16 @@ export const getCardLogsQuery = gql`query allCardLogs($cardId: Int!) {
   }
 }`;
 
+const setDoneTaskMutation = gql`mutation setDoneTaskMutation($taskId: Int!, $done: Boolean!) {
+  setDoneTask(taskId: $taskId, done: $done) {
+    ok
+  }
+}`;
+
 export default compose(
+  graphql(setDoneTaskMutation, {
+    name: 'setDoneTaskMutation',
+  }),
   graphql(getCardLogsQuery, {
     name: 'getCardLogsQuery',
     options: props => {
