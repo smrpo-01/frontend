@@ -170,7 +170,7 @@ class SidebarCard extends Component {
           description: this.state.description,
           typeId: parseInt(this.state.type, 10),
           projectId: parseInt(this.state.selectedProject.id, 10),
-          expiration: this.formatDate(this.state.expiration),
+          expiration: this.state.expiration,
           estimate: parseFloat(this.state.estimate),
           ownerUserteamId: parseInt(this.state.owner.id, 10),
           tasks: filteredTasks,

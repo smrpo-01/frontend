@@ -156,7 +156,7 @@ class SideBarCardMore extends Component {
 
   getDate(timestamp) {
     const date = new Date(timestamp);
-    return `${date.getDate()}.${date.getMonth()}.${1900 + date.getYear()}`;
+    return `${date.getDate()}.${date.getMonth() + 1}.${1900 + date.getYear()}`;
   }
 
   render() {
