@@ -94,7 +94,7 @@ class LeadTimeGraph extends Component {
     return (
       <Box pad='medium' >
         <Heading margin='medium' style={{ marginTop: '0px' }} tag='h3' strong>
-          <span>{'Povprečni čas izdelave'}</span>
+          <span>{'Čas izdelave'}</span>
         </Heading>
         <List>
           <ListItem justify='between' pad={{ between: 'small', vertical: 'small' }} size='xxlarge'>

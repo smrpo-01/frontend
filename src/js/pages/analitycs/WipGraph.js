@@ -39,7 +39,7 @@ class WipGraph extends Component {
     return (
       <Box pad='medium' >
         <Heading margin='medium' style={{ marginTop: '0px' }} tag='h3' strong>
-          <span>{'Kršitev omejitve WIP'}</span>
+          <span>{'Kršitev omejitev WIP'}</span>
         </Heading>
 
         <Box pad='small' />
