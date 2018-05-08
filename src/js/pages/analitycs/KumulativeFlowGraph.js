@@ -20,7 +20,7 @@ import {
 import Loading from '../../components/Loading';
 
 // const colorPalette = ['9e0142', 'd53e4f', 'f46d43', 'fdae61', 'fee08b', 'e6f598', 'abdda4', '66c2a5', '3288bd', '5e4fa2'];
-const colorPalette = ['9e0142', 'd53e4f', 'f46d43', 'fdae61', 'fee08b', 'ffffbf', 'e6f598', 'abdda4', '66c2a5', '3288bd', '5e4fa2'];
+const colorPalette = ['5e4fa2', '3288bd', '66c2a5', 'abdda4', 'e6f598', 'ffffbf', 'fee08b', 'fdae61', 'f46d43', 'd53e4f', '9e0142'];
 const cLen = colorPalette.length;
 
 class LeadTimeGraph extends Component {
