@@ -46,6 +46,18 @@ const transitionStylesTransform = {
   exited: 0,
 };
 
+const prioryOptions = [
+  {
+    id: 1,
+    value: 'Could have'
+  },{
+    id: 2,
+    value: 'Should have'
+  },{
+    id: 3,
+    value: 'Must have'
+  },
+]
 
 class SidebarCard extends Component {
   constructor() {
@@ -67,6 +79,10 @@ class SidebarCard extends Component {
       type: 0,
       errors: {},
       estimate: 0,
+      priority: {
+        value: 'Must have',
+        id: 1,
+      }
     };
   }
 
@@ -163,13 +179,14 @@ class SidebarCard extends Component {
 
         let filteredTasks = this.state.tasks.filter(task => task.description !== '');
         filteredTasks = filteredTasks.map(task => ({ description: task.description, assigneeUserteamId: task.owner && parseInt(task.owner.id, 10), done: task.done }));
-        
+
         const cardData = {
           id: this.state.id,
           name: this.state.name,
           description: this.state.description,
           typeId: parseInt(this.state.type, 10),
           projectId: parseInt(this.state.selectedProject.id, 10),
+          priority: this.state.priority.value,
           expiration: this.state.expiration,
           estimate: parseFloat(this.state.estimate),
           ownerUserteamId: parseInt(this.state.owner.id, 10),
@@ -378,13 +395,19 @@ class SidebarCard extends Component {
       projectName: true,
       tasks: true,
       type: true,
+      priority: true,
     };
+
+    console.log(this.props.whoCanEditQuery)
+
     if (this.props.whoCanEditQuery.whoCanEdit && this.props.modeEdit) {
       whoCanEdit = {
         ...this.props.whoCanEditQuery.whoCanEdit,
         type: false,
       };
     }
+
+    console.log(whoCanEdit)
 
     return (
       <Layer
@@ -413,6 +436,22 @@ class SidebarCard extends Component {
                     checked={this.state.type === 1 && this.state.km}
                     onChange={() => this.changeType(1)} />
                 </div>
+              </FormField>
+              <FormField label='Prioriteta kartice' error={this.state.errors.selectedProject} style={{ backgroundColor: whoCanEdit.projectName ? 'white' : '#f0f0f0' }}>
+                { (!whoCanEdit.priority &&
+                  (<TextInput
+                    id='project'
+                    value={this.state.priority && this.state.priority.value || ''}
+                    disabled={true}
+                  />)) ||
+                    <Select placeHolder='/'
+                      options={prioryOptions}
+                      multiple={false}
+                      onChange={change => this.setState({
+                        priority: change.value
+                      })}
+                      value={this.state.priority} />
+                }
               </FormField>
               <FormField label='Ime kartice' error={this.state.errors.name} style={{ backgroundColor: whoCanEdit.cardName ? 'white' : '#f0f0f0' }}>
                 <TextInput
@@ -443,7 +482,6 @@ class SidebarCard extends Component {
                       onChange={change => this.changeProject(change.value)}
                       value={this.state.selectedProject} />
                 }
-                
               </FormField>
               <FormField label='Izberite uporabnika' error={this.state.errors.owner} style={{ backgroundColor: whoCanEdit.owner ? 'white' : '#f0f0f0' }}>
                 { (!whoCanEdit.owner &&
@@ -476,19 +514,19 @@ class SidebarCard extends Component {
                 }
               </FormField>
               <FormField label='Zahtevnost kartice' style={{ backgroundColor: whoCanEdit.estimate ? 'white' : '#f0f0f0' }}>
-              { (!whoCanEdit.date &&
-                (<TextInput
-                  id='date'
-                  value={this.state.estimate}
-                  disabled={true}
-                />)) ||
-                <NumberInput
-                  min={0}
-                  value={this.state.estimate}
-                  step={0.1}
-                  onChange={event => this.setState({ estimate: event.target.value })}
-                />
-              }
+                { (!whoCanEdit.date &&
+                  (<TextInput
+                    id='date'
+                    value={this.state.estimate}
+                    disabled={true}
+                  />)) ||
+                  <NumberInput
+                    min={0}
+                    value={this.state.estimate}
+                    step={0.1}
+                    onChange={event => this.setState({ estimate: event.target.value })}
+                  />
+                }
               </FormField>
               <FormField label='Naloge' strong={true} style={{ backgroundColor: '#fdfdfd' }}>
                 { this.state.tasks.map((task, i) => (
@@ -680,9 +718,10 @@ export default compose(
     options: (props) => {
       const user = sessionStorage.getItem('user');
       const userId = JSON.parse(user).id;
+      console.log()
       return ({ variables: {
         userId,
-        cardId: (props.data.card && parseInt(props.data.card.id, 10)) || null,
+        cardId: (props.cardId && parseInt(props.cardId, 10)) || null,
         skip: false,
       }});
     }})

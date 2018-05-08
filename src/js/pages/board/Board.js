@@ -188,6 +188,7 @@ class Board extends Component {
     this.setState({
       showMore: true,
       showMoreCard: card.id,
+      editCard: card,
     });
   }
 
@@ -225,7 +226,7 @@ class Board extends Component {
 
       if (pr.team.productOwner.idUser === userId) canCreateCard = true;
     });
-
+    console.log(this.state.editCard)
     return (
       <div>
         <div style={{ display: 'inline-block', minWidth: '100%', }}>
