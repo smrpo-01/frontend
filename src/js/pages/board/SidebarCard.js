@@ -496,7 +496,7 @@ class SidebarCard extends Component {
                 { (!whoCanEdit.date &&
                   (<TextInput
                     id='date'
-                    value={this.formatDate(this.state.expiration)}
+                    value={this.state.expiration}
                     disabled={true}
                   />)) ||
                   <DateTime
