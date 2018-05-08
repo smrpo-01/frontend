@@ -255,13 +255,9 @@ class SidebarCard extends Component {
     return this.findFirstColumn(column.columns[0]);
   }
 
-  formatDate(dateToFormat, format = 'grommet') {
-    if (format === 'django') {
-      let d = dateToFormat.split('-'); // YYYY-MM-DD
-      return (d[2] + '/' + d[1] + '/' + d[0]); // DD/MM/YYYY
-    }
-    let d = dateToFormat.split('/'); // DD/MM/YYYY
-    return (d[2] + '-' + d[1] + '-' + d[0]); // YYYY-MM-DD
+  formatDate(dateToFormat) {
+    let d = dateToFormat.split('-'); // YYYY-MM-DD
+    return (d[2] + '.' + d[1] + '.' + d[0]); // DD/MM/YYYY
   }
 
   changeProject(value) {
@@ -398,7 +394,6 @@ class SidebarCard extends Component {
       priority: true,
     };
 
-    console.log(this.props.whoCanEditQuery)
 
     if (this.props.whoCanEditQuery.whoCanEdit && this.props.modeEdit) {
       whoCanEdit = {
@@ -501,7 +496,7 @@ class SidebarCard extends Component {
                 { (!whoCanEdit.date &&
                   (<TextInput
                     id='date'
-                    value={this.state.expiration}
+                    value={this.formatDate(this.state.expiration)}
                     disabled={true}
                   />)) ||
                   <DateTime
@@ -620,6 +615,7 @@ export const whoCanEditQuery = gql`query whoCanEdit($userId: Int!, $cardId: Int,
     estimate
     tasks
     error
+    priority
   }
 }`;
 

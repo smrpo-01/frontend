@@ -152,6 +152,7 @@ class SideBarCardMore extends Component {
   }
 
   formatDate(dateToFormat) {
+    console.log(dateToFormat)
     let d = dateToFormat.split('-'); // YYYY-MM-DD
     return (d[2] + '.' + d[1] + '.' + d[0]); // DD/MM/YYYY
   }
@@ -443,7 +444,7 @@ export default compose(
       const userId = JSON.parse(user).id;
       return ({ variables: {
         userId,
-        cardId: props.cardId,
+        cardId: parseInt(props.cardId),
         skip: false,
     }});
   }}))(SideBarCardMore);
