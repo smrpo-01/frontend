@@ -76,6 +76,7 @@ class SideBarCardMore extends Component {
       errors: {},
       estimate: 0,
       description: '',
+      priority: '',
       project: {
         name: '',
       },
@@ -144,7 +145,8 @@ class SideBarCardMore extends Component {
         project: card.project,
         owner: card.owner,
         estimate: card.estimate,
-        expiration: card.expiration
+        expiration: card.expiration,
+        priority: card.priority,
       });
     }
   }
@@ -181,13 +183,21 @@ class SideBarCardMore extends Component {
           <Tabs justify='start'>
             <Tab title='Podatki o kartici'>
               <div>
-                <div style={{ borderColor: borderColor, borderStyle: 'solid', borderWidth: 1, padding: 10 }}>
+                <div style={{ borderColor: borderColor, borderStyle: 'solid', borderWidth: 1, padding: 10, backgroundColor: this.state.type && this.state.type.id === 'A_0' ? 'white' : '#0F36411A'}}>
                   <Label style={{width: 150}}>
                     Tip kartice:
                   </Label>
                   <Label size='medium' style={{marginLeft: 30, fontWeight: 600}}>
                     {this.state.type && this.state.type.id === 'A_0' && 'Navadna kartica'}
                     {this.state.type && this.state.type.id === 'A_1' && 'Silver bullet'}
+                  </Label>
+                </div>
+                <div style={{ borderColor: borderColor, borderStyle: 'solid', borderWidth: 1, padding: 10 }}>
+                  <Label style={{width: 150}}>
+                    Prioriteta kartice:
+                  </Label>
+                  <Label size='medium' style={{marginLeft: 30, fontWeight: 600}}>
+                    {this.state.priority}
                   </Label>
                 </div>
                 <div style={{ borderColor: borderColor, borderStyle: 'solid', borderWidth: 1, padding: 10 }}>
@@ -356,6 +366,7 @@ export const getCardQuery = gql`query allCards($cardId: Int!) {
     description
     name
     estimate
+    priority
     project {
       id
       name
