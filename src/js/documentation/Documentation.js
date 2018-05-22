@@ -8,7 +8,7 @@ import Footer from 'grommet/components/Footer';
 import Section from 'grommet/components/Section';
 
 export const userAdmin = (
-  <Article>
+  <Article className='help-article' size='large' pad='large'>
     <Header>
       <Heading>Pomoč pri administraciji uporabnikov</Heading>
     </Header>
@@ -25,7 +25,7 @@ export const userAdmin = (
 );
 
 export const teamManagement = (
-  <Article>
+  <Article className='help-article' size='large' pad='large'>
     <Header>
       <Heading>Pomoč pri vzdrževanju razvojnih skupin</Heading>
     </Header>
@@ -56,7 +56,7 @@ export const teamManagement = (
 );
 
 export const loginPage = (
-  <Article>
+  <Article className='help-article' size='large' pad='large'>
     <Header>
       <Heading>Pomoč pri prijavi v sistem Emineo</Heading>
     </Header>
@@ -75,7 +75,7 @@ export const loginPage = (
 
 
 export const graphsHelp = (
-  <Article>
+  <Article className='help-article' size='large' pad='large'>
     <Header>
       <Heading>Pomoč pri uporabi grafov</Heading>
     </Header>
@@ -91,7 +91,7 @@ export const graphsHelp = (
 );
 
 export const helpTemplate = (
-  <Article>
+<Article className='help-article' size='large' pad='large'>
     <Header>
       <Heading>Sample help page</Heading>
     </Header>

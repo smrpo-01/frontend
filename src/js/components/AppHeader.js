@@ -1,3 +1,4 @@
+/* eslint no-undef: 0 */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
@@ -20,12 +21,17 @@ import TableIcon from 'grommet/components/icons/base/Table';
 import HomeIcon from 'grommet/components/icons/base/Home';
 import VmMaintenanceIcon from 'grommet/components/icons/base/VmMaintenance';
 import UserIcon from 'grommet/components/icons/base/User';
+import HelpIcon from 'grommet/components/icons/base/Help';
+
+import HelpOverlay from '../components/HelpOverlay';
 
 const imgUri = process.env.NODE_ENV === 'development' ? '/' : '/static/app/';
 
 class AppHeader extends Component {
   constructor() {
     super();
+    this.closeHelp = this.closeHelp.bind(this);
+
     this.state = {
       menuItems: [
         { id: 1, itemName: 'Domov', route: '/home', icon: <HomeIcon /> },
@@ -35,7 +41,8 @@ class AppHeader extends Component {
         { id: 5, itemName: 'Analiza', route: '/analitycs', icon: <AnalyticsIcon /> },
       ],
       userRoles: [],
-      email: ''
+      email: '',
+      showHelp: false
     };
   }
 
@@ -83,6 +90,11 @@ class AppHeader extends Component {
       default:
         return false;
     }
+  }
+
+
+  closeHelp() {
+    this.setState({ showHelp: false });
   }
 
 
@@ -135,6 +147,15 @@ class AppHeader extends Component {
           <Label margin='none'>{this.state.email}</Label>
         </Box>
 
+        {/* Show help */}
+        <Box direction='row' justify='between' size='small'>
+          <Button
+            plain
+            label='Pomoč'
+            icon={<HelpIcon />}
+            onClick={() => this.setState({ showHelp: true })} />
+        </Box>
+
         {/* Logout button */}
         <Button
           plain
@@ -142,6 +163,8 @@ class AppHeader extends Component {
           icon={<LogoutIcon />}
           href='../'
           onClick={() => this.props.logoutUser()} />
+
+        {(this.state.showHelp) && <HelpOverlay page={location.pathname} onClose={this.closeHelp} />}
       </Header>
     );
   }
