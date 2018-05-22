@@ -175,6 +175,43 @@ export const home = (
   </Article>
 );
 
+export const board = (
+<Article className='help-article' size='large' pad='large'>
+    <Header>
+      <Heading>Uporaba table</Heading>
+    </Header>
+    <Section>
+      <Heading tag="h3" margin="none" strong>Prikaz table</Heading>
+      <Section>
+        Na strani je prikaza izbrana tabla.
+        Vrstice predstavljajo plavalne proge, vsaka plavalna proga pa je namenjena enemu projektu.
+        Poleg projektov soprikazane vse kartice v ustreznih stolpcih.
+        Za delo s karticami preberite navodila spodaj.
+      </Section>
+
+      <Heading tag="h3" margin="none" strong>Dodajanje nove kartice</Heading>
+      <Section>
+        Za dodajanje nove kartice kliknite gumb "Dodaj kartico".
+        Prikazalo se vam bo pojavno okno kjer lahko izpolnete zahtevane podatke za dodajanje nove kartice.
+        Izpolnite obvezna polja in gliknite gumb "Dodaj".
+        Če želite zavreči spremembe kliknite gumb "Prekliči".
+      </Section>
+
+      <Heading tag="h3" margin="none" strong>Premikanje kartic</Heading>
+      <Section>
+        Če želite premakniti kartico v drugi stolpec jo kliknite, pridržite in povlecite v želeni stolpec.
+      </Section>
+
+      <Heading tag="h3" margin="none" strong>Prikaz podrobnosti in urejanje kartice</Heading>
+      <Section>
+        Za prikaz podrobnosti kartice kliknite na ikono za več možnosti v desnem zgornem kotu kartice.
+        Prikazalo se vam bo pojavno okno s podrobnostimi kartice.
+
+        Poleg tega lahko uredite vsebino kartice, če imate ustrezne pravice za urejanje vsebine kartice.
+      </Section>
+    </Section>
+  </Article>
+);
 
 export const helpTemplate = (
 <Article className='help-article' size='large' pad='large'>

@@ -22,7 +22,7 @@ class HelpOverlay extends Component {
       case '/management':
         return documentation.teamManagement;
       case '/board':
-        return documentation.helpTemplate;
+        return documentation.board;
       default:
         return null;
     }
