@@ -16,7 +16,7 @@ class HelpOverlay extends Component {
       case '/administration':
         return documentation.userAdmin;
       case '/home':
-        return documentation.helpTemplate;
+        return documentation.home;
       case '/analitycs':
         return documentation.graphsHelp;
       case '/management':
