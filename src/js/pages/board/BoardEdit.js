@@ -47,6 +47,7 @@ class BoardNew extends Component {
       selectedProjects: [],
       showError: false,
       legalProjects: true,
+      previousJson: null,
     };
   }
 
@@ -163,10 +164,11 @@ class BoardNew extends Component {
     };
     // eslint-disable-next-line
     const user = sessionStorage.getItem('user');
+    const jsonString = (this.state.previousJson !== null) ? this.state.previousJson : JSON.stringify(board);
 
     this.props.editBoardMutation({
       variables: {
-        jsonString: JSON.stringify(board),
+        jsonString: jsonString,
         checkWip: checkWip
       },
       refetchQueries: [{
@@ -174,10 +176,12 @@ class BoardNew extends Component {
         variables: { userId: parseInt(JSON.parse(user).id, 10) }
       }]
     }).then(() => {
+      this.setState({ previousJson: null });
       this.props.history.goBack();
     }).catch((err) => {
       this.setState({
         showError: true,
+        previousJson: jsonString,
         error: err.message.split(':')[1],
       });
     });
