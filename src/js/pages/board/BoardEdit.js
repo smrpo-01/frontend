@@ -139,10 +139,13 @@ class BoardNew extends Component {
     });
   }
 
-  closeErr() {
+  closeErr(forceSave = false) {
     this.setState({
       showError: false,
     });
+    if (forceSave) {
+      this.save(false);
+    }
   }
 
   closer() {
@@ -151,7 +154,7 @@ class BoardNew extends Component {
     });
   }
 
-  save() {
+  save(checkWip = true) {
     const board = {
       id: this.state.id,
       boardName: this.state.boardName,
@@ -164,6 +167,7 @@ class BoardNew extends Component {
     this.props.editBoardMutation({
       variables: {
         jsonString: JSON.stringify(board),
+        checkWip: checkWip
       },
       refetchQueries: [{
         query: getBoardsQuery,
@@ -312,8 +316,8 @@ BoardNew.defaultProps = {
 
 
 const editBoardMutation = gql`
-  mutation editBoard($jsonString: String!) {
-    editBoard(jsonString: $jsonString) {
+  mutation editBoard($jsonString: String!, $checkWip: Boolean!) {
+    editBoard(jsonString: $jsonString, checkWip: $checkWip) {
       board
     }
   }
