@@ -47,6 +47,7 @@ class BoardNew extends Component {
       selectedProjects: [],
       showError: false,
       legalProjects: true,
+      previousJson: null,
     };
   }
 
@@ -139,10 +140,13 @@ class BoardNew extends Component {
     });
   }
 
-  closeErr() {
+  closeErr(forceSave = false) {
     this.setState({
       showError: false,
     });
+    if (forceSave) {
+      this.save(false);
+    }
   }
 
   closer() {
@@ -151,7 +155,7 @@ class BoardNew extends Component {
     });
   }
 
-  save() {
+  save(checkWip = true) {
     const board = {
       id: this.state.id,
       boardName: this.state.boardName,
@@ -160,20 +164,24 @@ class BoardNew extends Component {
     };
     // eslint-disable-next-line
     const user = sessionStorage.getItem('user');
+    const jsonString = (this.state.previousJson !== null) ? this.state.previousJson : JSON.stringify(board);
 
     this.props.editBoardMutation({
       variables: {
-        jsonString: JSON.stringify(board),
+        jsonString: jsonString,
+        checkWip: checkWip
       },
       refetchQueries: [{
         query: getBoardsQuery,
         variables: { userId: parseInt(JSON.parse(user).id, 10) }
       }]
     }).then(() => {
+      this.setState({ previousJson: null });
       this.props.history.goBack();
     }).catch((err) => {
       this.setState({
         showError: true,
+        previousJson: jsonString,
         error: err.message.split(':')[1],
       });
     });
@@ -312,8 +320,8 @@ BoardNew.defaultProps = {
 
 
 const editBoardMutation = gql`
-  mutation editBoard($jsonString: String!) {
-    editBoard(jsonString: $jsonString) {
+  mutation editBoard($jsonString: String!, $checkWip: Boolean!) {
+    editBoard(jsonString: $jsonString, checkWip: $checkWip) {
       board
     }
   }

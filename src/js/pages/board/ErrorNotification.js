@@ -22,9 +22,13 @@ class ErrorNotification extends Component {
             </p2>
           </div>
           <Footer pad={{ vertical: 'medium', between: 'medium' }} justify='center'>
+            <Button label='Prekliči'
+              primary={false}
+              onClick={() => this.props.closer()}
+            />
             <Button label='Vredu'
               primary={true}
-              onClick={() => this.props.closer()}
+              onClick={() => this.props.closer(true)}
             />
           </Footer>
         </Article>
