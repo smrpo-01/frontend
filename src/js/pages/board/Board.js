@@ -14,6 +14,9 @@ import uuid from 'uuid/v4';
 import ErrorNotificationCard from './ErrorNotificationCard';
 import SideBarCardMore from './SidebarCardMore';
 import ErrorNotificationToggle from './ErrorNotificationToggle';
+import UserSettingsIcon from 'grommet/components/icons/base/UserSettings';
+
+import BoardSettings from './BoardSettings';
 
 import { getCardLogsQuery, getCardQuery } from './SidebarCardMore';
 import { whoCanEditQuery } from './SidebarCard';
@@ -44,6 +47,7 @@ class Board extends Component {
       dialogErrorMessage: '',
       toggleSidebard: false,
       showMore: false,
+      timeframe: 0,
     };
   }
 
@@ -198,7 +202,7 @@ class Board extends Component {
     );
 
     if (column.columns.length === 0) {
-      return (<Column data={column} project={project} key={`${column.id}${project.id}`} cards={cards} showError={this.showError} moveCard={this.moveCard} showMore={this.showMore} boardId={parseInt(this.props.board, 10)}/>);
+      return (<Column timeframe={this.state.timeframe} data={column} project={project} key={`${column.id}${project.id}`} cards={cards} showError={this.showError} moveCard={this.moveCard} showMore={this.showMore} boardId={parseInt(this.props.board, 10)}/>);
     }
     return (
       <div style={{ display: 'flex', borderRightWidth: 2, borderLeftWidth: 2, borderTopWidth: 2, borderBottomWidth: 0, borderStyle: 'solid', borderColor: 'white', }} key={uuid()}>
@@ -226,7 +230,7 @@ class Board extends Component {
 
       if (pr.team.productOwner.idUser === userId) canCreateCard = true;
     });
-    console.log(this.state.editCard)
+    // console.log(this.state.editCard)
     return (
       <div>
         <div style={{ display: 'inline-block', minWidth: '100%', }}>
@@ -254,6 +258,11 @@ class Board extends Component {
                   onClick={() => this.setState({ toggleSidebard: true, modeEdit: false })} />
               </div>
             }
+            <Button
+              icon={<UserSettingsIcon />}
+              primary={false}
+              onClick={() => this.setState({ showSettings: true })}
+            />
           </div>
           <div style={{ display: 'flex', minWidth: '98%' }}>
             <div style={{ backgroundColor: 'white', width: 15, maxHeight: '100%' }} />
@@ -292,6 +301,9 @@ class Board extends Component {
         }
         { this.state.dialogErrorToggle &&
           <ErrorNotificationToggle error={this.state.dialogErrorMessage} closer={() => this.setState({ dialogErrorToggle: false })}  />
+        }
+        { this.state.showSettings &&
+          <BoardSettings timeframe={this.state.timeframe} updateParent={val => this.setState({ timeframe: val })} closer={() => this.setState({ showSettings: false })}  />
         }
       </div>
     );
