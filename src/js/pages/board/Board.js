@@ -346,6 +346,7 @@ export const getBoardQuery = gql`query allBoards($id: Int!) {
 export const allCardsQuery = gql`query allCards($id: Int!) {
   allCards(boardId: $id) {
     id
+    isDone
     cardNumber
     colorRejected
     column {

@@ -107,7 +107,7 @@ class Card extends Component {
     const expirationDate = new Date(data.expiration);
     let today = new Date();
     today.setDate(today.getDate() + timeframe);
-    const shouldBlink = (expirationDate <= today);
+    const shouldBlink = ((expirationDate <= today) && !data.isDone);
     const percent = (data.estimate / 6);
     const w = true ? Math.max(5, 100 * Math.min(percent, 1)) : 0;
     return connectDragSource(
