@@ -40,6 +40,7 @@ class Board extends Component {
     this.showError = this.showError.bind(this);
 
     this.state = {
+      daysToExpire: 0,
       name: '',
       projects: [],
       columns: [],
@@ -54,12 +55,13 @@ class Board extends Component {
   componentWillReceiveProps(nextProps) {
     if (nextProps.allBoardsQuery.allBoards && nextProps.allCardsQuery.allCards) {
       const board = nextProps.allBoardsQuery.allBoards[0];
-      const { name, projects } = board;
+      const { name, projects, daysToExpire } = board;
       const { columns } = JSON.parse(board.columns);
 
       const cards = nextProps.allCardsQuery.allCards;
 
       this.setState({
+        daysToExpire,
         name,
         projects,
         columns,
@@ -303,7 +305,14 @@ class Board extends Component {
           <ErrorNotificationToggle error={this.state.dialogErrorMessage} closer={() => this.setState({ dialogErrorToggle: false })}  />
         }
         { this.state.showSettings &&
-          <BoardSettings timeframe={this.state.timeframe} updateParent={val => this.setState({ timeframe: val })} closer={() => this.setState({ showSettings: false })}  />
+          <BoardSettings
+            timeframe={this.state.timeframe}
+            daysToExpire={this.state.daysToExpire}
+            boardId={parseInt(this.props.board, 10)}
+            updateDaysToExpire={val => this.setState({ daysToExpire: parseInt(val, 10) })}
+            updateTimeframe={val => this.setState({ timeframe: parseInt(val, 10) })}
+            closer={() => this.setState({ showSettings: false })}
+          />
         }
       </div>
     );
@@ -321,6 +330,7 @@ export const getBoardQuery = gql`query allBoards($id: Int!) {
     id
     name
     columns
+    daysToExpire
     projects {
       id
       name
