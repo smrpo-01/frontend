@@ -41,7 +41,7 @@ class Column extends Component {
     );
 
     if (cards) {
-      return cards.map(card => <Card data={card} key={card.id} showError={this.props.showError} showMore={this.props.showMore} boardId={this.props.boardId} />);
+      return cards.map(card => <Card timeframe={this.props.timeframe} data={card} key={card.id} showError={this.props.showError} showMore={this.props.showMore} boardId={this.props.boardId} />);
     }
 
     return null;
@@ -68,6 +68,7 @@ Column.defaultProps = {
 
 Column.propTypes = {
   cards: PropTypes.array,
+  timeframe: PropTypes.number.isRequired,
 };
 
 

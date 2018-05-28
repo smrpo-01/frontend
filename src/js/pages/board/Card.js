@@ -102,12 +102,16 @@ class Card extends Component {
   }
 
   render() {
-    const { isDragging, connectDragSource } = this.props;
+    const { isDragging, connectDragSource, timeframe } = this.props;
     const data = this.props.data;
+    const expirationDate = new Date(data.expiration);
+    let today = new Date();
+    today.setDate(today.getDate() + timeframe);
+    const shouldBlink = ((expirationDate <= today) && !data.isDone);
     const percent = (data.estimate / 6);
     const w = true ? Math.max(5, 100 * Math.min(percent, 1)) : 0;
     return connectDragSource(
-      <div style={{ backgroundColor: data.colorRejected ? '#ff84841A' : 'white', width: '95%', maxWidth: 250, borderStyle: 'solid', borderColor: '#dbd9d9', borderWidth: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 5, opacity: isDragging ? 0.3 : 1, cursor: 'move', borderRadius: 10, marginTop: 5, borderColor: data.colorRejected ? '#d62a2a' : 'white' }}>
+      <div className={(shouldBlink) ? 'blink' : ''} style={{ backgroundColor: data.colorRejected ? '#ff84841A' : 'white', width: '95%', maxWidth: 250, borderStyle: 'solid', borderColor: '#dbd9d9', borderWidth: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 5, opacity: isDragging ? 0.3 : 1, cursor: 'move', borderRadius: 10, marginTop: 5, borderColor: data.colorRejected ? '#d62a2a' : 'white' }}>
         <div style={{ display: 'flex', width: '90%', justifyContent: 'space-between', marginBottom: 8, marginTop: 5 }}>
           <h style={{ opacity: 0.5 }}>
             {data.id}
@@ -153,7 +157,8 @@ Card.propTypes = {
   data: PropTypes.object,
   // Injected by React DnD:
   isDragging: PropTypes.bool.isRequired,
-  connectDragSource: PropTypes.func.isRequired
+  connectDragSource: PropTypes.func.isRequired,
+  timeframe: PropTypes.number.isRequired,
 };
 
 const setDoneTaskMutation = gql`mutation setDoneTaskMutation($taskId: Int!, $done: Boolean!, $userId: Int!) {
