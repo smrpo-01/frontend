@@ -38,6 +38,9 @@ class Board extends Component {
     this.showMore = this.showMore.bind(this);
     this.editCard = this.editCard.bind(this);
     this.showError = this.showError.bind(this);
+    this.toggleHidden = this.toggleHidden.bind(this);
+    this.recursiveHidden = this.recursiveHidden.bind(this);
+    this.checkIfHaveCards = this.checkIfHaveCards.bind(this);
 
     this.state = {
       daysToExpire: 0,
@@ -56,9 +59,14 @@ class Board extends Component {
     if (nextProps.allBoardsQuery.allBoards && nextProps.allCardsQuery.allCards) {
       const board = nextProps.allBoardsQuery.allBoards[0];
       const { name, projects, daysToExpire } = board;
-      const { columns } = JSON.parse(board.columns);
+      let { columns } = JSON.parse(board.columns);
 
       const cards = nextProps.allCardsQuery.allCards;
+
+
+      if(this.state.columns.length !== 0) {
+        columns = this.state.columns;
+      }
 
       this.setState({
         daysToExpire,
@@ -70,15 +78,63 @@ class Board extends Component {
     }
   }
 
+  checkIfHaveCards(column) {
+    console.log(column)
+    const cards = this.state.cards.filter(card => column.id === card.column.id);
+    if(cards.length !== 0) {
+      return true;
+    }
+    let umesni = false;
+    for (i in column.columns) {
+      umesni = this.checkIfHaveCards(column.columns[i]);
+      if(umesni) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  recursiveHidden(columns, columnId) {
+    return columns.map(column => {
+      if(column.id === columnId) {
+        if(!this.checkIfHaveCards(column)) {
+          column.hidden = column.hidden !== undefined ? !column.hidden : true;
+        }
+      }
+      column.columns = this.recursiveHidden(column.columns, columnId);
+      return column;
+    })
+  }
+
+  toggleHidden(columnId) {
+    const columns = this.state.columns;
+    const newColumns = this.recursiveHidden(columns, columnId);
+    this.setState({
+      columns: newColumns,
+    })
+  }
+
   componentWillMount() {
     this.props.allBoardsQuery.refetch();
     this.props.allCardsQuery.refetch();
   }
 
   renderNames(column, color) {
+
+    if(column.hidden) {
+      return (
+        <div style={{ display: 'flex', justifyContent: 'center', backgroundColor: '#cbd0c4', width: 50, flexDirection: 'column', alignItems: 'center', height: '100%', borderColor: 'white', borderStyle: 'solid', borderTopWidth: 2, borderRightWidth: 2, borderLeftWidth: 2, borderBottomWidth: 0, cursor: 'pointer' }} key={uuid()} onClick={() => this.toggleHidden(column.id)}>
+        <h style={{ writingMode: 'tb-rl', transform: 'rotate(180deg)', marginTop: 5, marginBottom: 5}}>
+          {column.name}
+        </h>
+        </div>
+      )
+    }
+
     return (
       <div style={{ display: 'flex', justifyContent: 'center', backgroundColor: '#cbd0c4', minWidth: width, flexDirection: 'column', alignItems: 'center', height: '100%', borderColor: 'white', borderStyle: 'solid', borderTopWidth: 2, borderRightWidth: 2, borderLeftWidth: 2, borderBottomWidth: 0 }} key={uuid()}>
-        <h style={{ fontSize: 16, width: '100%', display: 'flex', justifyContent: 'center', minHeight: 25, position: 'relative' }}>
+        <h style={{ fontSize: 16, width: '100%', display: 'flex', justifyContent: 'center', minHeight: 25, position: 'relative', cursor: 'pointer' }} onClick={() => this.toggleHidden(column.id)}>
           {column.name}
           <div style={{ right: 5, top: 0, position: 'absolute' }}>
             { column.boundary && <Image
@@ -203,6 +259,12 @@ class Board extends Component {
       card.project.id === project.id && column.id === card.column.id
     );
 
+    if(column.hidden) {
+      return (
+        <div style={{ width: 50, borderRightWidth: 2, borderLeftWidth: 2, borderTopWidth: 2, borderStyle: 'solid', borderColor: 'white', display: 'flex', alignItems: 'center', flexDirection: 'column', backgroundColor: '#f5fbef' }}/>
+        )
+    }
+
     if (column.columns.length === 0) {
       return (<Column timeframe={this.state.timeframe} data={column} project={project} key={`${column.id}${project.id}`} cards={cards} showError={this.showError} moveCard={this.moveCard} showMore={this.showMore} boardId={parseInt(this.props.board, 10)}/>);
     }
@@ -232,15 +294,15 @@ class Board extends Component {
 
       if (pr.team.productOwner.idUser === userId) canCreateCard = true;
     });
-    // console.log(this.state.editCard)
+
     return (
       <div>
         <div style={{ display: 'inline-block', minWidth: '100%', }}>
           <div style={{ display: 'flex', minWidth: '100%', marginTop: 10, marginBottom: 15, alignItems: 'center' }}>
-            <Title style={{ marginLeft: 20, flexGrow: 1 }}>
+            <Title style={{ marginLeft: 20 }}>
               {this.state.name}
             </Title>
-            <div style={{ flexGrow: 3, display: 'flex' }}>
+            <div style={{ marginLeft: 100, display: 'flex' }}>
               <Title style={{ fontSize: 20 }}>
                 Projekti:
               </Title>
