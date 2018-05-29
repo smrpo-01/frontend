@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { graphql } from 'react-apollo';
+import { graphql, compose } from 'react-apollo';
 import gql from 'graphql-tag';
 import PropTypes from 'prop-types';
 // Template
@@ -18,6 +18,7 @@ class Home extends Component {
     this.changeAndSetBoard = this.changeAndSetBoard.bind(this);
     this.changeAndSetBoardEdit = this.changeAndSetBoardEdit.bind(this);
     this.changeAndShowAnalitycs = this.changeAndShowAnalitycs.bind(this);
+    this.copyBoard = this.copyBoard.bind(this);
 
     this.state = {
       boards: [],
@@ -54,6 +55,20 @@ class Home extends Component {
     this.props.history.push('./../analitycs');
   }
 
+  copyBoard(boardId) {
+    const user = sessionStorage.getItem('user');
+
+    this.props.copyBoardMutation({
+      variables: {
+        boardId
+      },
+      refetchQueries: [{
+        query: getBoardsQuery,
+        variables: { userId: parseInt(JSON.parse(user).id, 10) }
+      }]
+    })
+  }
+
 
   render() {
     const { data: { loading, error, getUserBoards } } = this.props;
@@ -79,6 +94,7 @@ class Home extends Component {
               board={board}
               changeBoard={this.changeAndSetBoard}
               editBoard={this.changeAndSetBoardEdit}
+              copyBoard={this.copyBoard}
               showAnalitycs={this.changeAndShowAnalitycs}
               push={this.props.history.push}
               canEdit={this.state.userRoles.includes('km')}
@@ -111,10 +127,22 @@ export const getBoardsQuery = gql`query getUserBoards($userId: Int!){
   }
 }`;
 
-export default graphql(getBoardsQuery, {
-  options: () => {
-    // eslint-disable-next-line
-    const user = sessionStorage.getItem('user');
-    return ({ variables: { userId: parseInt(JSON.parse(user).id, 10) } });
+export const copyBoardMutation = gql`mutation copyBoard($boardId: Int!){
+  copyBoard(boardId: $boardId) {
+    board {
+      id
+    }
   }
-})(Home);
+}`;
+
+export default compose(
+  graphql(getBoardsQuery, {
+    options: () => {
+      // eslint-disable-next-line
+      const user = sessionStorage.getItem('user');
+      return ({ variables: { userId: parseInt(JSON.parse(user).id, 10) } });
+    }
+  }),
+  graphql(copyBoardMutation, {
+    name: 'copyBoardMutation',
+  }))(Home);
