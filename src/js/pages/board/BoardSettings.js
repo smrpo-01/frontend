@@ -7,6 +7,7 @@ import gql from 'graphql-tag';
 // Grommet components
 import Article from 'grommet/components/Article';
 import Button from 'grommet/components/Button';
+import CheckBox from 'grommet/components/CheckBox';
 import Header from 'grommet/components/Header';
 import Heading from 'grommet/components/Heading';
 import Footer from 'grommet/components/Footer';
@@ -28,9 +29,13 @@ class BoardSettings extends Component {
     };
   }
 
+  onToggle() {
+    if (this.props.daysToExpire > -1) this.props.updateDaysToExpire(-1);
+    else this.props.updateDaysToExpire(5);
+  }
+
   onSubmit() {
     this.setState({ onSubmit: null, error: ''});
-    console.log(this.props);
     this.props.mutateDaysToExpire({
       variables: { boardId: this.props.boardId, daysToExpire: this.props.daysToExpire  }
     })
@@ -45,7 +50,6 @@ class BoardSettings extends Component {
     // eslint-disable-next-line no-undef
     const user = sessionStorage.getItem('user');
     const userRoles = JSON.parse(user).roles;
-    console.log(userRoles);
 
     return (
       <Layer onClose={this.props.closer} closer>
@@ -55,7 +59,16 @@ class BoardSettings extends Component {
           </Header>
           <Section pad='none'>
             <Form style={{ maxWidth: 310 }}>
-              {(userRoles.indexOf('km') !== -1) &&
+
+              <FormField label='Število dni do poteka roka kartice'>
+                <NumberInput
+                  min={0}
+                  value={this.props.timeframe}
+                  onChange={e => this.props.updateTimeframe(e.target.value)}
+                />
+              </FormField>
+
+              {(userRoles.indexOf('km') !== -1 && (this.props.daysToExpire !== -1)) &&
                 <FormField label='Število dni do zahtevanega roka za dokončanje'>
                   <NumberInput
                     min={0}
@@ -64,13 +77,17 @@ class BoardSettings extends Component {
                   />
                 </FormField>
               }
-              <FormField label='Število dni do poteka roka kartice'>
-                <NumberInput
-                  min={0}
-                  value={this.props.timeframe}
-                  onChange={e => this.props.updateTimeframe(e.target.value)}
-                />
-              </FormField>
+
+              {/* Enable or disable mail notifications */}
+              {(userRoles.indexOf('km') !== -1) &&
+                <FormField label='Vključi/izključi pošiljanje e-mail sporočil'>
+                  <CheckBox
+                    toggle
+                    checked={(this.props.daysToExpire > -1)}
+                    onChange={() => this.onToggle()}
+                  />
+                </FormField>
+              }
 
             </Form>
           </Section>
