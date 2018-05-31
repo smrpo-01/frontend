@@ -365,6 +365,7 @@ export const getCardLogsQuery = gql`query allCardLogs($cardId: Int!) {
 export const getCardQuery = gql`query allCards($cardId: Int!) {
   allCards(cardId: $cardId) {
     id
+    isDone
     cardNumber
     colorRejected
     column {
