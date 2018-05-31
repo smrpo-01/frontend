@@ -15,6 +15,7 @@ import ErrorNotificationCard from './ErrorNotificationCard';
 import SideBarCardMore from './SidebarCardMore';
 import ErrorNotificationToggle from './ErrorNotificationToggle';
 import UserSettingsIcon from 'grommet/components/icons/base/UserSettings';
+import ExpandIcon from 'grommet/components/icons/base/Expand';
 
 import BoardSettings from './BoardSettings';
 
@@ -125,9 +126,7 @@ class Board extends Component {
     if(column.hidden) {
       return (
         <div style={{ display: 'flex', justifyContent: 'center', backgroundColor: '#cbd0c4', width: 50, flexDirection: 'column', alignItems: 'center', height: '100%', borderColor: 'white', borderStyle: 'solid', borderTopWidth: 2, borderRightWidth: 2, borderLeftWidth: 2, borderBottomWidth: 0, cursor: 'pointer' }} key={uuid()} onClick={() => this.toggleHidden(column.id)}>
-        <h style={{ writingMode: 'tb-rl', transform: 'rotate(180deg)', marginTop: 5, marginBottom: 5}}>
-          {column.name}
-        </h>
+          <ExpandIcon style={{ height: 20, width: 20 }}/>
         </div>
       )
     }
@@ -261,7 +260,11 @@ class Board extends Component {
 
     if(column.hidden) {
       return (
-        <div style={{ width: 50, borderRightWidth: 2, borderLeftWidth: 2, borderTopWidth: 2, borderStyle: 'solid', borderColor: 'white', display: 'flex', alignItems: 'center', flexDirection: 'column', backgroundColor: '#f5fbef' }}/>
+        <div style={{ width: 50, borderRightWidth: 2, borderLeftWidth: 2, borderTopWidth: 2, borderStyle: 'solid', borderColor: 'white', display: 'flex', alignItems: 'center', flexDirection: 'column', backgroundColor: '#cbd0c4' }}>
+        <h style={{ writingMode: 'tb-rl', transform: 'rotate(180deg)', marginTop: 60, marginBottom: 5,}}>
+          {column.name}
+        </h>
+        </div>
         )
     }
 

@@ -33,6 +33,7 @@ import TableRow from 'grommet/components/TableRow';
 
 
 import EditIcon from 'grommet/components/icons/base/Edit';
+import FormClockIcon from 'grommet/components/icons/base/FormClock';
 
 
 import { whoCanEditQuery } from './SidebarCard';
@@ -256,12 +257,20 @@ class SideBarCardMore extends Component {
                     </Label>
                     <div style={{ display: 'flex', flexDirection: 'column', padding: 5, paddingLeft: 20, paddingRight: 20}}>
                       {this.state.tasks.map(task => (
-                        <div style={{height: 40, display: 'flex', justifyContent: 'space-between', alignItems: 'center',}} key={task.id}>
+                        <div style={{height: 45, display: 'flex', justifyContent: 'space-between', alignItems: 'center',}} key={task.id}>
                           <CheckBox label={task.description} checked={task.done} key={task.id} onClick={() => this.toggleTask(task.id, task.done)} />
-                          <p>
-                            {task.assignee && task.assignee.member.firstName} {task.assignee && task.assignee.member.lastName}
-                            {!task.assignee && '/'}
-                          </p>
+                          <div style={{display: 'flex', justifyContent: 'space-between', width: 200}}>
+                            <p>
+                              {task.assignee && task.assignee.member.firstName} {task.assignee && task.assignee.member.lastName}
+                              {!task.assignee && '/'}
+                            </p>
+                            <div style={{display: 'flex', justifyContent: 'space-between', width: 60, alignItems: 'center'}}>
+                              <p>
+                                {task.hours ? task.hours + ' h' : '/'}
+                              </p>
+                              <FormClockIcon style={{opacity: 0.5}}/>
+                            </div>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -405,6 +414,7 @@ export const getCardQuery = gql`query allCards($cardId: Int!) {
       id
       description
       done
+      hours
       assignee {
         id
         member {
