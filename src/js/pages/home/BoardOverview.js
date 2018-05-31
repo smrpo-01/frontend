@@ -4,12 +4,17 @@ import PropTypes from 'prop-types';
 import EditIcon from 'grommet/components/icons/base/Edit';
 import AnalyticsIcon from 'grommet/components/icons/base/Analytics';
 
+import CopyIcon from 'grommet/components/icons/base/Copy';
+
+
+
 class BoardOverview extends Component {
   constructor() {
     super();
     this.state = {
       opacity: 1,
       opacityAnalisys: 1,
+      opacityCopy: 1,
     };
   }
   render() {
@@ -20,6 +25,18 @@ class BoardOverview extends Component {
             {this.props.board.name}
           </h4>
             <div style={{ display: 'flex', justifyContent: 'space-between', flexDirection: 'row' }}>
+            { this.props.canEdit &&
+              <div
+                style={{ cursor: 'pointer', opacity: this.state.opacityCopy, marginRight: 10 }}
+                onClick={(e) => { e.stopPropagation(); }}
+                onMouseEnter={() => this.setState({ opacityCopy: 0.5 })}
+                onMouseLeave={() => this.setState({ opacityCopy: 1 })}
+                role='button'
+                tabIndex='0'
+              >
+                <CopyIcon onClick={() => this.props.copyBoard(this.props.board.id)} />
+              </div>
+              }
               { this.props.canEdit &&
               <div
                 style={{ cursor: 'pointer', opacity: this.state.opacity }}

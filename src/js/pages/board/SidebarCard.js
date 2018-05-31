@@ -126,6 +126,7 @@ class SidebarCard extends Component {
         tasks: card.tasks.map(task => ({
           description: task.description,
           id: task.id,
+          hours: task.hours,
           owner: task.assignee && {
             value: `${task.assignee.member.firstName} ${task.assignee.member.lastName}`,
             id: parseInt(task.assignee.id, 10),
@@ -178,7 +179,7 @@ class SidebarCard extends Component {
         }
 
         let filteredTasks = this.state.tasks.filter(task => task.description !== '');
-        filteredTasks = filteredTasks.map(task => ({ description: task.description, assigneeUserteamId: task.owner && parseInt(task.owner.id, 10), done: task.done }));
+        filteredTasks = filteredTasks.map(task => ({ description: task.description, assigneeUserteamId: task.owner && parseInt(task.owner.id, 10), done: task.done, hours: task.hours }));
 
         const cardData = {
           id: this.state.id,
@@ -278,6 +279,22 @@ class SidebarCard extends Component {
         return {
           ...task,
           description: value
+        };
+      }
+      return task;
+    });
+
+    this.setState({
+      tasks,
+    });
+  }
+
+  changeTaskHours(value, taskId) {
+    const tasks = this.state.tasks.map((task) => {
+      if (task.id === taskId) {
+        return {
+          ...task,
+          hours: value
         };
       }
       return task;
@@ -535,6 +552,12 @@ class SidebarCard extends Component {
                       multiple={false}
                       onChange={change => this.changeTaskOwner(change.value, task.id)}
                       value={task.owner} />
+                    <NumberInput
+                      min={0}
+                      value={task.hours}
+                      step={0.1}
+                      onChange={event => this.changeTaskHours(event.target.value, task.id)}
+                    />
                   </FormField>
                 )
                 )}
@@ -676,6 +699,7 @@ const getCardQuery = gql`query allCards($cardId: Int!) {
       id
       description
       done
+      hours
       assignee {
         id
         member {
